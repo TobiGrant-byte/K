@@ -4,12 +4,7 @@ import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 
 const facts = [
-  { label: "Nationality", value: "Nigerian" },
-  { label: "Degree", value: "PhD, Civil Engineering" },
-  { label: "License", value: "Professional Engineer (PE)" },
-  { label: "MSc", value: "Nottingham Trent University, UK" },
-  { label: "BSc", value: "Federal Univ. of Agriculture, Abeokuta" },
-  { label: "Employer", value: "Garver Engineering" },
+  { label: "License", value: "Professional Engineer (PE)" }
 ];
 
 export default function About() {
@@ -43,7 +38,7 @@ export default function About() {
               {/* Stats card */}
               <motion.div initial={{ opacity: 0, x: -20 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ delay: 0.5 }}
                 style={{ position: "absolute", bottom: 0, left: 0, background: "var(--navy-800)", padding: "20px 22px", zIndex: 3, width: 170 }}>
-                {[{ v: "PhD", l: "Civil Engineering" }, { v: "PE", l: "Licensed Engineer" }, { v: "MSc", l: "Nottingham Trent" }, { v: "BSc", l: "FUNAAB, Nigeria" }].map(s => (
+                {[{ v: "PhD", l: "Civil Engineering" }, { v: "PE", l: "Licensed Engineer" }, { v: "MSc", l: "Civil Engineering" }, { v: "BSc", l: "FUNAAB, Nigeria" }].map(s => (
                   <div key={s.l} style={{ marginBottom: 12 }}>
                     <div style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 600, fontSize: 20, color: "#fff", lineHeight: 1 }}>{s.v}</div>
                     <div style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "1px", color: "rgba(255,255,255,0.45)", textTransform: "uppercase", lineHeight: 1.4 }}>{s.l}</div>
@@ -65,7 +60,7 @@ export default function About() {
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
               <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 19, lineHeight: 1.75, color: "var(--text-secondary)", fontWeight: 400 }}>
-                Dr. Sunday Okafor is a Nigerian-born Civil Engineer and transportation researcher whose work sits at the intersection of road safety, inclusive mobility, and connected vehicle technology.
+                Dr. Sunday Okafor is a Nigerian-born Civil Engineer whose work sits at the intersection of road safety, inclusive mobility, and connected vehicle technology.
               </p>
               <p style={{ fontSize: 15, lineHeight: 1.8, color: "var(--text-muted)" }}>
                 He earned his Doctor of Philosophy in Transportation Systems Engineering from the University of Alabama, where he served as a Graduate Research Assistant at the Alabama Transportation Institute (ATI) — one of the nation&#39;s leading transportation research centers. His MSc in Civil Engineering from Nottingham Trent University, UK, was fully funded through the prestigious Commonwealth Shared Scholarship.

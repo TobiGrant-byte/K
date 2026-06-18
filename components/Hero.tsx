@@ -39,7 +39,6 @@ export default function Hero() {
             style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
             <div style={{ width: 36, height: 1, background: "rgba(255,255,255,0.5)", flexShrink: 0 }} />
             <span style={{ fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "4px", textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}>
-              Transportation Systems Engineering
             </span>
           </motion.div>
 
@@ -78,7 +77,7 @@ export default function Hero() {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.3 }}
             style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
             <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}
-              onClick={() => document.querySelector("#about")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => window.open("https://scholar.google.com/citations?user=iAfft0gAAAAJ&hl=en", "_blank")}
               style={{ padding: "15px 36px", fontFamily: "'Cinzel',serif", fontSize: "11px", letterSpacing: "3px", textTransform: "uppercase", fontWeight: 600, background: "#fff", color: "var(--navy-800)", border: "none", cursor: "pointer", transition: "opacity 0.2s" }}>
               Discover My Work
             </motion.button>

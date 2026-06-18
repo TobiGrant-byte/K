@@ -40,7 +40,7 @@ export default function Research() {
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.7) 0%, transparent 55%)" }} />
               <div style={{ position: "absolute", bottom: 16, left: 16 }}>
                 <div className="eyebrow" style={{ marginBottom: 4 }}>Research</div>
-                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, color: "#fff", fontStyle: "italic" }}>Road Safety Science</div>
+                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, color: "#fff", fontStyle: "italic" }}>Playing chess</div>
               </div>
             </div>
             <div className="img-zoom" style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden" }}>

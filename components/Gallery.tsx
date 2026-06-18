@@ -8,7 +8,7 @@ const allPhotos = [
   { src: "/images/graduation-denny.webp",   caption: "Denny Chimes · Tuscaloosa, Alabama" },
   { src: "/images/garver-award-1.png",       caption: "Garver Award Ceremony" },
   { src: "/images/lifesavers-conf.webp",     caption: "LIFESAVERS 2023 · Seattle, WA" },
-  { src: "/images/lecture-road-safety.jpg", caption: "Road Safety Research Presentation" },
+  { src: "/images/lecture-road-safety.jpg", caption: "Playing Chess" },
   { src: "/images/traffic-safety-scholars.jpg", caption: "Traffic Safety Scholars · LIFESAVERS 2023" },
   { src: "/images/graduation-mentor.webp",  caption: "Doctoral Hooding Ceremony" },
   { src: "/images/msc-graduation.jpg",      caption: "MSc Graduation · Nottingham Trent, UK" },
