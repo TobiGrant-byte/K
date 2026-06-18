@@ -38,7 +38,7 @@ export default function About() {
               {/* Stats card */}
               <motion.div initial={{ opacity: 0, x: -20 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ delay: 0.5 }}
                 style={{ position: "absolute", bottom: 0, left: 0, background: "var(--navy-800)", padding: "20px 22px", zIndex: 3, width: 170 }}>
-                {[{ v: "PhD", l: "Civil Engineering" }, { v: "PE", l: "Licensed Engineer" }, { v: "MSc", l: "Civil Engineering" }, { v: "BSc", l: "FUNAAB, Nigeria" }].map(s => (
+                {[{ v: "PhD", l: "Civil Engineering, The University of Alabama" }, { v: "PE", l: "Licensed Engineer" }, { v: "MSc", l: "Nottingham Trent, University of Alabama(Civil Engineering)" }, { v: "BSc", l: "FUNAAB, Nigeria" }].map(s => (
                   <div key={s.l} style={{ marginBottom: 12 }}>
                     <div style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 600, fontSize: 20, color: "#fff", lineHeight: 1 }}>{s.v}</div>
                     <div style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "1px", color: "rgba(255,255,255,0.45)", textTransform: "uppercase", lineHeight: 1.4 }}>{s.l}</div>
