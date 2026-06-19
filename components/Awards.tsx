@@ -7,7 +7,7 @@ const awards = [
   {
     year: "2025",
     title: "Garver Engineering Award",
-    org: "Garver Engineers",
+    org: "Garver, USA",
     desc: "Recognized internally at Garver's annual company gathering for exceptional performance, contributions to transportation projects, and embodying the firm's values as a project engineer.",
     img: "/images/garver-award-2.webp",
   },

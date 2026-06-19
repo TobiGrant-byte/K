@@ -16,7 +16,7 @@ const FacebookIcon = () => (
 
 // ── Replace these with Dr. Okafor's real profile URLs ──
 const socials = [
-  { icon: TwitterIcon,   label: "Twitter",   href: "https://twitter.com/your-handle" },
+  { icon: TwitterIcon,   label: "Twitter",   href: "https://x.com/Okafor_SC" },
   { icon: InstagramIcon, label: "Instagram", href: "https://www.instagram.com/sunday_okafor1/" },
   { icon: LinkedinIcon,  label: "LinkedIn",  href: "https://www.linkedin.com/in/sunday-okafor" },
   { icon: FacebookIcon,  label: "Facebook",  href: "https://www.facebook.com/okafor.sunday.58/" },
@@ -31,7 +31,7 @@ export default function Footer() {
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 24, marginBottom: 32 }}>
           <div>
             <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, letterSpacing: "3px", color: "#fff", fontWeight: 500, marginBottom: 4 }}>DR. SUNDAY OKAFOR</div>
-            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 13, fontStyle: "italic", color: "rgba(255,255,255,0.4)" }}>PhD, PE · Transportation Systems Engineer</div>
+            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 13, fontStyle: "italic", color: "rgba(255,255,255,0.4)" }}>PhD, PE ·</div>
           </div>
           <nav style={{ display: "flex", gap: 28, flexWrap: "wrap" }}>
             {["about","research","awards","gallery","contact"].map(l => (

@@ -17,11 +17,8 @@ export default function Hero() {
 
       {/* Video / fallback */}
       <motion.div style={{ position: "absolute", inset: 0, zIndex: 0, scale }}>
-        <video autoPlay muted loop playsInline poster="/images/graduation-denny.webp"
-            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 35%" }}>
-        <source src="/videos/hero.mp4" type="video/mp4" />
-        </video>
-        <Image src="/images/graduation-denny.webp" alt="" fill priority style={{ objectFit: "cover", objectPosition: "top", zIndex: -1 }} sizes="100vw" />
+        <Image src="/images/graduation-denny.webp" alt="Dr. Sunday Okafor" fill priority
+          style={{ objectFit: "cover", objectPosition: "center 30%" }} sizes="100vw" />
         {/* Overlays */}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(105deg, rgba(5,13,26,0.92) 0%, rgba(5,13,26,0.65) 50%, rgba(5,13,26,0.2) 100%)" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,1) 0%, rgba(5,13,26,0.3) 40%, transparent 70%)" }} />
