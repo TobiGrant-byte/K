@@ -7,7 +7,7 @@ const hobbies = [
   {
     title: "Playing Chess",
     desc: "A game of strategy, patience, and precision — chess mirrors the way Dr. Okafor approaches every engineering challenge. Always thinking several moves ahead.",
-    img: "/images/chess.jpg",
+    img: "/images/chess 1.jpg",
     icon: "♟",
   },
   {
@@ -90,7 +90,7 @@ export default function Hobbies() {
         >
           <div style={{ width: 1, height: 48, background: "linear-gradient(to bottom, transparent, rgba(255,255,255,0.2), transparent)", margin: "0 auto 28px" }} />
           <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: 20, color: "rgba(255,255,255,0.35)", maxWidth: 500, margin: "0 auto" }}>
-            "A great mind is nothing without a great heart — and a great partner to share life with."
+            &quot;A great mind is nothing without a great heart — and a great partner to share life with.&quot;
           </p>
         </motion.div>
       </div>

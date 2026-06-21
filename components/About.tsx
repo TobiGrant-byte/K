@@ -30,21 +30,6 @@ export default function About() {
               <div className="img-zoom" style={{ position: "relative", width: 360, height: 480, zIndex: 1 }}>
                 <Image src="/images/headshot.jpg" alt="Dr. Sunday Okafor" fill style={{ objectFit: "cover" }} sizes="360px" />
               </div>
-              {/* Secondary */}
-              <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.35 }}
-                className="img-zoom" style={{ position: "absolute", bottom: 0, right: -20, width: 150, height: 185, border: "4px solid var(--off-white)", zIndex: 2, boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}>
-                <Image src="/images/seated.webp" alt="Dr. Okafor" fill style={{ objectFit: "cover", objectPosition: "top" }} sizes="150px" />
-              </motion.div>
-              {/* Stats card */}
-              <motion.div initial={{ opacity: 0, x: -20 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ delay: 0.5 }}
-                style={{ position: "absolute", bottom: 0, left: 0, background: "var(--navy-800)", padding: "20px 22px", zIndex: 3, width: 170 }}>
-                {[{ v: "PhD", l: "Civil Engineering, The University of Alabama" }, { v: "PE", l: "Licensed Engineer" }, { v: "MSc", l: "Nottingham Trent, University of Alabama(Civil Engineering)" }, { v: "BSc", l: "FUNAAB, Nigeria" }].map(s => (
-                  <div key={s.l} style={{ marginBottom: 12 }}>
-                    <div style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 600, fontSize: 20, color: "#fff", lineHeight: 1 }}>{s.v}</div>
-                    <div style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "1px", color: "rgba(255,255,255,0.45)", textTransform: "uppercase", lineHeight: 1.4 }}>{s.l}</div>
-                  </div>
-                ))}
-              </motion.div>
             </div>
           </motion.div>
 
@@ -55,18 +40,18 @@ export default function About() {
               <span style={{ fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "4px", textTransform: "uppercase", color: "var(--navy-500)", opacity: 0.7 }}>About</span>
             </div>
             <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(32px,4vw,52px)", color: "var(--navy-800)", lineHeight: 1.1, marginBottom: 24 }}>
-              Engineer. Scholar.{" "}
-              <em style={{ fontWeight: 600 }}>Champion of Safe Roads.</em>
+                A Civil Engineer Dedicated to the Future of Safe,{" "}
+              <em style={{ fontWeight: 600 }}>Smart Transportation Infrastructure.</em>
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
               <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 19, lineHeight: 1.75, color: "var(--text-secondary)", fontWeight: 400 }}>
-                Dr. Sunday Okafor is a Nigerian-born Civil Engineer whose work sits at the intersection of road safety, inclusive mobility, and connected vehicle technology.
+                Dr. Sunday Okafor is a licensed Professional Engineer operating at the critical nexus of traffic safety analytics, connected vehicle systems, and complex infrastructure delivery. His work is driven by a singular mission: to use data to make our roads safer, more efficient, and more equitable for everyone.
               </p>
               <p style={{ fontSize: 15, lineHeight: 1.8, color: "var(--text-muted)" }}>
-                He earned his Doctor of Philosophy in Transportation Systems Engineering from the University of Alabama, where he served as a Graduate Research Assistant at the Alabama Transportation Institute (ATI) — one of the nation&#39;s leading transportation research centers. His MSc in Civil Engineering from Nottingham Trent University, UK, was fully funded through the prestigious Commonwealth Shared Scholarship.
+                A distinguished scholar, Dr. Okafor earned his Master’s and Doctor of Philosophy (Ph.D.) in Civil Engineering from The University of Alabama, where his research as a Graduate Research Assistant at the Alabama Transportation Institute (ATI)—a premier national hub for transit innovation—focused on advanced crash analytics and predictive modeling. He was awarded his Master of Science (M.Sc.) in Civil Engineering from Nottingham Trent University, UK, as a prestigious Commonwealth Shared Scholar, a testament to his academic excellence and global potential. He holds a Bachelor of Science (B.Sc.) from FUNAAB, Nigeria.
               </p>
               <p style={{ fontSize: 15, lineHeight: 1.8, color: "var(--text-muted)" }}>
-                A licensed Professional Engineer (PE), Dr. Okafor currently works at Garver Engineering, bringing research-backed expertise to real-world transportation infrastructure projects. He is a member of both the American Society of Civil Engineers (ASCE) and the Institute of Transportation Engineers (ITE), and served as President of the African Students Association at the University of Alabama.
+                Today, Dr. Okafor brings this academic rigor to the corporate sector as a Project Engineer at Garver, where he designs safer, more efficient roadway networks for communities across the United States. An active member of ASCE and ITE, he is also a dedicated community builder, having previously served as President of the African Students Association at the University of Alabama, fostering a vibrant and inclusive environment for international scholars.
               </p>
             </div>
 

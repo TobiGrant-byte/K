@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 
-const words = ["Engineer.", "Researcher.", "Leader.", "Scholar."];
+const words = ["Transportation Engineer.", "Researcher.", "Leader."];
 
 export default function Hero() {
   const ref = useRef<HTMLDivElement>(null);
@@ -43,7 +43,7 @@ export default function Hero() {
           <div style={{ overflow: "hidden", marginBottom: 6 }}>
             <motion.h1 initial={{ y: 120 }} animate={{ y: 0 }} transition={{ duration: 1.1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
               style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(52px,8.5vw,116px)", lineHeight: 0.95, color: "#fff", margin: 0 }}>
-              Dr. Sunday
+              Sunday Chizoba 
             </motion.h1>
           </div>
           <div style={{ overflow: "hidden", marginBottom: 36 }}>

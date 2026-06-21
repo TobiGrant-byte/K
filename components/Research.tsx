@@ -4,9 +4,9 @@ import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 
 const areas = [
-  { n: "01", title: "Road Traffic Safety", desc: "Investigating crash causation factors, road user behavior, and data-driven countermeasures to reduce fatalities and serious injuries on public roads." },
-  { n: "02", title: "Inclusive Mobility", desc: "Advancing equitable transportation systems that serve all populations — including underserved communities, people with disabilities, and international contexts." },
-  { n: "03", title: "Connected Vehicles & Technology", desc: "Leveraging connected and autonomous vehicle technologies and AI-driven modeling to improve traffic operations, safety outcomes, and infrastructure performance." },
+  { n: "01", title: "Advanced Crash Analytics & Predictive Safety", desc: "Investigating the complex interplay of human behavior, roadway geometry, and environmental factors that lead to crashes. Expertise lies in developing predictive safety models, identifying systemic improvements, and implementing state and federal data-driven countermeasures designed to drastically reduce traffic fatalities." },
+  { n: "02", title: "Connected Infrastructure & Intelligent Transportation Systems", desc: "Harnessing the power of real-world connected vehicle (CV) data, cloud-based telematics, and AI-driven spatial simulations to optimize corridor performance, assess autonomous vehicle readiness, and build future-proof, resilient municipal highway networks." },
+  { n: "03", title: " Inclusive Infrastructure Design", desc: "Championing human-centric transit solutions that serve all populations. Expertise includes adapting spatial data workflows to identify and rectify infrastructure disparities in underserved communities, enhance pedestrian networks, and improve mobility in both domestic and international contexts." },
 ];
 
 export default function Research() {

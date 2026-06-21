@@ -38,7 +38,7 @@ export default function Navbar() {
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           {/* Logo */}
           <motion.button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} whileHover={{ opacity: 0.75 }} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
-            <div style={{ fontFamily: "'Cinzel',serif", fontSize: "13px", letterSpacing: "3px", color: "#fff", fontWeight: 500 }}>DR. SUNDAY OKAFOR</div>
+            <div style={{ fontFamily: "'Cinzel',serif", fontSize: "13px", letterSpacing: "3px", color: "#fff", fontWeight: 500 }}>DR.  Sunday Chizoba Okafor</div>
             <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "11px", fontStyle: "italic", color: "rgba(255,255,255,0.5)", letterSpacing: "2px" }}>PhD, PE </div>
           </motion.button>
 

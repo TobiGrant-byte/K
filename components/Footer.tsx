@@ -13,6 +13,16 @@ const LinkedinIcon = () => (
 const FacebookIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.128 22 16.991 22 12z"/></svg>
 );
+const YoutubeIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
+    <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.75 15.5v-7l6 3.5-6 3.5z" />
+  </svg>
+);
 
 // ── Replace these with Dr. Okafor's real profile URLs ──
 const socials = [
@@ -20,6 +30,7 @@ const socials = [
   { icon: InstagramIcon, label: "Instagram", href: "https://www.instagram.com/sunday_okafor1/" },
   { icon: LinkedinIcon,  label: "LinkedIn",  href: "https://www.linkedin.com/in/sunday-okafor" },
   { icon: FacebookIcon,  label: "Facebook",  href: "https://www.facebook.com/okafor.sunday.58/" },
+  { icon: YoutubeIcon, label: "YouTube", href: "https://m.youtube.com/c/SundayOkafor" },
 ];
 
 export default function Footer() {
