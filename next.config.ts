@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
         search: "",
       },
     ],
+    remotePatterns: [
+      { protocol: "https", hostname: "www.scholarshipregion.com" },
+      { protocol: "https", hostname: "cdn.legit.ng" },
+      { protocol: "https", hostname: "news.ua.edu" },
+      { protocol: "https", hostname: "sundayokafor.com" },
+    ],
   },
 };
 

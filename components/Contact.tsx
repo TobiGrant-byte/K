@@ -3,16 +3,17 @@ import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 
 type Status = "idle"|"loading"|"success"|"error";
+type FormState = { name: string; email: string; subject: string; message: string };
 
 export default function Contact() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
-  const [form, setForm] = useState({ name:"", email:"", subject:"", message:"" });
+  const [form, setForm] = useState<FormState>({ name:"", email:"", subject:"", message:"" });
   const [status, setStatus] = useState<Status>("idle");
   const [errMsg, setErrMsg] = useState("");
 
   const update = (e: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) =>
-    setForm(p => ({ ...p, [e.target.name]: e.target.value }));
+    setForm(p => ({ ...p, [e.target.name as keyof FormState]: e.target.value }));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,10 +47,10 @@ export default function Contact() {
               <span className="eyebrow">Contact</span>
             </div>
             <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(32px,4vw,56px)", color: "#fff", lineHeight: 1.1, marginBottom: 20 }}>
-              Let's Start a <em style={{ fontWeight: 600 }}>Conversation</em>
+              Let&apos;s Start a <em style={{ fontWeight: 600 }}>Conversation</em>
             </h2>
             <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontStyle: "italic", color: "rgba(255,255,255,0.55)", lineHeight: 1.7, marginBottom: 44 }}>
-              Whether you're interested in research collaboration, speaking engagements, mentorship, or professional consultation — Dr. Okafor welcomes your message.
+              Whether you&apos;re interested in research collaboration, speaking engagements, mentorship, or professional consultation — Dr. Okafor welcomes your message.
             </p>
             <div style={{ height: 1, background: "rgba(255,255,255,0.08)", marginBottom: 36 }} />
             {[
@@ -84,10 +85,10 @@ export default function Contact() {
             ) : (
               <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                  {[{ n: "name", ph: "Full name", label: "Name" }, { n: "email", ph: "your@email.com", label: "Email" }].map(f => (
+                  {[{ n: "name" as const, ph: "Full name", label: "Name" }, { n: "email" as const, ph: "your@email.com", label: "Email" }].map(f => (
                     <div key={f.n}>
                       <div style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>{f.label}</div>
-                      <input type={f.n === "email" ? "email" : "text"} name={f.n} value={(form as any)[f.n]} onChange={update} required placeholder={f.ph} style={inputStyle}
+                      <input type={f.n === "email" ? "email" : "text"} name={f.n} value={form[f.n]} onChange={update} required placeholder={f.ph} style={inputStyle}
                         onFocus={e => e.target.style.borderColor = "rgba(255,255,255,0.4)"}
                         onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.12)"} />
                     </div>

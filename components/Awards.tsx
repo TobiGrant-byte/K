@@ -6,9 +6,9 @@ import Image from "next/image";
 const awards = [
   {
     year: "2025",
-    title: "Garver Engineering Award",
+    title: "Garver Peak Performer Award",
     org: "Garver, USA",
-    desc: "Recognized internally at Garver's annual company gathering for exceptional performance, contributions to transportation projects, and embodying the firm's values as a project engineer.",
+    desc: "Recognized firm-wide for exceptional performance and significant contributions to multi-state engineering teams, awarded to top talent in the first two years of their career.",
     img: "/images/garver-award-2.webp",
   },
   {

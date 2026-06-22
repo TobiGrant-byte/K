@@ -8,6 +8,7 @@ import Credentials from "@/components/Credentials";
 import Hobbies from "@/components/Hobbies";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+ import PressSection from "@/components/PressSection";
 
 export default function Home() {
   return (
@@ -19,6 +20,7 @@ export default function Home() {
       <Awards />
       <Gallery />
       <Credentials />
+      <PressSection />  
       <Hobbies />
       <Contact />
       <Footer />
