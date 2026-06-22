@@ -4,7 +4,7 @@ import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 
 const timeline = [
-  { year: "2025", title: "Garver Engineering — Project Engineer", org: "Garver, USA", detail: "Delivering transportation infrastructure projects across the United States, applying research-backed expertise to real-world road safety and mobility challenges." },
+  { year: "2025", title: "Garver — Project Engineer", org: "Garver, USA", detail: "Delivering transportation infrastructure projects across the United States, applying research-backed expertise to real-world road safety and mobility challenges." },
   { year: "2024", title: "PhD in Transportation Systems Engineering", org: "University of Alabama", detail: "Dissertation research on traffic safety and inclusive mobility at the Alabama Transportation Institute — one of the nation's premier transportation research centers." },
   { year: "2024", title: "Licensed Professional Engineer (PE)", org: "State Engineering Board", detail: "Obtained PE licensure, the gold standard credential for practicing engineers in the United States, demonstrating mastery of civil engineering and public safety responsibility." },
   { year: "2023", title: "LIFESAVERS Traffic Safety Scholar", org: "LIFESAVERS National Conference — Seattle, WA", detail: "Selected as a scholar at the leading national conference on highway safety priorities, recognizing emerging researchers making an impact in road safety science." },
