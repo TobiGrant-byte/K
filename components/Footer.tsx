@@ -87,9 +87,6 @@ export default function Footer() {
           <p style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "1px", color: "rgba(255,255,255,0.25)" }}>
             © {new Date().getFullYear()} Dr. Sunday Okafor. All rights reserved.
           </p>
-          <p style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "1px", color: "rgba(255,255,255,0.2)" }}>
-            University of Alabama · Alabama Transportation Institute · Garver Engineers
-          </p>
         </div>
       </div>
     </footer>

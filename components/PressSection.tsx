@@ -20,6 +20,13 @@ const pressItems: PressItem[] = [
     href: "https://www.scholarshipregion.com/brilliant-nigerian-man-bags-first-class-bachelors-degree-masters-and-phd-at-us-uk-university-becomes-the-first-graduate-in-his-family/",
   },
   {
+    title: "ITE Young Leader to Follow 2024",
+    source: "Institute of Transportation Engineers",
+    date: "2024",
+    image: "/images/lifesavers-conf.webp",
+    href: "https://www.ite.org/professional-and-career-development/young-leaders-to-follow/young-leaders-to-follow-for-2024/",
+  },
+  {
     title:
       "University of Alabama Praises Nigerian Student as He Bags Job after Doctorate in Civil Engineering",
     source: "Legit.ng",

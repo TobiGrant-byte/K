@@ -9,7 +9,7 @@ const awards = [
     title: "Garver Peak Performer Award",
     org: "Garver, USA",
     desc: "Recognized firm-wide for exceptional performance and significant contributions to multi-state engineering teams, awarded to top talent in the first two years of their career.",
-    img: "/images/garver-award-2.webp",
+    img: "/images/garver-award-1.png",
   },
   {
     year: "2024",

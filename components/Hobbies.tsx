@@ -13,7 +13,7 @@ const hobbies = [
   {
     title: "Talking to His Wife",
     desc: "His favourite hobby, his greatest joy, and his most important conversation every day. Behind every great engineer is an even greater partnership.",
-    img: "/images/headshot.jpg",
+    img: "/images/couple.png",
     icon: "♡",
   },
 ];

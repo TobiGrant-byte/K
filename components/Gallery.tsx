@@ -4,12 +4,12 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 const allPhotos = [
-  { src: "/videos/hero.mp4",                caption: "A Glimpse Into My Journey", isVideo: true },
+  { src: "/images/credentials.png",       caption: "Licensed Engineer" },
   { src: "/images/grad-pensive.webp",       caption: "PhD Graduation · University of Alabama" },
   { src: "/images/graduation-denny.webp",   caption: "Denny Chimes · Tuscaloosa, Alabama" },
   { src: "/images/garver-award-1.png",       caption: "Garver Award Ceremony" },
   { src: "/images/lifesavers-conf.webp",     caption: "LIFESAVERS 2023 · Seattle, WA" },
-  { src: "/images/lecture-road-safety.jpg", caption: "Playing Chess" },
+  { src: "/images/chess.jpg",               caption: "Playing Chess" },
   { src: "/images/traffic-safety-scholars.jpg", caption: "Traffic Safety Scholars · LIFESAVERS 2023" },
   { src: "/images/graduation-mentor.webp",  caption: "Doctoral Hooding Ceremony" },
   { src: "/images/msc-graduation.jpg",      caption: "MSc Graduation · Nottingham Trent, UK" },
@@ -23,22 +23,9 @@ const allPhotos = [
   { src: "/images/seated.webp",             caption: "University of Alabama Campus" },
 ];
 
-// duplicate for seamless loop
 const strip = [...allPhotos, ...allPhotos];
 
-function MediaThumb({ src, caption, isVideo, width }: { src: string; caption: string; isVideo?: boolean; width: number }) {
-  if (isVideo) {
-    return (
-      <video
-        src={src}
-        muted
-        loop
-        autoPlay
-        playsInline
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-      />
-    );
-  }
+function MediaThumb({ src, caption, width }: { src: string; caption: string; width: number }) {
   return <Image src={src} alt={caption} fill style={{ objectFit: "cover" }} sizes={`${width}px`} />;
 }
 
@@ -71,16 +58,11 @@ export default function Gallery() {
           {strip.map((p, i) => (
             <div key={i} onClick={() => setLightbox(i % allPhotos.length)}
               className="img-zoom" style={{ position: "relative", width: 320, height: 220, flexShrink: 0, overflow: "hidden", cursor: "zoom-in" }}>
-              <MediaThumb src={p.src} caption={p.caption} isVideo={p.isVideo} width={320} />
+              <MediaThumb src={p.src} caption={p.caption} width={320} />
               <motion.div initial={{ opacity: 0 }} whileHover={{ opacity: 1 }}
                 style={{ position: "absolute", inset: 0, background: "rgba(5,13,26,0.65)", display: "flex", alignItems: "flex-end", padding: 14 }}>
                 <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 14, fontStyle: "italic", color: "#fff", lineHeight: 1.3 }}>{p.caption}</p>
               </motion.div>
-              {p.isVideo && (
-                <div style={{ position: "absolute", top: 12, right: 12, width: 28, height: 28, borderRadius: "50%", background: "rgba(5,13,26,0.55)", border: "1px solid rgba(255,255,255,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ width: 0, height: 0, borderTop: "5px solid transparent", borderBottom: "5px solid transparent", borderLeft: "8px solid #fff", marginLeft: 2 }} />
-                </div>
-              )}
             </div>
           ))}
         </div>
@@ -93,16 +75,11 @@ export default function Gallery() {
           {[...strip].reverse().map((p, i) => (
             <div key={i} onClick={() => setLightbox((strip.length - 1 - i) % allPhotos.length)}
               className="img-zoom" style={{ position: "relative", width: 280, height: 200, flexShrink: 0, overflow: "hidden", cursor: "zoom-in" }}>
-              <MediaThumb src={p.src} caption={p.caption} isVideo={p.isVideo} width={280} />
+              <MediaThumb src={p.src} caption={p.caption} width={280} />
               <motion.div initial={{ opacity: 0 }} whileHover={{ opacity: 1 }}
                 style={{ position: "absolute", inset: 0, background: "rgba(5,13,26,0.65)", display: "flex", alignItems: "flex-end", padding: 14 }}>
                 <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 14, fontStyle: "italic", color: "#fff", lineHeight: 1.3 }}>{p.caption}</p>
               </motion.div>
-              {p.isVideo && (
-                <div style={{ position: "absolute", top: 12, right: 12, width: 28, height: 28, borderRadius: "50%", background: "rgba(5,13,26,0.55)", border: "1px solid rgba(255,255,255,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ width: 0, height: 0, borderTop: "5px solid transparent", borderBottom: "5px solid transparent", borderLeft: "8px solid #fff", marginLeft: 2 }} />
-                </div>
-              )}
             </div>
           ))}
         </div>
@@ -116,18 +93,7 @@ export default function Gallery() {
             onClick={() => setLightbox(null)}>
             <motion.div initial={{ scale: 0.88, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.88, opacity: 0 }} transition={{ duration: 0.3 }}
               style={{ position: "relative", maxWidth: 900, width: "100%", aspectRatio: "3/2" }} onClick={e => e.stopPropagation()}>
-              {allPhotos[lightbox].isVideo ? (
-                <video
-                  src={allPhotos[lightbox].src}
-                  controls
-                  autoPlay
-                  loop
-                  playsInline
-                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                />
-              ) : (
-                <Image src={allPhotos[lightbox].src} alt={allPhotos[lightbox].caption} fill style={{ objectFit: "contain" }} sizes="90vw" />
-              )}
+              <Image src={allPhotos[lightbox].src} alt={allPhotos[lightbox].caption} fill style={{ objectFit: "contain" }} sizes="90vw" />
               <div style={{ position: "absolute", bottom: -32, left: 0, right: 0, textAlign: "center" }}>
                 <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", color: "rgba(255,255,255,0.5)", fontSize: 14 }}>{allPhotos[lightbox].caption}</p>
               </div>

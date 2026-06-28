@@ -36,10 +36,10 @@ export default function Research() {
           {/* Images */}
           <motion.div initial={{ opacity: 0, x: -36 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div className="img-zoom" style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden" }}>
-              <Image src="/images/chess 1.jpg" alt="Dr. Okafor presenting road safety research" fill style={{ objectFit: "cover" }} sizes="40vw" />
+              <Image src="/images/chess.jpg" alt="Dr. Okafor playing chess" fill style={{ objectFit: "cover" }} sizes="40vw" />
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.7) 0%, transparent 55%)" }} />
               <div style={{ position: "absolute", bottom: 16, left: 16 }}>
-                <div className="eyebrow" style={{ marginBottom: 4 }}>Research</div>
+                <div className="eyebrow" style={{ marginBottom: 4 }}>Pleasure</div>
                 <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, color: "#fff", fontStyle: "italic" }}>Playing chess</div>
               </div>
             </div>
