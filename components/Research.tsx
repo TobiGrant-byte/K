@@ -35,6 +35,7 @@ export default function Research() {
         <div style={{ display: "grid", gridTemplateColumns: "2fr 3fr", gap: 64, alignItems: "start" }}>
           {/* Images */}
           <motion.div initial={{ opacity: 0, x: -36 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {/* Chess image commented out
             <div className="img-zoom" style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden" }}>
               <Image src="/images/chess.jpg" alt="Dr. Okafor playing chess" fill style={{ objectFit: "cover" }} sizes="40vw" />
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.7) 0%, transparent 55%)" }} />
@@ -43,6 +44,7 @@ export default function Research() {
                 <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, color: "#fff", fontStyle: "italic" }}>Playing chess</div>
               </div>
             </div>
+            */}
             <div className="img-zoom" style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden" }}>
               <Image src="/images/lecture-hall.jpg" alt="Dr. Okafor lecturing" fill style={{ objectFit: "cover" }} sizes="40vw" />
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.7) 0%, transparent 55%)" }} />

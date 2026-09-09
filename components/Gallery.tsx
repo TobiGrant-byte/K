@@ -15,7 +15,7 @@ const allPhotos: {
   { src: "/images/graduation-denny.webp",   caption: "Denny Chimes · Tuscaloosa, Alabama", objectPosition: "center 38%", zoom: 1.25, transformOrigin: "center 38%" },
   { src: "/images/garver-award-1.png",       caption: "Garver Award Ceremony", objectPosition: "center 30%" },
   { src: "/images/lifesavers-conf.webp",     caption: "LIFESAVERS 2023 · Seattle, WA", objectPosition: "center 28%" },
-  { src: "/images/chess.jpg",               caption: "Playing Chess" },
+  // { src: "/images/chess.jpg",               caption: "Playing Chess" },
   { src: "/images/traffic-safety-scholars.jpg", caption: "Traffic Safety Scholars · LIFESAVERS 2023" },
   { src: "/images/graduation-mentor.webp",  caption: "Doctoral Hooding Ceremony" },
   { src: "/images/msc-graduation.jpg",      caption: "MSc Graduation · Nottingham Trent, UK", objectPosition: "top center", zoom: 1.18, transformOrigin: "top center" },

@@ -35,21 +35,38 @@ export default function Navbar() {
           display: "flex", alignItems: "center",
         }}
       >
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div className="nav-inner" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           {/* Logo */}
-          <motion.button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} whileHover={{ opacity: 0.75 }} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
-            <div style={{ fontFamily: "'Cinzel',serif", fontSize: "13px", letterSpacing: "3px", color: "#fff", fontWeight: 500 }}>DR.  Sunday Chizoba Okafor</div>
-            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "11px", fontStyle: "italic", color: "rgba(255,255,255,0.5)", letterSpacing: "2px" }}>PhD, PE </div>
+          <motion.button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            whileHover={{ opacity: 0.75 }}
+            className="nav-logo"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              textAlign: "left",
+              padding: 0,
+              margin: 0,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              gap: 3,
+            }}
+          >
+            <div style={{ fontFamily: "'Cinzel',serif", fontSize: "13px", letterSpacing: "3px", color: "#fff", fontWeight: 500, lineHeight: 1.25 }}>Dr. Sunday Chizoba</div>
+            <div style={{ fontFamily: "'Cinzel',serif", fontSize: "13px", letterSpacing: "3px", color: "#fff", fontWeight: 500, lineHeight: 1.25 }}>Okafor</div>
+            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "11px", fontStyle: "italic", color: "rgba(255,255,255,0.5)", letterSpacing: "2px", lineHeight: 1.25 }}>PhD, PE</div>
           </motion.button>
 
           {/* Desktop */}
-          <div style={{ display: "flex", alignItems: "center", gap: "36px" }} className="hidden-mobile">
+          <div style={{ display: "flex", alignItems: "center", gap: "36px", height: "100%" }} className="hidden-mobile">
             {links.map((l, i) => (
               <motion.button key={l}
                 initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07 + 0.3 }}
                 onClick={() => go(l)}
-                style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "3px", color: "rgba(255,255,255,0.75)", textTransform: "uppercase", position: "relative" }}
+                style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "3px", color: "rgba(255,255,255,0.75)", textTransform: "uppercase", position: "relative", padding: 0, margin: 0, lineHeight: 1, display: "inline-flex", alignItems: "center", height: 40 }}
                 className="nav-link"
               >
                 {l}
@@ -59,24 +76,47 @@ export default function Navbar() {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
               onClick={() => go("Contact")}
               whileHover={{ background: "rgba(255,255,255,0.12)" }}
-              style={{ background: "none", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", cursor: "pointer", padding: "10px 22px", fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "2px", textTransform: "uppercase", transition: "all 0.3s" }}
+              style={{ background: "none", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", cursor: "pointer", padding: "10px 22px", fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "2px", textTransform: "uppercase", transition: "all 0.3s", display: "inline-flex", alignItems: "center", lineHeight: 1 }}
             >
               Get In Touch
             </motion.button>
           </div>
 
           {/* Hamburger */}
-          <button onClick={() => setOpen(!open)} style={{ background: "none", border: "none", cursor: "pointer", display: "none", flexDirection: "column", gap: "5px", padding: "4px" }} className="show-mobile">
+          <button
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle menu"
+            className="show-mobile"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              display: "none",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "5px",
+              padding: 0,
+              margin: 0,
+              width: 40,
+              height: 40,
+              flexShrink: 0,
+            }}
+          >
             {[0,1,2].map(i => (
-              <motion.span key={i} animate={{ rotate: open && i!==1 ? (i===0?45:-45) : 0, y: open && i!==1 ? (i===0?9:0) : 0, opacity: open && i===1 ? 0 : 1 }}
-                style={{ display: "block", width: "22px", height: "1px", background: "#fff" }} />
+              <motion.span key={i} animate={{ rotate: open && i!==1 ? (i===0?45:-45) : 0, y: open && i!==1 ? (i===0?10:0) : 0, opacity: open && i===1 ? 0 : 1 }}
+                style={{ display: "block", width: "22px", height: "1.5px", background: "#fff", transformOrigin: "center" }} />
             ))}
           </button>
         </div>
       </motion.nav>
 
       <style>{`
-        @media(max-width:768px){.hidden-mobile{display:none!important}.show-mobile{display:flex!important}}
+        @media(max-width:768px){
+          .hidden-mobile{display:none!important}
+          .show-mobile{display:flex!important}
+          .nav-inner{padding:0 24px!important}
+        }
         .nav-link::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:rgba(255,255,255,0.6);transition:width 0.3s}
         .nav-link:hover::after{width:100%}
         .nav-link:hover{color:#fff!important}

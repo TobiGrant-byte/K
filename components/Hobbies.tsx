@@ -4,13 +4,13 @@ import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 
 const hobbies = [
-  {
-    title: "Playing Chess",
-    desc: "A game of strategy, patience, and precision — chess mirrors the way Dr. Okafor approaches every engineering challenge. Always thinking several moves ahead.",
-    img: "/images/chess 1.jpg",
-    icon: "♟",
-    objectPosition: "top",
-  },
+  // {
+  //   title: "Playing Chess",
+  //   desc: "A game of strategy, patience, and precision — chess mirrors the way Dr. Okafor approaches every engineering challenge. Always thinking several moves ahead.",
+  //   img: "/images/chess 1.jpg",
+  //   icon: "♟",
+  //   objectPosition: "top",
+  // },
   {
     title: "Talking to His Wife",
     desc: "His favourite hobby, his greatest joy, and his most important conversation every day. Behind every great engineer is an even greater partnership.",
@@ -53,7 +53,7 @@ export default function Hobbies() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.75, delay: i * 0.18, ease: [0.22, 1, 0.36, 1] }}
               whileHover={{ y: -8, transition: { duration: 0.3 } }}
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden", cursor: "default" }}
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, overflow: "hidden", cursor: "default" }}
             >
               {/* Image */}
               <div className="img-zoom hobbies-img" style={{ position: "relative", height: 280, overflow: "hidden" }}>
