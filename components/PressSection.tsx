@@ -1,4 +1,3 @@
-// components/PressSection.tsx
 import Image from "next/image";
 
 interface PressItem {
@@ -53,69 +52,201 @@ const pressItems: PressItem[] = [
 
 export default function PressSection() {
   return (
-    <section className="relative py-24 px-6 sm:px-10 lg:px-20" style={{ backgroundColor: "#0a1628" }}>
-      <div className="mx-auto max-w-3xl text-center mb-16">
-        <span className="text-xs sm:text-sm uppercase tracking-[0.25em] text-white/50 font-medium">
-          Press &amp; Recognition
-        </span>
-        <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-semibold text-white leading-tight">
-          Featured{" "}
-          <span className="italic font-light text-white/70">In The Press</span>
-        </h2>
-        <p className="mt-4 text-white/50 text-base sm:text-lg">
-          A journey covered by leading platforms — celebrating excellence,
-          scholarship, and impact.
-        </p>
-      </div>
-
-      <div className="mx-auto max-w-7xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {pressItems.map((item) => (
-          <a
-            key={item.href}
-            href={item.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group block overflow-hidden rounded-2xl border border-white/10 hover:border-white/30 transition-colors duration-300"
-            style={{ backgroundColor: "#0f2040" }}
+    <section
+      id="press"
+      className="section-pad"
+      style={{ background: "var(--navy-800)", position: "relative", overflow: "hidden" }}
+    >
+      <div className="container">
+        {/* Header — explicitly centered */}
+        <div
+          style={{
+            textAlign: "center",
+            maxWidth: 640,
+            marginLeft: "auto",
+            marginRight: "auto",
+            marginBottom: 64,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 14,
+              marginBottom: 16,
+            }}
           >
-            <div className="relative h-48 w-full overflow-hidden">
-              <Image
-                src={item.image}
-                alt={item.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 25vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628]/90 via-[#0a1628]/10 to-transparent" />
-            </div>
+            <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.25)" }} />
+            <span className="eyebrow">Press &amp; Recognition</span>
+            <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.25)" }} />
+          </div>
+          <h2
+            style={{
+              fontFamily: "'Cormorant Garamond',serif",
+              fontWeight: 300,
+              fontSize: "clamp(32px,5vw,58px)",
+              color: "#fff",
+              lineHeight: 1.1,
+              margin: 0,
+            }}
+          >
+            Featured{" "}
+            <em style={{ fontWeight: 600 }}>In The Press</em>
+          </h2>
+          <p
+            style={{
+              fontFamily: "'Cormorant Garamond',serif",
+              fontStyle: "italic",
+              fontSize: 18,
+              color: "rgba(255,255,255,0.45)",
+              marginTop: 16,
+              lineHeight: 1.6,
+            }}
+          >
+            A journey covered by leading platforms — celebrating excellence,
+            scholarship, and impact.
+          </p>
+        </div>
 
-            <div className="p-5">
-              <span className="text-[11px] uppercase tracking-wider text-white/40 font-medium">
-                {item.source} · {item.date}
-              </span>
-              <h3 className="mt-2 text-white text-base font-medium leading-snug group-hover:text-white/80 transition-colors duration-300">
-                {item.title}
-              </h3>
-              <span className="mt-3 inline-flex items-center text-sm text-white/40 group-hover:text-white/70 transition-colors duration-300">
-                Read Feature
-                <svg
-                  className="ml-1.5 h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
+        {/* Cards — centered rows */}
+        <div
+          className="press-grid"
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: 28,
+          }}
+        >
+          {pressItems.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="press-card"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+                maxWidth: 360,
+                background: "var(--navy-700)",
+                border: "1px solid rgba(255,255,255,0.14)",
+                borderRadius: 16,
+                overflow: "hidden",
+                textDecoration: "none",
+                transition: "border-color 0.3s, transform 0.3s",
+              }}
+            >
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  height: 200,
+                  flexShrink: 0,
+                  overflow: "hidden",
+                }}
+              >
+                <Image
+                  src={item.image}
+                  alt={item.title}
+                  fill
+                  sizes="360px"
+                  style={{ objectFit: "cover" }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                      "linear-gradient(to top, rgba(5,13,26,0.85) 0%, transparent 55%)",
+                  }}
+                />
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  flex: 1,
+                  padding: "28px 28px 32px",
+                  gap: 14,
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'Cinzel',serif",
+                    fontSize: 10,
+                    letterSpacing: "2px",
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.4)",
+                  }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
-                </svg>
-              </span>
-            </div>
-          </a>
-        ))}
+                  {item.source} · {item.date}
+                </span>
+                <h3
+                  style={{
+                    fontFamily: "'Cormorant Garamond',serif",
+                    fontSize: 20,
+                    fontWeight: 500,
+                    color: "#fff",
+                    lineHeight: 1.35,
+                    margin: 0,
+                  }}
+                >
+                  {item.title}
+                </h3>
+                <span
+                  style={{
+                    marginTop: "auto",
+                    paddingTop: 8,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontSize: 13,
+                    color: "rgba(255,255,255,0.45)",
+                  }}
+                >
+                  Read Feature
+                  <svg
+                    width="14"
+                    height="14"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17 8l4 4m0 0l-4 4m4-4H3"
+                    />
+                  </svg>
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
       </div>
+
+      <style>{`
+        .press-card:hover {
+          border-color: rgba(255,255,255,0.35) !important;
+          transform: translateY(-4px);
+        }
+        @media (min-width: 640px) {
+          .press-card {
+            width: calc(50% - 14px) !important;
+            max-width: none !important;
+          }
+        }
+        @media (min-width: 1024px) {
+          .press-card {
+            width: calc(33.333% - 19px) !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }
