@@ -3,7 +3,11 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 
-const words = ["Transportation Engineer.", "Researcher.", "Leader."];
+const words = [
+  ["Transportation", "Engineer."],
+  ["Researcher."],
+  ["Leader."],
+];
 
 export default function Hero() {
   const ref = useRef<HTMLDivElement>(null);
@@ -29,24 +33,24 @@ export default function Hero() {
 
       {/* Content */}
       <motion.div style={{ position: "relative", zIndex: 10, width: "100%", y: textY, opacity }}>
-        <div className="container" style={{ paddingBottom: "96px" }}>
+        <div className="container" style={{ paddingBottom: "72px" }}>
 
           {/* Eyebrow */}
           <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.4 }}
-            style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
+            style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
             <div style={{ width: 36, height: 1, background: "rgba(255,255,255,0.5)", flexShrink: 0 }} />
             <span style={{ fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "4px", textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}>
             </span>
           </motion.div>
 
           {/* Name */}
-          <div style={{ overflow: "hidden", marginBottom: 6 }}>
+          <div style={{ overflow: "hidden", marginBottom: 4 }}>
             <motion.h1 initial={{ y: 120 }} animate={{ y: 0 }} transition={{ duration: 1.1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
               style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(52px,8.5vw,116px)", lineHeight: 0.95, color: "#fff", margin: 0 }}>
               Sunday Chizoba 
             </motion.h1>
           </div>
-          <div style={{ overflow: "hidden", marginBottom: 36 }}>
+          <div style={{ overflow: "hidden", marginBottom: 22 }}>
             <motion.h1 initial={{ y: 120 }} animate={{ y: 0 }} transition={{ duration: 1.1, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
               style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 600, fontStyle: "italic", fontSize: "clamp(52px,8.5vw,116px)", lineHeight: 0.95, color: "rgba(255,255,255,0.92)", margin: 0 }}>
               Okafor
@@ -55,16 +59,33 @@ export default function Hero() {
 
           {/* Rotating word */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }}
-            style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 48 }}>
-            <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, fontStyle: "italic", color: "rgba(255,255,255,0.55)" }}>PhD, PE ·</span>
-            <div style={{ overflow: "hidden", height: 30 }}>
-              {words.map((w, i) => (
-                <motion.span key={w}
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: [30, 0, 0, -30], opacity: [0, 1, 1, 0] }}
+            style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 32 }}>
+            <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "clamp(22px,2.4vw,28px)", fontStyle: "italic", color: "rgba(255,255,255,0.7)", lineHeight: 1, whiteSpace: "nowrap" }}>PhD, PE ·</span>
+            <div style={{ position: "relative", overflow: "hidden", height: 44, minWidth: 220 }}>
+              {words.map((lines, i) => (
+                <motion.span key={lines.join(" ")}
+                  initial={{ y: 44, opacity: 0 }}
+                  animate={{ y: [44, 0, 0, -44], opacity: [0, 1, 1, 0] }}
                   transition={{ duration: 3, delay: i * 3 + 1.2, repeat: Infinity, repeatDelay: (words.length - 1) * 3 }}
-                  style={{ display: "block", fontFamily: "'Cinzel',serif", fontSize: 13, letterSpacing: 3, textTransform: "uppercase", color: "rgba(255,255,255,0.85)", position: i === 0 ? "relative" : "absolute" }}>
-                  {w}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    height: 44,
+                    fontFamily: "'Cinzel',serif",
+                    fontSize: "clamp(14px,1.5vw,17px)",
+                    letterSpacing: 3,
+                    textTransform: "uppercase",
+                    color: "rgba(255,255,255,0.9)",
+                    lineHeight: 1.25,
+                    whiteSpace: "nowrap",
+                    position: i === 0 ? "relative" : "absolute",
+                    left: 0,
+                    top: 0,
+                  }}>
+                  {lines.map((line) => (
+                    <span key={line}>{line}</span>
+                  ))}
                 </motion.span>
               ))}
             </div>

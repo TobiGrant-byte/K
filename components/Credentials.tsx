@@ -18,13 +18,13 @@ export default function Credentials() {
   const inView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
-    <section ref={ref} style={{ background: "var(--navy-900)", position: "relative", overflow: "hidden" }} className="section-pad">
+    <section id="credentials" ref={ref} style={{ background: "var(--navy-900)", position: "relative", overflow: "hidden" }} className="section-pad">
       <div style={{ position: "absolute", top: 0, left: 0, width: "60%", height: "100%", background: "radial-gradient(ellipse at 10% 50%, rgba(255,255,255,0.02) 0%, transparent 65%)", pointerEvents: "none" }} />
 
       <div className="container">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }}>
+        <div className="credentials-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }}>
           {/* Timeline */}
-          <div>
+          <div className="credentials-timeline">
             <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }} style={{ marginBottom: 56 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
                 <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.35)" }} />
@@ -59,10 +59,15 @@ export default function Credentials() {
           </div>
 
           {/* Images */}
-          <motion.div initial={{ opacity: 0, x: 40 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            style={{ display: "flex", flexDirection: "column", gap: 16, position: "sticky", top: 96 }}>
-            <div className="img-zoom" style={{ position: "relative", aspectRatio: "3/4", overflow: "hidden", maxHeight: 420 }}>
-              <Image src="/images/grad-pensive.webp" alt="Dr. Okafor doctoral regalia" fill style={{ objectFit: "cover", objectPosition: "top" }} sizes="40vw" />
+          <motion.div
+            className="credentials-images"
+            initial={{ opacity: 0, x: 40 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            style={{ display: "flex", flexDirection: "column", gap: 16, position: "sticky", top: 96 }}
+          >
+            <div className="img-zoom" style={{ position: "relative", aspectRatio: "3/4", overflow: "hidden", maxHeight: 420, borderRadius: 12 }}>
+              <Image src="/images/grad-pensive.webp" alt="Dr. Okafor doctoral regalia" fill style={{ objectFit: "cover", objectPosition: "top" }} sizes="(max-width: 768px) 100vw, 40vw" />
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.7) 0%, transparent 50%)" }} />
               <div style={{ position: "absolute", bottom: 20, left: 20, right: 20 }}>
                 <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: 17, color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>
@@ -71,11 +76,11 @@ export default function Credentials() {
               </div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <div className="img-zoom" style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden" }}>
-                <Image src="/images/msc-graduation.jpg" alt="MSc graduation UK" fill style={{ objectFit: "cover", objectPosition: "top" }} sizes="20vw" />
+              <div className="img-zoom" style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden", borderRadius: 12 }}>
+                <Image src="/images/msc-graduation.jpg" alt="MSc graduation UK" fill style={{ objectFit: "cover", objectPosition: "top" }} sizes="(max-width: 768px) 50vw, 20vw" />
               </div>
-              <div className="img-zoom" style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden" }}>
-                <Image src="/images/garver-award-1.png" alt="Garver Award" fill style={{ objectFit: "cover" }} sizes="20vw" />
+              <div className="img-zoom" style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden", borderRadius: 12 }}>
+                <Image src="/images/garver-award-1.png" alt="Garver Award" fill style={{ objectFit: "cover" }} sizes="(max-width: 768px) 50vw, 20vw" />
               </div>
             </div>
           </motion.div>
@@ -83,7 +88,20 @@ export default function Credentials() {
       </div>
       <style>{`
         .timeline-item:hover .timeline-dot{background:rgba(255,255,255,0.3)!important}
-        @media(max-width:768px){#credentials .container>div>div:first-child{grid-template-columns:1fr!important}}
+        @media (max-width: 768px) {
+          .credentials-grid {
+            grid-template-columns: 1fr !important;
+            gap: 40px !important;
+          }
+          .credentials-images {
+            order: -1;
+            position: relative !important;
+            top: auto !important;
+          }
+          .credentials-timeline {
+            order: 1;
+          }
+        }
       `}</style>
     </section>
   );

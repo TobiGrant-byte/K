@@ -6,6 +6,8 @@ interface PressItem {
   date: string;
   image: string;
   href: string;
+  objectPosition?: string;
+  zoom?: number;
 }
 
 const pressItems: PressItem[] = [
@@ -17,6 +19,7 @@ const pressItems: PressItem[] = [
     image:
       "https://www.scholarshipregion.com/wp-content/uploads/2024/08/Brilliant-Nigerian-man-bags-first-class-bachelors-degree-Sunday-Okafor-also-earned-masters-and-PhD-at-US-UK-university-becomes-the-first-graduate-in-his-family.jpg",
     href: "https://www.scholarshipregion.com/brilliant-nigerian-man-bags-first-class-bachelors-degree-masters-and-phd-at-us-uk-university-becomes-the-first-graduate-in-his-family/",
+    objectPosition: "center 48%",
   },
   {
     title: "ITE Young Leader to Follow 2024",
@@ -24,6 +27,7 @@ const pressItems: PressItem[] = [
     date: "2024",
     image: "/images/lifesavers-conf.webp",
     href: "https://www.ite.org/professional-and-career-development/young-leaders-to-follow/young-leaders-to-follow-for-2024/",
+    objectPosition: "center 28%",
   },
   {
     title:
@@ -39,6 +43,7 @@ const pressItems: PressItem[] = [
     date: "2024",
     image: "/images/headshot.jpg",
     href: "https://www.linkedin.com/posts/iamsamuelaboki_nigeriansareamazing-ugcPost-7231205061375217664-88xN/?utm_source=share&utm_medium=member_ios",
+    objectPosition: "center 15%",
   },
   {
     title: "The Long and Safe Road: International Graduate Helps Others",
@@ -47,6 +52,8 @@ const pressItems: PressItem[] = [
     image:
       "https://news.ua.edu/wp-content/uploads/2024/07/2407025_sunday_okafor_featured.jpg",
     href: "https://news.ua.edu/2024/07/the-long-and-safe-road-international-graduate-helps-others/",
+    objectPosition: "65% 22%",
+    zoom: 1.2,
   },
 ];
 
@@ -143,7 +150,7 @@ export default function PressSection() {
                 style={{
                   position: "relative",
                   width: "100%",
-                  height: 200,
+                  height: 228,
                   flexShrink: 0,
                   overflow: "hidden",
                 }}
@@ -153,7 +160,12 @@ export default function PressSection() {
                   alt={item.title}
                   fill
                   sizes="360px"
-                  style={{ objectFit: "cover" }}
+                  style={{
+                    objectFit: "cover",
+                    objectPosition: item.objectPosition || "center",
+                    transform: item.zoom ? `scale(${item.zoom})` : undefined,
+                    transformOrigin: item.objectPosition || "center center",
+                  }}
                 />
                 <div
                   style={{
