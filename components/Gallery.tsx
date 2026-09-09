@@ -3,30 +3,63 @@ import { useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
-const allPhotos = [
+const allPhotos: {
+  src: string;
+  caption: string;
+  objectPosition?: string;
+  zoom?: number;
+  transformOrigin?: string;
+}[] = [
   { src: "/images/credentials.png",       caption: "Licensed Engineer" },
-  { src: "/images/grad-pensive.webp",       caption: "PhD Graduation · University of Alabama" },
-  { src: "/images/graduation-denny.webp",   caption: "Denny Chimes · Tuscaloosa, Alabama" },
-  { src: "/images/garver-award-1.png",       caption: "Garver Award Ceremony" },
-  { src: "/images/lifesavers-conf.webp",     caption: "LIFESAVERS 2023 · Seattle, WA" },
+  { src: "/images/grad-pensive.webp",       caption: "PhD Graduation · University of Alabama", objectPosition: "center 28%", transformOrigin: "center 28%" },
+  { src: "/images/graduation-denny.webp",   caption: "Denny Chimes · Tuscaloosa, Alabama", objectPosition: "center 38%", zoom: 1.25, transformOrigin: "center 38%" },
+  { src: "/images/garver-award-1.png",       caption: "Garver Award Ceremony", objectPosition: "center 30%" },
+  { src: "/images/lifesavers-conf.webp",     caption: "LIFESAVERS 2023 · Seattle, WA", objectPosition: "center 28%" },
   { src: "/images/chess.jpg",               caption: "Playing Chess" },
   { src: "/images/traffic-safety-scholars.jpg", caption: "Traffic Safety Scholars · LIFESAVERS 2023" },
   { src: "/images/graduation-mentor.webp",  caption: "Doctoral Hooding Ceremony" },
-  { src: "/images/msc-graduation.jpg",      caption: "MSc Graduation · Nottingham Trent, UK" },
-  { src: "/images/africa-ball.jpg",         caption: "Africa Ball · University of Alabama" },
-  { src: "/images/headshot.jpg",            caption: "Professional Portrait" },
-  { src: "/images/grad-lean.webp",          caption: "PhD — University of Alabama" },
+  { src: "/images/msc-graduation.jpg",      caption: "MSc Graduation · Nottingham Trent, UK", objectPosition: "top center", zoom: 1.18, transformOrigin: "top center" },
+  { src: "/images/africa-ball.jpg",         caption: "Africa Ball · University of Alabama", objectPosition: "center 35%", zoom: 1.15, transformOrigin: "center 35%" },
+  { src: "/images/headshot.jpg",            caption: "Professional Portrait", objectPosition: "center 20%", transformOrigin: "center 20%" },
+  { src: "/images/grad-lean.webp",          caption: "PhD — University of Alabama", objectPosition: "center 20%", transformOrigin: "center 20%" },
   { src: "/images/lecture-hall.jpg",        caption: "Socio-Cultural Adaptation Talk" },
-  { src: "/images/speaking.webp",           caption: "Cultural Event MC" },
+  { src: "/images/speaking.webp",           caption: "Cultural Event MC", zoom: 1.32, transformOrigin: "center center" },
   { src: "/images/garver-award-2.webp",     caption: "Garver Recognition" },
-  { src: "/images/grad-close.webp",         caption: "Graduation Portrait" },
-  { src: "/images/seated.webp",             caption: "University of Alabama Campus" },
+  { src: "/images/grad-close.webp",         caption: "Graduation Portrait", objectPosition: "center 15%", transformOrigin: "center 15%" },
+  { src: "/images/seated.webp",             caption: "University of Alabama Campus", objectPosition: "center 40%", transformOrigin: "center 40%" },
 ];
 
 const strip = [...allPhotos, ...allPhotos];
 
-function MediaThumb({ src, caption, width }: { src: string; caption: string; width: number }) {
-  return <Image src={src} alt={caption} fill style={{ objectFit: "cover" }} sizes={`${width}px`} />;
+function MediaThumb({
+  src,
+  caption,
+  width,
+  objectPosition,
+  zoom,
+  transformOrigin,
+}: {
+  src: string;
+  caption: string;
+  width: number;
+  objectPosition?: string;
+  zoom?: number;
+  transformOrigin?: string;
+}) {
+  return (
+    <Image
+      src={src}
+      alt={caption}
+      fill
+      style={{
+        objectFit: "cover",
+        objectPosition: objectPosition || "center",
+        transform: zoom ? `scale(${zoom})` : undefined,
+        transformOrigin: transformOrigin || "center center",
+      }}
+      sizes={`${width}px`}
+    />
+  );
 }
 
 export default function Gallery() {
@@ -57,8 +90,15 @@ export default function Gallery() {
         <div className="scroll-track">
           {strip.map((p, i) => (
             <div key={i} onClick={() => setLightbox(i % allPhotos.length)}
-              className="img-zoom" style={{ position: "relative", width: 320, height: 220, flexShrink: 0, overflow: "hidden", cursor: "zoom-in" }}>
-              <MediaThumb src={p.src} caption={p.caption} width={320} />
+              className="img-zoom" style={{ position: "relative", width: 360, height: 248, flexShrink: 0, overflow: "hidden", cursor: "zoom-in" }}>
+              <MediaThumb
+                src={p.src}
+                caption={p.caption}
+                width={360}
+                objectPosition={p.objectPosition}
+                zoom={p.zoom}
+                transformOrigin={p.transformOrigin}
+              />
               <motion.div initial={{ opacity: 0 }} whileHover={{ opacity: 1 }}
                 style={{ position: "absolute", inset: 0, background: "rgba(5,13,26,0.65)", display: "flex", alignItems: "flex-end", padding: 14 }}>
                 <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 14, fontStyle: "italic", color: "#fff", lineHeight: 1.3 }}>{p.caption}</p>
@@ -74,8 +114,15 @@ export default function Gallery() {
         <div className="scroll-track" style={{ animationDirection: "reverse", animationDuration: "35s" }}>
           {[...strip].reverse().map((p, i) => (
             <div key={i} onClick={() => setLightbox((strip.length - 1 - i) % allPhotos.length)}
-              className="img-zoom" style={{ position: "relative", width: 280, height: 200, flexShrink: 0, overflow: "hidden", cursor: "zoom-in" }}>
-              <MediaThumb src={p.src} caption={p.caption} width={280} />
+              className="img-zoom" style={{ position: "relative", width: 320, height: 228, flexShrink: 0, overflow: "hidden", cursor: "zoom-in" }}>
+              <MediaThumb
+                src={p.src}
+                caption={p.caption}
+                width={320}
+                objectPosition={p.objectPosition}
+                zoom={p.zoom}
+                transformOrigin={p.transformOrigin}
+              />
               <motion.div initial={{ opacity: 0 }} whileHover={{ opacity: 1 }}
                 style={{ position: "absolute", inset: 0, background: "rgba(5,13,26,0.65)", display: "flex", alignItems: "flex-end", padding: 14 }}>
                 <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 14, fontStyle: "italic", color: "#fff", lineHeight: 1.3 }}>{p.caption}</p>
