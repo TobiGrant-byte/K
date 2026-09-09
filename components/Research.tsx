@@ -69,13 +69,13 @@ export default function Research() {
 
             {/* Lifesavers conf image */}
             <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.65 }}
-              className="img-zoom" style={{ position: "relative", aspectRatio: "16/7", overflow: "hidden", marginTop: 24 }}>
-              <Image src="/images/lifesavers-conf.webp" alt="LIFESAVERS 2023 National Conference, Seattle" fill style={{ objectFit: "cover" }} sizes="55vw" />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(5,13,26,0.85) 0%, rgba(5,13,26,0.2) 100%)" }} />
-              <div style={{ position: "absolute", top: "50%", left: 24, transform: "translateY(-50%)" }}>
-                <div className="eyebrow" style={{ marginBottom: 6 }}>Conference</div>
-                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, color: "#fff", fontWeight: 400 }}>LIFESAVERS 2023</div>
-                <div style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "2px", color: "rgba(255,255,255,0.5)", marginTop: 4 }}>Traffic Safety Scholars · Seattle, WA</div>
+              className="img-zoom" style={{ position: "relative", aspectRatio: "16/10", overflow: "hidden", marginTop: 24 }}>
+              <Image src="/images/lifesavers-conf.webp" alt="LIFESAVERS 2023 National Conference, Seattle" fill style={{ objectFit: "cover", objectPosition: "center 22%" }} sizes="55vw" />
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.9) 0%, rgba(5,13,26,0.35) 45%, rgba(5,13,26,0.15) 100%)" }} />
+              <div className="lifesavers-caption" style={{ position: "absolute", left: 24, right: 24 }}>
+                <div className="eyebrow" style={{ marginBottom: 8, fontSize: 11 }}>Conference</div>
+                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "clamp(22px,2.4vw,28px)", color: "#fff", fontWeight: 500, lineHeight: 1.15 }}>LIFESAVERS 2023</div>
+                <div style={{ fontFamily: "'Cinzel',serif", fontSize: 11, letterSpacing: "2px", color: "rgba(255,255,255,0.88)", marginTop: 6 }}>Traffic Safety Scholars · Seattle, WA</div>
               </div>
             </motion.div>
           </div>
@@ -84,7 +84,11 @@ export default function Research() {
       <style>{`
         .research-item::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:rgba(255,255,255,0.3);transition:width 0.4s}
         .research-item:hover::after{width:100%}
-        @media(max-width:768px){#research .container>div:last-child{grid-template-columns:1fr!important}}
+        .lifesavers-caption{bottom:28px}
+        @media(max-width:768px){
+          #research .container>div:last-child{grid-template-columns:1fr!important}
+          .lifesavers-caption{bottom:14px;left:16px!important;right:16px!important}
+        }
       `}</style>
     </section>
   );

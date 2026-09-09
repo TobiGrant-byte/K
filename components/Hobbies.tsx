@@ -9,12 +9,14 @@ const hobbies = [
     desc: "A game of strategy, patience, and precision — chess mirrors the way Dr. Okafor approaches every engineering challenge. Always thinking several moves ahead.",
     img: "/images/chess 1.jpg",
     icon: "♟",
+    objectPosition: "top",
   },
   {
     title: "Talking to His Wife",
     desc: "His favourite hobby, his greatest joy, and his most important conversation every day. Behind every great engineer is an even greater partnership.",
     img: "/images/couple.png",
     icon: "♡",
+    objectPosition: "center 22%",
   },
 ];
 
@@ -23,7 +25,7 @@ export default function Hobbies() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section ref={ref} style={{ background: "var(--navy-700)", position: "relative", overflow: "hidden" }} className="section-pad">
+    <section id="hobbies" ref={ref} style={{ background: "var(--navy-700)", position: "relative", overflow: "hidden" }} className="section-pad">
       {/* Soft radial glow */}
       <div style={{ position: "absolute", inset: 0, opacity: 0.05, backgroundImage: "radial-gradient(ellipse at 50% 100%, #fff 0%, transparent 60%)", pointerEvents: "none" }} />
 
@@ -44,7 +46,7 @@ export default function Hobbies() {
         </motion.div>
 
         {/* Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, maxWidth: 900, margin: "0 auto" }}>
+        <div className="hobbies-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, maxWidth: 900, margin: "0 auto" }}>
           {hobbies.map((h, i) => (
             <motion.div key={h.title}
               initial={{ opacity: 0, y: 40 }}
@@ -54,8 +56,8 @@ export default function Hobbies() {
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden", cursor: "default" }}
             >
               {/* Image */}
-              <div className="img-zoom" style={{ position: "relative", height: 280, overflow: "hidden" }}>
-                <Image src={h.img} alt={h.title} fill style={{ objectFit: "cover", objectPosition: "top" }} sizes="45vw" />
+              <div className="img-zoom hobbies-img" style={{ position: "relative", height: 280, overflow: "hidden" }}>
+                <Image src={h.img} alt={h.title} fill style={{ objectFit: "cover", objectPosition: h.objectPosition }} sizes="(max-width: 640px) 100vw, 45vw" />
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.8) 0%, rgba(5,13,26,0.1) 60%)" }} />
                 {/* Big icon */}
                 <motion.div
@@ -95,7 +97,18 @@ export default function Hobbies() {
         </motion.div>
       </div>
 
-      <style>{`@media(max-width:640px){#hobbies-section .container>div:nth-child(2){grid-template-columns:1fr!important}}`}</style>
+      <style>{`
+        @media (max-width: 640px) {
+          .hobbies-grid {
+            grid-template-columns: 1fr !important;
+            gap: 24px !important;
+            max-width: 100% !important;
+          }
+          .hobbies-img {
+            height: 320px !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }

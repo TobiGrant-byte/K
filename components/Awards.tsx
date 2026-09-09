@@ -10,6 +10,7 @@ const awards = [
     org: "Garver, USA",
     desc: "Recognized firm-wide for exceptional performance and significant contributions to multi-state engineering teams, awarded to top talent in the first two years of their career.",
     img: "/images/garver-award-1.png",
+    objectPosition: "center 30%",
   },
   {
     year: "2024",
@@ -17,6 +18,8 @@ const awards = [
     org: "State Engineering Board",
     desc: "Obtained licensure as a Professional Engineer — a rigorous credential demonstrating mastery of civil engineering principles, safety standards, and professional responsibility.",
     img: "/images/grad-pensive.webp",
+    objectPosition: "center 28%",
+    transformOrigin: "center 28%",
   },
   {
     year: "2024",
@@ -24,6 +27,9 @@ const awards = [
     org: "University of Alabama",
     desc: "Conferred PhD in Transportation Systems Engineering under the Department of Civil, Construction and Environmental Engineering, with research focused on traffic safety and inclusive mobility.",
     img: "/images/graduation-denny.webp",
+    objectPosition: "center 38%",
+    zoom: 1.25,
+    transformOrigin: "center 38%",
   },
   {
     year: "2023",
@@ -31,6 +37,7 @@ const awards = [
     org: "LIFESAVERS National Conference",
     desc: "Selected as a Traffic Safety Scholar at the prestigious LIFESAVERS 2023 National Conference on Highway Safety Priorities in Seattle, Washington — recognizing emerging researchers in road safety.",
     img: "/images/lifesavers-conf.webp",
+    objectPosition: "center 28%",
   },
   {
     year: "2023",
@@ -38,6 +45,7 @@ const awards = [
     org: "University of Alabama",
     desc: "Elected President of the African Students Association at UA, leading initiatives that promoted African culture, supported international students, and strengthened community bonds.",
     img: "/images/asa-board.jpg",
+    objectPosition: "center 25%",
   },
   {
     year: "2019",
@@ -45,6 +53,9 @@ const awards = [
     org: "UK Commonwealth Commission",
     desc: "Received full funding for MSc in Civil Engineering at Nottingham Trent University, UK — awarded to exceptional students from Commonwealth nations who demonstrate academic excellence and leadership potential.",
     img: "/images/msc-graduation.jpg",
+    objectPosition: "top center",
+    zoom: 1.18,
+    transformOrigin: "top center",
   },
 ];
 
@@ -73,11 +84,22 @@ export default function Awards() {
               initial={{ opacity: 0, y: 36 }} animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.65, delay: i * 0.1 }}
               whileHover={{ y: -6 }}
-              style={{ background: "#fff", overflow: "hidden", boxShadow: "0 2px 20px rgba(10,22,40,0.06)", cursor: "default", transition: "box-shadow 0.3s" }}
+              style={{ background: "#fff", overflow: "hidden", borderRadius: 8, boxShadow: "0 2px 20px rgba(10,22,40,0.06)", cursor: "default", transition: "box-shadow 0.3s" }}
               className="award-card">
               {/* Image */}
-              <div className="img-zoom" style={{ position: "relative", height: 200, overflow: "hidden" }}>
-                <Image src={a.img} alt={a.title} fill style={{ objectFit: "cover", objectPosition: "top" }} sizes="33vw" />
+              <div className="img-zoom" style={{ position: "relative", height: 240, overflow: "hidden" }}>
+                <Image
+                  src={a.img}
+                  alt={a.title}
+                  fill
+                  style={{
+                    objectFit: "cover",
+                    objectPosition: a.objectPosition,
+                    transform: a.zoom ? `scale(${a.zoom})` : undefined,
+                    transformOrigin: a.transformOrigin || "center center",
+                  }}
+                  sizes="33vw"
+                />
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.65) 0%, transparent 55%)" }} />
                 <div style={{ position: "absolute", bottom: 12, left: 16 }}>
                   <span style={{ fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "3px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase" }}>{a.year}</span>
