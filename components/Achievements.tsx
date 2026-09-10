@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 
-const awards = [
+const achievements = [
   {
     year: "2025",
     title: "Garver Peak Performer Award",
@@ -59,67 +59,61 @@ const awards = [
   },
 ];
 
-export default function Awards() {
+export default function Achievements() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section id="awards" ref={ref} style={{ background: "var(--off-white)", position: "relative", overflow: "hidden" }} className="section-pad">
+    <section id="achievements" ref={ref} className="section-pad relative overflow-hidden bg-off-white">
       <div className="container">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }} style={{ marginBottom: 72 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-            <div style={{ width: 40, height: 1, background: "var(--navy-800)", opacity: 0.3 }} />
-            <span style={{ fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "4px", textTransform: "uppercase", color: "var(--navy-500)", opacity: 0.65 }}>Recognition & Milestones</span>
+        <motion.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }} className="mb-[72px]">
+          <div className="mb-4 flex items-center gap-3.5">
+            <div className="h-px w-10 bg-navy-800 opacity-30" />
+            <span className="font-title text-[10px] uppercase tracking-[4px] text-navy-500 opacity-65">Achievements & Milestones</span>
           </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(32px,5vw,58px)", color: "var(--navy-800)", lineHeight: 1.1 }}>
-            A Career Defined by{" "}<em style={{ fontWeight: 600 }}>Excellence</em>
+          <h2 className="font-display text-[clamp(32px,5vw,58px)] font-light leading-[1.1] text-navy-800">
+            A Career Defined by{" "}<em className="font-semibold">Excellence</em>
           </h2>
         </motion.div>
 
-        {/* Awards grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
-          {awards.map((a, i) => (
+        {/* Achievements grid */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {achievements.map((a, i) => (
             <motion.div key={i}
               initial={{ opacity: 0, y: 36 }} animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.65, delay: i * 0.1 }}
               whileHover={{ y: -6 }}
-              style={{ background: "#fff", overflow: "hidden", borderRadius: 8, boxShadow: "0 2px 20px rgba(10,22,40,0.06)", cursor: "default", transition: "box-shadow 0.3s" }}
-              className="award-card">
+              className="cursor-default overflow-hidden rounded-lg bg-white shadow-[0_2px_20px_rgba(10,22,40,0.06)] transition-shadow duration-300 hover:shadow-[0_12px_40px_rgba(10,22,40,0.12)]">
               {/* Image */}
-              <div className="img-zoom" style={{ position: "relative", height: 240, overflow: "hidden" }}>
+              <div className="img-zoom relative h-60 overflow-hidden">
                 <Image
                   src={a.img}
                   alt={a.title}
                   fill
+                  className="object-cover"
                   style={{
-                    objectFit: "cover",
                     objectPosition: a.objectPosition,
                     transform: a.zoom ? `scale(${a.zoom})` : undefined,
                     transformOrigin: a.transformOrigin || "center center",
                   }}
                   sizes="33vw"
                 />
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.65) 0%, transparent 55%)" }} />
-                <div style={{ position: "absolute", bottom: 12, left: 16 }}>
-                  <span style={{ fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "3px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase" }}>{a.year}</span>
+                <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.65)_0%,transparent_55%)]" />
+                <div className="absolute bottom-3 left-4">
+                  <span className="font-title text-[10px] uppercase tracking-[3px] text-white/70">{a.year}</span>
                 </div>
               </div>
               {/* Content */}
-              <div style={{ padding: "24px 24px 28px" }}>
-                <div style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "2px", textTransform: "uppercase", color: "var(--navy-500)", opacity: 0.55, marginBottom: 8 }}>{a.org}</div>
-                <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, fontWeight: 600, color: "var(--navy-800)", marginBottom: 10, lineHeight: 1.25 }}>{a.title}</h3>
-                <p style={{ fontSize: 13, lineHeight: 1.75, color: "var(--text-muted)" }}>{a.desc}</p>
+              <div className="px-6 pb-7 pt-6">
+                <div className="mb-2 font-title text-[9px] uppercase tracking-[2px] text-navy-500 opacity-55">{a.org}</div>
+                <h3 className="mb-2.5 font-display text-xl font-semibold leading-[1.25] text-navy-800">{a.title}</h3>
+                <p className="text-[13px] leading-[1.75] text-text-muted">{a.desc}</p>
               </div>
             </motion.div>
           ))}
         </div>
       </div>
-      <style>{`
-        .award-card:hover{box-shadow:0 12px 40px rgba(10,22,40,0.12)!important}
-        @media(max-width:1024px){#awards .container>div:last-child{grid-template-columns:repeat(2,1fr)!important}}
-        @media(max-width:640px){#awards .container>div:last-child{grid-template-columns:1fr!important}}
-      `}</style>
     </section>
   );
 }

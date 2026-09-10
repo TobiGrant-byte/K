@@ -10,6 +10,14 @@ interface FadeInProps {
   threshold?: number;
 }
 
+const directionClass = {
+  up: "translate-y-10",
+  down: "-translate-y-10",
+  left: "translate-x-10",
+  right: "-translate-x-10",
+  none: "",
+};
+
 export function FadeIn({
   children,
   delay = 0,
@@ -19,14 +27,6 @@ export function FadeIn({
 }: FadeInProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
-
-  const directionMap = {
-    up: "translateY(40px)",
-    down: "translateY(-40px)",
-    left: "translateX(40px)",
-    right: "translateX(-40px)",
-    none: "none",
-  };
 
   useEffect(() => {
     const el = ref.current;
@@ -47,13 +47,10 @@ export function FadeIn({
   return (
     <div
       ref={ref}
-      className={className}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "none" : directionMap[direction],
-        transition: `opacity 0.8s ease ${delay}ms, transform 0.8s ease ${delay}ms`,
-        willChange: "opacity, transform",
-      }}
+      className={`transition-[opacity,transform] duration-[800ms] ease-in-out will-change-[opacity,transform] ${
+        visible ? "opacity-100 translate-x-0 translate-y-0" : `opacity-0 ${directionClass[direction]}`
+      } ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
     </div>

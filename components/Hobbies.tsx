@@ -25,57 +25,70 @@ export default function Hobbies() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section id="hobbies" ref={ref} style={{ background: "var(--navy-700)", position: "relative", overflow: "hidden" }} className="section-pad">
+    <section id="hobbies" ref={ref} className="section-pad bg-navy-700 relative overflow-hidden">
       {/* Soft radial glow */}
-      <div style={{ position: "absolute", inset: 0, opacity: 0.05, backgroundImage: "radial-gradient(ellipse at 50% 100%, #fff 0%, transparent 60%)", pointerEvents: "none" }} />
+      <div className="absolute inset-0 opacity-5 bg-[radial-gradient(ellipse_at_50%_100%,#fff_0%,transparent_60%)] pointer-events-none" />
 
       <div className="container">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 28 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }} style={{ marginBottom: 72, textAlign: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 16 }}>
-            <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.25)" }} />
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7 }}
+          className="mb-[72px] text-center"
+        >
+          <div className="flex items-center justify-center gap-3.5 mb-4">
+            <div className="w-10 h-px bg-white/25" />
             <span className="eyebrow">Beyond the Lab</span>
-            <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.25)" }} />
+            <div className="w-10 h-px bg-white/25" />
           </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(32px,5vw,58px)", color: "#fff", lineHeight: 1.1 }}>
-            The Man Behind the <em style={{ fontWeight: 600 }}>PhD</em>
+          <h2 className="font-display font-light text-[clamp(32px,5vw,58px)] text-white leading-[1.1]">
+            The Man Behind the <em className="font-semibold">PhD</em>
           </h2>
-          <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: 18, color: "rgba(255,255,255,0.45)", marginTop: 14, maxWidth: 480, margin: "14px auto 0" }}>
+          <p className="font-display italic text-lg text-white/45 mt-3.5 max-w-[480px] mx-auto">
             Excellence in engineering begins with a life well-lived outside of it.
           </p>
         </motion.div>
 
         {/* Cards */}
-        <div className="hobbies-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, maxWidth: 900, margin: "0 auto" }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 max-w-[900px] mx-auto">
           {hobbies.map((h, i) => (
-            <motion.div key={h.title}
+            <motion.div
+              key={h.title}
               initial={{ opacity: 0, y: 40 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.75, delay: i * 0.18, ease: [0.22, 1, 0.36, 1] }}
               whileHover={{ y: -8, transition: { duration: 0.3 } }}
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, overflow: "hidden", cursor: "default" }}
+              className="bg-white/[0.04] border border-white/[0.08] rounded-xl overflow-hidden cursor-default"
             >
               {/* Image */}
-              <div className="img-zoom hobbies-img" style={{ position: "relative", height: 280, overflow: "hidden" }}>
-                <Image src={h.img} alt={h.title} fill style={{ objectFit: "cover", objectPosition: h.objectPosition }} sizes="(max-width: 640px) 100vw, 45vw" />
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.8) 0%, rgba(5,13,26,0.1) 60%)" }} />
+              <div className="img-zoom relative h-80 sm:h-[280px] overflow-hidden">
+                <Image
+                  src={h.img}
+                  alt={h.title}
+                  fill
+                  className="object-cover"
+                  style={{ objectPosition: h.objectPosition }}
+                  sizes="(max-width: 640px) 100vw, 45vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,13,26,0.8)] from-0% via-[rgba(5,13,26,0.1)] via-60% to-transparent" />
                 {/* Big icon */}
                 <motion.div
                   initial={{ scale: 0.5, opacity: 0 }}
                   animate={inView ? { scale: 1, opacity: 1 } : {}}
                   transition={{ delay: i * 0.18 + 0.4, type: "spring", stiffness: 200 }}
-                  style={{ position: "absolute", top: 20, right: 20, width: 52, height: 52, background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, border: "1px solid rgba(255,255,255,0.15)" }}
+                  className="absolute top-5 right-5 w-[52px] h-[52px] bg-white/12 backdrop-blur-sm rounded-full flex items-center justify-center text-[22px] border border-white/15"
                 >
                   {h.icon}
                 </motion.div>
               </div>
 
               {/* Text */}
-              <div style={{ padding: "28px 28px 32px" }}>
-                <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 26, fontWeight: 600, color: "#fff", marginBottom: 12, lineHeight: 1.2 }}>
+              <div className="px-7 pt-7 pb-8">
+                <h3 className="font-display text-[26px] font-semibold text-white mb-3 leading-[1.2]">
                   {h.title}
                 </h3>
-                <p style={{ fontSize: 14, lineHeight: 1.85, color: "rgba(255,255,255,0.5)" }}>
+                <p className="text-sm leading-[1.85] text-white/50">
                   {h.desc}
                 </p>
               </div>
@@ -88,27 +101,14 @@ export default function Hobbies() {
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
           transition={{ delay: 0.7 }}
-          style={{ textAlign: "center", marginTop: 64 }}
+          className="text-center mt-16"
         >
-          <div style={{ width: 1, height: 48, background: "linear-gradient(to bottom, transparent, rgba(255,255,255,0.2), transparent)", margin: "0 auto 28px" }} />
-          <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: 20, color: "rgba(255,255,255,0.35)", maxWidth: 500, margin: "0 auto" }}>
+          <div className="w-px h-12 bg-gradient-to-b from-transparent via-white/20 to-transparent mx-auto mb-7" />
+          <p className="font-display italic text-xl text-white/35 max-w-[500px] mx-auto">
             &quot;A great mind is nothing without a great heart — and a great partner to share life with.&quot;
           </p>
         </motion.div>
       </div>
-
-      <style>{`
-        @media (max-width: 640px) {
-          .hobbies-grid {
-            grid-template-columns: 1fr !important;
-            gap: 24px !important;
-            max-width: 100% !important;
-          }
-          .hobbies-img {
-            height: 320px !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }
