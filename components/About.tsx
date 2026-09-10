@@ -3,9 +3,9 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 
-const facts = [
-  { label: "License", value: "Professional Engineer (PE)" }
-];
+// const facts = [
+//   { label: "License", value: "Professional Engineer (PE)" }
+// ];
 
 export default function About() {
   const ref = useRef(null);
@@ -70,14 +70,14 @@ export default function About() {
               className="h-px bg-gradient-to-r from-navy-800 to-transparent opacity-15 mb-7 origin-left"
             />
 
-            <div className="grid grid-cols-1 gap-x-6 gap-y-3">
+            {/* <div className="grid grid-cols-1 gap-x-6 gap-y-3">
               {facts.map(f => (
                 <div key={f.label} className="min-w-0">
                   <div className="font-title text-[9px] tracking-[2px] uppercase text-navy-500 opacity-50 mb-0.5">{f.label}</div>
                   <div className="text-[13px] font-medium text-navy-800">{f.value}</div>
                 </div>
               ))}
-            </div>
+            </div> */}
           </motion.div>
         </div>
       </div>

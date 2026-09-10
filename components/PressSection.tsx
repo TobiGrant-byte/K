@@ -73,7 +73,7 @@ export default function PressSection() {
           </div>
           <h2 className="m-0 font-display text-[clamp(32px,5vw,58px)] font-light leading-[1.1] text-white">
             Featured{" "}
-            <em className="font-semibold">In Print & Online</em>
+            <em className="font-semibold">In The Press</em>
           </h2>
           <p className="mt-4 font-display text-lg italic leading-[1.6] text-white/45">
             A journey covered by leading platforms — celebrating excellence,

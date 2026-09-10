@@ -10,8 +10,8 @@ const allPhotos: {
   zoom?: number;
   transformOrigin?: string;
 }[] = [
-  { src: "/images/credentials.png",       caption: "Licensed Engineer" },
-  { src: "/images/grad-pensive.webp",       caption: "PhD Graduation · University of Alabama", objectPosition: "center 28%", transformOrigin: "center 28%" },
+  { src: "/images/credentials.png",       caption: "Engineering Credentials" },
+  { src: "/images/grad-pensive.webp",       caption: "Graduation · University of Alabama", objectPosition: "center 28%", transformOrigin: "center 28%" },
   { src: "/images/graduation-denny.webp",   caption: "Denny Chimes · Tuscaloosa, Alabama", objectPosition: "center 38%", zoom: 1.25, transformOrigin: "center 38%" },
   { src: "/images/garver-award-1.png",       caption: "Garver Award Ceremony", objectPosition: "center 30%" },
   { src: "/images/lifesavers-conf.webp",     caption: "LIFESAVERS 2023 · Seattle, WA", objectPosition: "center 28%" },
@@ -21,7 +21,7 @@ const allPhotos: {
   { src: "/images/msc-graduation.jpg",      caption: "MSc Graduation · Nottingham Trent, UK", objectPosition: "top center", zoom: 1.18, transformOrigin: "top center" },
   { src: "/images/africa-ball.jpg",         caption: "Africa Ball · University of Alabama", objectPosition: "center 35%", zoom: 1.15, transformOrigin: "center 35%" },
   { src: "/images/headshot.jpg",            caption: "Professional Portrait", objectPosition: "center 20%", transformOrigin: "center 20%" },
-  { src: "/images/grad-lean.webp",          caption: "PhD — University of Alabama", objectPosition: "center 20%", transformOrigin: "center 20%" },
+  { src: "/images/grad-lean.webp",          caption: "Graduation — University of Alabama", objectPosition: "center 20%", transformOrigin: "center 20%" },
   { src: "/images/lecture-hall.jpg",        caption: "Socio-Cultural Adaptation Talk" },
   { src: "/images/speaking.webp",           caption: "Cultural Event MC", zoom: 1.32, transformOrigin: "center center" },
   { src: "/images/garver-award-2.webp",     caption: "Garver Recognition" },

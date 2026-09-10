@@ -38,8 +38,7 @@ export default function Footer() {
       <div className="container">
         <div className="flex flex-wrap justify-between items-center gap-6 mb-8">
           <div>
-            <div className="font-title text-[13px] tracking-[3px] text-white font-medium mb-1">DR. SUNDAY OKAFOR</div>
-            <div className="font-display text-[13px] italic text-white/40">PhD, PE ·</div>
+            <div className="font-title text-[13px] tracking-[3px] text-white font-medium">DR. SUNDAY OKAFOR</div>
           </div>
           <nav className="flex flex-wrap gap-7">
             {footerLinks.map((l) => (

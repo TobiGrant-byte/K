@@ -60,7 +60,6 @@ export default function Hero() {
           {/* Rotating word */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }}
             className="mb-8 flex items-center gap-3.5">
-            <span className="whitespace-nowrap font-display text-[clamp(22px,2.4vw,28px)] italic leading-none text-white/70">PhD, PE ·</span>
             <div className="relative h-11 min-w-[220px] overflow-hidden">
               {words.map((lines, i) => (
                 <motion.span key={lines.join(" ")}
