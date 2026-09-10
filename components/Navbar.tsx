@@ -56,7 +56,6 @@ export default function Navbar() {
           >
             <div style={{ fontFamily: "'Cinzel',serif", fontSize: "13px", letterSpacing: "3px", color: "#fff", fontWeight: 500, lineHeight: 1.25 }}>Dr. Sunday Chizoba</div>
             <div style={{ fontFamily: "'Cinzel',serif", fontSize: "13px", letterSpacing: "3px", color: "#fff", fontWeight: 500, lineHeight: 1.25 }}>Okafor</div>
-            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "11px", fontStyle: "italic", color: "rgba(255,255,255,0.5)", letterSpacing: "2px", lineHeight: 1.25 }}>PhD, PE</div>
           </motion.button>
 
           {/* Desktop */}
@@ -72,14 +71,6 @@ export default function Navbar() {
                 {l}
               </motion.button>
             ))}
-            <motion.button
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
-              onClick={() => go("Contact")}
-              whileHover={{ background: "rgba(255,255,255,0.12)" }}
-              style={{ background: "none", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", cursor: "pointer", padding: "10px 22px", fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "2px", textTransform: "uppercase", transition: "all 0.3s", display: "inline-flex", alignItems: "center", lineHeight: 1 }}
-            >
-              Get In Touch
-            </motion.button>
           </div>
 
           {/* Hamburger */}

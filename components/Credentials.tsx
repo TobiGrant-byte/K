@@ -67,7 +67,7 @@ export default function Credentials() {
             style={{ display: "flex", flexDirection: "column", gap: 16, position: "sticky", top: 96 }}
           >
             <div className="img-zoom" style={{ position: "relative", aspectRatio: "3/4", overflow: "hidden", maxHeight: 420, borderRadius: 12 }}>
-              <Image src="/images/grad-pensive.webp" alt="Dr. Okafor doctoral regalia" fill style={{ objectFit: "cover", objectPosition: "top" }} sizes="(max-width: 768px) 100vw, 40vw" />
+              <Image src="/images/grad-pensive.webp" alt="Dr. Okafor doctoral regalia" fill style={{ objectFit: "cover", objectPosition: "center 18%" }} sizes="(max-width: 768px) 100vw, 40vw" />
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.7) 0%, transparent 50%)" }} />
               <div style={{ position: "absolute", bottom: 20, left: 20, right: 20 }}>
                 <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: 17, color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>

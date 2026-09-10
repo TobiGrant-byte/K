@@ -5,6 +5,14 @@ export const metadata: Metadata = {
   title: "Dr. Sunday Okafor, PhD",
   description: "Official portfolio of Dr. Sunday Okafor — researcher, scholar, and academic leader.",
   keywords: ["Dr. Sunday Okafor", "PhD", "researcher", "transportation", "University of Alabama"],
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
+    shortcut: "/favicon.png",
+  },
   openGraph: {
     title: "Dr. Sunday Okafor, PhD",
     description: "Official portfolio of Dr. Sunday Okafor — researcher, scholar, and academic leader.",
@@ -26,7 +34,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=Cinzel:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
-        <link rel="icon" href="/images/headshot.jpg" />
       </head>
       <body>{children}</body>
     </html>

@@ -27,7 +27,7 @@ export default function Research() {
           </motion.div>
           <motion.h2 initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.1 }}
             style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(32px,5vw,62px)", color: "#fff", lineHeight: 1.1, maxWidth: 700 }}>
-            Saving Lives Through{" "}<em style={{ fontWeight: 600, fontStyle: "italic" }}>Rigorous Science</em>
+            Ideas That Shape How{" "}<em style={{ fontWeight: 600, fontStyle: "italic" }}>We Move</em>
           </motion.h2>
         </div>
 
@@ -49,8 +49,8 @@ export default function Research() {
               <Image src="/images/lecture-hall.jpg" alt="Dr. Okafor lecturing" fill style={{ objectFit: "cover" }} sizes="40vw" />
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.7) 0%, transparent 55%)" }} />
               <div style={{ position: "absolute", bottom: 16, left: 16 }}>
-                <div className="eyebrow" style={{ marginBottom: 4 }}>Education</div>
-                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, color: "#fff", fontStyle: "italic" }}>Socio-Cultural & Transportation</div>
+                <div className="eyebrow" style={{ marginBottom: 4 }}>Guiding Minds</div>
+                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, color: "#fff", fontStyle: "italic" }}>Where ideas find a voice</div>
               </div>
             </div>
           </motion.div>
