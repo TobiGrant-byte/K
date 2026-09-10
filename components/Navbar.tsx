@@ -1,134 +1,130 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
-const links = ["About","Research","Awards","Gallery","Contact"];
+import { navLinks } from "@/lib/nav";
+
+const links = navLinks;
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const isHome = pathname === "/";
+  const solid = !isHome || scrolled;
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 50);
+    fn();
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  const go = (id: string) => {
+  useEffect(() => {
     setOpen(false);
-    document.querySelector(`#${id.toLowerCase()}`)?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, [pathname]);
 
   return (
-    <>
-      <motion.nav
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        style={{
-          position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
-          height: "72px",
-          background: scrolled ? "rgba(5,13,26,0.95)" : "transparent",
-          backdropFilter: scrolled ? "blur(24px)" : "none",
-          borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
-          transition: "all 0.4s ease",
-          display: "flex", alignItems: "center",
-        }}
-      >
-        <div className="nav-inner" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          {/* Logo */}
-          <motion.button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            whileHover={{ opacity: 0.75 }}
-            className="nav-logo"
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              textAlign: "left",
-              padding: 0,
-              margin: 0,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              gap: 3,
-            }}
-          >
-            <div style={{ fontFamily: "'Cinzel',serif", fontSize: "13px", letterSpacing: "3px", color: "#fff", fontWeight: 500, lineHeight: 1.25 }}>Dr. Sunday Chizoba</div>
-            <div style={{ fontFamily: "'Cinzel',serif", fontSize: "13px", letterSpacing: "3px", color: "#fff", fontWeight: 500, lineHeight: 1.25 }}>Okafor</div>
-          </motion.button>
-
-          {/* Desktop */}
-          <div style={{ display: "flex", alignItems: "center", gap: "36px", height: "100%" }} className="hidden-mobile">
-            {links.map((l, i) => (
-              <motion.button key={l}
-                initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07 + 0.3 }}
-                onClick={() => go(l)}
-                style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "3px", color: "rgba(255,255,255,0.75)", textTransform: "uppercase", position: "relative", padding: 0, margin: 0, lineHeight: 1, display: "inline-flex", alignItems: "center", height: 40 }}
-                className="nav-link"
-              >
-                {l}
-              </motion.button>
-            ))}
+    <motion.nav
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+      className={`fixed top-0 left-0 right-0 z-50 h-[72px] transition-[background,border-color,backdrop-filter] duration-[400ms] ease-in-out ${
+        solid
+          ? "bg-[rgba(5,13,26,0.95)] backdrop-blur-xl border-b border-white/[0.06]"
+          : "bg-transparent border-b border-transparent"
+      }`}
+    >
+      <div className="mx-auto w-full max-w-[1280px] px-6 min-[1101px]:px-12 h-full flex items-center justify-between relative">
+        <Link
+          href="/"
+          className="no-underline text-left flex flex-col justify-center gap-[3px]"
+        >
+          <div className="font-title text-[13px] tracking-[3px] text-white font-medium leading-[1.25]">
+            Dr. Sunday Chizoba
           </div>
+          <div className="font-title text-[13px] tracking-[3px] text-white font-medium leading-[1.25]">
+            Okafor
+          </div>
+        </Link>
 
-          {/* Hamburger */}
-          <button
-            onClick={() => setOpen(!open)}
-            aria-label="Toggle menu"
-            className="show-mobile"
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              display: "none",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "5px",
-              padding: 0,
-              margin: 0,
-              width: 40,
-              height: 40,
-              flexShrink: 0,
-            }}
-          >
-            {[0,1,2].map(i => (
-              <motion.span key={i} animate={{ rotate: open && i!==1 ? (i===0?45:-45) : 0, y: open && i!==1 ? (i===0?10:0) : 0, opacity: open && i===1 ? 0 : 1 }}
-                style={{ display: "block", width: "22px", height: "1.5px", background: "#fff", transformOrigin: "center" }} />
-            ))}
-          </button>
+        {/* Desktop */}
+        <div className="hidden min-[1101px]:flex items-center gap-[22px] h-full flex-nowrap">
+          {links.map((l, i) => {
+            const active = pathname === l.href;
+            return (
+              <motion.div key={l.href} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 + 0.2 }}>
+                <Link
+                  href={l.href}
+                  className={`font-title text-xs tracking-[1.5px] uppercase no-underline relative inline-flex items-center h-10 whitespace-nowrap transition-colors duration-300 after:content-[''] after:absolute after:bottom-2 after:left-0 after:h-px after:w-0 after:bg-white/60 after:transition-[width] after:duration-300 hover:after:w-full hover:text-white ${
+                    active ? "text-white" : "text-white/75"
+                  }`}
+                >
+                  {l.label}
+                </Link>
+              </motion.div>
+            );
+          })}
         </div>
-      </motion.nav>
 
-      <style>{`
-        @media(max-width:768px){
-          .hidden-mobile{display:none!important}
-          .show-mobile{display:flex!important}
-          .nav-inner{padding:0 24px!important}
-        }
-        .nav-link::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:rgba(255,255,255,0.6);transition:width 0.3s}
-        .nav-link:hover::after{width:100%}
-        .nav-link:hover{color:#fff!important}
-      `}</style>
+        {/* Hamburger */}
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Toggle menu"
+          aria-expanded={open}
+          className="flex min-[1101px]:hidden flex-col items-center justify-center gap-[5px] p-0 w-10 h-10 shrink-0 z-[2] bg-transparent border-none cursor-pointer"
+        >
+          {[0, 1, 2].map((i) => (
+            <motion.span
+              key={i}
+              animate={{
+                rotate: open && i !== 1 ? (i === 0 ? 45 : -45) : 0,
+                y: open && i !== 1 ? (i === 0 ? 6.5 : -6.5) : 0,
+                opacity: open && i === 1 ? 0 : 1,
+              }}
+              transition={{ duration: 0.25 }}
+              className="block w-[22px] h-[1.5px] bg-white origin-center"
+            />
+          ))}
+        </button>
 
-      {/* Mobile menu */}
-      <AnimatePresence>
-        {open && (
-          <motion.div initial={{ opacity: 0, x: "100%" }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: "100%" }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            style={{ position: "fixed", inset: 0, zIndex: 40, background: "var(--navy-900)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "36px" }}
-          >
-            {links.map((l, i) => (
-              <motion.button key={l} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }}
-                onClick={() => go(l)} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'Cormorant Garamond',serif", fontSize: "clamp(32px,6vw,48px)", color: "#fff", fontWeight: 300 }}>
-                {l}
-              </motion.button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+        {/* Mobile dropdown (not fullscreen) */}
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scaleY: 0.96 }}
+              animate={{ opacity: 1, y: 0, scaleY: 1 }}
+              exit={{ opacity: 0, y: -8, scaleY: 0.96 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute top-[calc(100%+8px)] right-6 left-6 origin-top bg-[rgba(5,13,26,0.98)] border border-white/12 rounded-xl py-3 px-2 shadow-[0_16px_48px_rgba(0,0,0,0.45)] z-[60] min-[1101px]:hidden block"
+            >
+              {links.map((l, i) => {
+                const active = pathname === l.href;
+                return (
+                  <motion.div
+                    key={l.href}
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.04 * i + 0.05 }}
+                  >
+                    <Link
+                      href={l.href}
+                      onClick={() => setOpen(false)}
+                      className={`block py-3.5 px-4 font-display text-[22px] no-underline rounded-lg ${
+                        active ? "font-medium text-white" : "font-light text-white/75"
+                      }`}
+                    >
+                      {l.label}
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.nav>
   );
 }

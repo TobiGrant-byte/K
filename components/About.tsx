@@ -12,94 +12,75 @@ export default function About() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section id="about" ref={ref} style={{ background: "var(--off-white)", position: "relative", overflow: "hidden" }} className="section-pad">
+    <section id="about" ref={ref} className="section-pad bg-off-white relative overflow-hidden">
       {/* BG accent */}
-      <div style={{ position: "absolute", top: 0, right: 0, width: "40%", height: "100%", background: "linear-gradient(to left, rgba(10,22,40,0.04), transparent)", pointerEvents: "none" }} />
+      <div className="absolute top-0 right-0 w-2/5 h-full bg-gradient-to-l from-[rgba(10,22,40,0.04)] to-transparent pointer-events-none" />
 
       <div className="container">
-        <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center">
 
           {/* Images */}
-          <motion.div initial={{ opacity: 0, x: -48 }} animate={inView ? { opacity: 1, x: 0 } : {}}
+          <motion.div
+            initial={{ opacity: 0, x: -48 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="about-photo"
-            style={{ position: "relative", display: "flex", justifyContent: "center", minWidth: 0 }}>
-            <div className="about-photo-inner" style={{ position: "relative", width: "100%", maxWidth: 360, paddingBottom: 56, paddingLeft: 28 }}>
+            className="relative flex justify-center min-w-0"
+          >
+            <div className="relative w-full max-w-[min(360px,100%)] pb-7 pl-4 md:pb-14 md:pl-7">
               {/* Frame */}
-              <div className="about-photo-frame" style={{ position: "absolute", top: 10, left: 38, width: "100%", maxWidth: 360, aspectRatio: "360 / 480", border: "1px solid rgba(10,22,40,0.15)", zIndex: 0 }} />
+              <div className="absolute top-2.5 left-5 w-[calc(100%-8px)] md:left-[38px] md:w-full md:max-w-[360px] aspect-[360/480] border border-[rgba(10,22,40,0.15)] z-0" />
               {/* Main */}
-              <div className="img-zoom about-photo-main" style={{ position: "relative", width: "100%", aspectRatio: "360 / 480", zIndex: 1 }}>
-                <Image src="/images/headshot.jpg" alt="Dr. Sunday Okafor" fill style={{ objectFit: "cover" }} sizes="(max-width: 768px) 100vw, 360px" />
+              <div className="img-zoom relative w-full aspect-[360/480] z-[1]">
+                <Image src="/images/headshot.jpg" alt="Dr. Sunday Okafor" fill className="object-cover" sizes="(max-width: 768px) 100vw, 360px" />
               </div>
             </div>
           </motion.div>
 
           {/* Text */}
           <motion.div
-            className="about-copy"
+            className="min-w-0 break-words"
             initial={{ opacity: 0, x: 48 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-            style={{ minWidth: 0, overflowWrap: "break-word" }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-              <div style={{ width: 40, height: 1, background: "var(--navy-800)", opacity: 0.4, flexShrink: 0 }} />
-              <span style={{ fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "4px", textTransform: "uppercase", color: "var(--navy-500)", opacity: 0.7 }}>About</span>
+            <div className="flex items-center gap-3.5 mb-5">
+              <div className="w-10 h-px bg-navy-800 opacity-40 shrink-0" />
+              <span className="font-title text-[10px] tracking-[4px] uppercase text-navy-500 opacity-70">About</span>
             </div>
-            <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(28px,4vw,52px)", color: "var(--navy-800)", lineHeight: 1.2, marginBottom: 24 }}>
+            <h2 className="font-display font-light text-[clamp(26px,7vw,36px)] md:text-[clamp(28px,4vw,52px)] text-navy-800 leading-[1.2] mb-6">
                 A Civil Engineer Dedicated to the Future of Safe,{" "}
-              <em style={{ fontWeight: 600 }}>Smart Transportation Infrastructure.</em>
+              <em className="font-semibold">Smart Transportation Infrastructure.</em>
             </h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
-              <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 19, lineHeight: 1.75, color: "var(--text-secondary)", fontWeight: 400 }}>
+            <div className="flex flex-col gap-4 mb-8">
+              <p className="font-display text-[15px] md:text-[19px] leading-[1.75] text-text-secondary font-normal">
                 Dr. Sunday Okafor is a licensed Professional Engineer operating at the critical nexus of traffic safety analytics, connected vehicle systems, and complex infrastructure delivery. His work is driven by a singular mission: to use data to make our roads safer, more efficient, and more equitable for everyone.
               </p>
-              <p style={{ fontSize: 15, lineHeight: 1.8, color: "var(--text-muted)" }}>
+              <p className="text-[15px] leading-[1.8] text-text-muted">
                 A distinguished scholar, Dr. Okafor earned his Master’s and Doctor of Philosophy (Ph.D.) in Civil Engineering from The University of Alabama, where his research as a Graduate Research Assistant at the Alabama Transportation Institute (ATI)—a premier national hub for transit innovation—focused on advanced crash analytics and predictive modeling. He was awarded his Master of Science (M.Sc.) in Civil Engineering from Nottingham Trent University, UK, as a prestigious Commonwealth Shared Scholar, a testament to his academic excellence and global potential. He holds a Bachelor of Science (B.Sc.) from FUNAAB, Nigeria.
               </p>
-              <p style={{ fontSize: 15, lineHeight: 1.8, color: "var(--text-muted)" }}>
+              <p className="text-[15px] leading-[1.8] text-text-muted">
                 Today, Dr. Okafor brings this academic rigor to the corporate sector as a Project Engineer at Garver, where he designs safer, more efficient roadway networks for communities across the United States. An active member of ASCE and ITE, he is also a dedicated community builder, having previously served as President of the African Students Association at the University of Alabama, fostering a vibrant and inclusive environment for international scholars.
               </p>
             </div>
 
-            <motion.div initial={{ scaleX: 0 }} animate={inView ? { scaleX: 1 } : {}} transition={{ duration: 0.7, delay: 0.6 }}
-              style={{ height: 1, background: "linear-gradient(to right, var(--navy-800), transparent)", opacity: 0.15, marginBottom: 28, transformOrigin: "left" }} />
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={inView ? { scaleX: 1 } : {}}
+              transition={{ duration: 0.7, delay: 0.6 }}
+              className="h-px bg-gradient-to-r from-navy-800 to-transparent opacity-15 mb-7 origin-left"
+            />
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px 24px" }}>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-3">
               {facts.map(f => (
-                <div key={f.label} style={{ minWidth: 0 }}>
-                  <div style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "2px", textTransform: "uppercase", color: "var(--navy-500)", opacity: 0.5, marginBottom: 2 }}>{f.label}</div>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: "var(--navy-800)" }}>{f.value}</div>
+                <div key={f.label} className="min-w-0">
+                  <div className="font-title text-[9px] tracking-[2px] uppercase text-navy-500 opacity-50 mb-0.5">{f.label}</div>
+                  <div className="text-[13px] font-medium text-navy-800">{f.value}</div>
                 </div>
               ))}
             </div>
           </motion.div>
         </div>
       </div>
-      <style>{`
-        @media (max-width: 768px) {
-          .about-grid {
-            grid-template-columns: 1fr !important;
-            gap: 40px !important;
-          }
-          .about-photo-inner {
-            padding-left: 16px !important;
-            padding-bottom: 28px !important;
-            max-width: min(360px, 100%) !important;
-          }
-          .about-photo-frame {
-            left: 20px !important;
-            width: calc(100% - 8px) !important;
-            max-width: none !important;
-          }
-          .about-copy h2 {
-            font-size: clamp(26px, 7vw, 36px) !important;
-          }
-          .about-copy p {
-            font-size: 15px !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }

@@ -14,43 +14,43 @@ export default function Research() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section id="research" ref={ref} style={{ background: "var(--navy-800)", position: "relative", overflow: "hidden" }} className="section-pad">
-      <div style={{ position: "absolute", inset: 0, opacity: 0.04, backgroundImage: "radial-gradient(circle at 80% 20%, #fff 0%, transparent 60%)", pointerEvents: "none" }} />
+    <section id="research" ref={ref} className="section-pad relative overflow-hidden bg-navy-800">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,#fff_0%,transparent_60%)] opacity-[0.04]" />
 
       <div className="container">
         {/* Header */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 0, marginBottom: 72 }}>
+        <div className="mb-[72px] flex flex-col gap-0">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}
-            style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-            <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.35)", flexShrink: 0 }} />
-            <span className="eyebrow">Research & Expertise</span>
+            className="mb-4 flex items-center gap-3.5">
+            <div className="h-px w-10 shrink-0 bg-white/35" />
+            <span className="eyebrow">Research & Development</span>
           </motion.div>
           <motion.h2 initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.1 }}
-            style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(32px,5vw,62px)", color: "#fff", lineHeight: 1.1, maxWidth: 700 }}>
-            Ideas That Shape How{" "}<em style={{ fontWeight: 600, fontStyle: "italic" }}>We Move</em>
+            className="max-w-[700px] font-display text-[clamp(32px,5vw,62px)] font-light leading-[1.1] text-white">
+            Ideas That Shape How{" "}<em className="font-semibold italic">We Move</em>
           </motion.h2>
         </div>
 
         {/* Grid: images + areas */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 3fr", gap: 64, alignItems: "start" }}>
+        <div className="grid grid-cols-1 items-start gap-16 md:grid-cols-[2fr_3fr]">
           {/* Images */}
-          <motion.div initial={{ opacity: 0, x: -36 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <motion.div initial={{ opacity: 0, x: -36 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col gap-3">
             {/* Chess image commented out
-            <div className="img-zoom" style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden" }}>
-              <Image src="/images/chess.jpg" alt="Dr. Okafor playing chess" fill style={{ objectFit: "cover" }} sizes="40vw" />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.7) 0%, transparent 55%)" }} />
-              <div style={{ position: "absolute", bottom: 16, left: 16 }}>
-                <div className="eyebrow" style={{ marginBottom: 4 }}>Pleasure</div>
-                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, color: "#fff", fontStyle: "italic" }}>Playing chess</div>
+            <div className="img-zoom relative aspect-[4/3] overflow-hidden">
+              <Image src="/images/chess.jpg" alt="Dr. Okafor playing chess" fill className="object-cover" sizes="40vw" />
+              <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.7)_0%,transparent_55%)]" />
+              <div className="absolute bottom-4 left-4">
+                <div className="eyebrow mb-1">Pleasure</div>
+                <div className="font-display text-[15px] italic text-white">Playing chess</div>
               </div>
             </div>
             */}
-            <div className="img-zoom" style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden" }}>
-              <Image src="/images/lecture-hall.jpg" alt="Dr. Okafor lecturing" fill style={{ objectFit: "cover" }} sizes="40vw" />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.7) 0%, transparent 55%)" }} />
-              <div style={{ position: "absolute", bottom: 16, left: 16 }}>
-                <div className="eyebrow" style={{ marginBottom: 4 }}>Guiding Minds</div>
-                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, color: "#fff", fontStyle: "italic" }}>Where ideas find a voice</div>
+            <div className="img-zoom relative aspect-[4/3] overflow-hidden">
+              <Image src="/images/lecture-hall.jpg" alt="Dr. Okafor lecturing" fill className="object-cover" sizes="40vw" />
+              <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.7)_0%,transparent_55%)]" />
+              <div className="absolute bottom-4 left-4">
+                <div className="eyebrow mb-1">Guiding Minds</div>
+                <div className="font-display text-[15px] italic text-white">Where ideas find a voice</div>
               </div>
             </div>
           </motion.div>
@@ -59,39 +59,29 @@ export default function Research() {
           <div>
             {areas.map((a, i) => (
               <motion.div key={a.n} initial={{ opacity: 0, x: 32 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.65, delay: i * 0.14 + 0.2 }}
-                style={{ display: "flex", gap: 20, padding: "28px 0", borderBottom: "1px solid rgba(255,255,255,0.07)", position: "relative", cursor: "default" }}
-                className="research-item">
-                <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 36, fontWeight: 300, color: "rgba(255,255,255,0.12)", flexShrink: 0, lineHeight: 1 }}>{a.n}</span>
+                className="relative flex cursor-default gap-5 border-b border-white/[0.07] py-7 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-white/30 after:transition-[width] after:duration-[400ms] hover:after:w-full">
+                <span className="shrink-0 font-display text-[36px] font-light leading-none text-white/[0.12]">{a.n}</span>
                 <div>
-                  <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 24, color: "#fff", marginBottom: 10, fontWeight: 500 }}>{a.title}</h3>
-                  <p style={{ fontSize: 14, lineHeight: 1.85, color: "rgba(255,255,255,0.55)" }}>{a.desc}</p>
+                  <h3 className="mb-2.5 font-display text-2xl font-medium text-white">{a.title}</h3>
+                  <p className="text-sm leading-[1.85] text-white/55">{a.desc}</p>
                 </div>
               </motion.div>
             ))}
 
             {/* Lifesavers conf image */}
             <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.65 }}
-              className="img-zoom" style={{ position: "relative", aspectRatio: "16/10", overflow: "hidden", marginTop: 24 }}>
-              <Image src="/images/lifesavers-conf.webp" alt="LIFESAVERS 2023 National Conference, Seattle" fill style={{ objectFit: "cover", objectPosition: "center 22%" }} sizes="55vw" />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.9) 0%, rgba(5,13,26,0.35) 45%, rgba(5,13,26,0.15) 100%)" }} />
-              <div className="lifesavers-caption" style={{ position: "absolute", left: 24, right: 24 }}>
-                <div className="eyebrow" style={{ marginBottom: 8, fontSize: 11 }}>Conference</div>
-                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "clamp(22px,2.4vw,28px)", color: "#fff", fontWeight: 500, lineHeight: 1.15 }}>LIFESAVERS 2023</div>
-                <div style={{ fontFamily: "'Cinzel',serif", fontSize: 11, letterSpacing: "2px", color: "rgba(255,255,255,0.88)", marginTop: 6 }}>Traffic Safety Scholars · Seattle, WA</div>
+              className="img-zoom relative mt-6 aspect-[16/10] overflow-hidden">
+              <Image src="/images/lifesavers-conf.webp" alt="LIFESAVERS 2023 National Conference, Seattle" fill className="object-cover object-[center_22%]" sizes="55vw" />
+              <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.9)_0%,rgba(5,13,26,0.35)_45%,rgba(5,13,26,0.15)_100%)]" />
+              <div className="absolute bottom-3.5 left-4 right-4 md:bottom-7 md:left-6 md:right-6">
+                <div className="eyebrow mb-2 text-[11px]">Conference</div>
+                <div className="font-display text-[clamp(22px,2.4vw,28px)] font-medium leading-[1.15] text-white">LIFESAVERS 2023</div>
+                <div className="mt-1.5 font-title text-[11px] tracking-[2px] text-white/[0.88]">Traffic Safety Scholars · Seattle, WA</div>
               </div>
             </motion.div>
           </div>
         </div>
       </div>
-      <style>{`
-        .research-item::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:rgba(255,255,255,0.3);transition:width 0.4s}
-        .research-item:hover::after{width:100%}
-        .lifesavers-caption{bottom:28px}
-        @media(max-width:768px){
-          #research .container>div:last-child{grid-template-columns:1fr!important}
-          .lifesavers-caption{bottom:14px;left:16px!important;right:16px!important}
-        }
-      `}</style>
     </section>
   );
 }

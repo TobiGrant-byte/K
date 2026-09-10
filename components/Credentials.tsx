@@ -18,39 +18,39 @@ export default function Credentials() {
   const inView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
-    <section id="credentials" ref={ref} style={{ background: "var(--navy-900)", position: "relative", overflow: "hidden" }} className="section-pad">
-      <div style={{ position: "absolute", top: 0, left: 0, width: "60%", height: "100%", background: "radial-gradient(ellipse at 10% 50%, rgba(255,255,255,0.02) 0%, transparent 65%)", pointerEvents: "none" }} />
+    <section id="credentials" ref={ref} className="section-pad relative overflow-hidden bg-navy-900">
+      <div className="pointer-events-none absolute left-0 top-0 h-full w-[60%] bg-[radial-gradient(ellipse_at_10%_50%,rgba(255,255,255,0.02)_0%,transparent_65%)]" />
 
       <div className="container">
-        <div className="credentials-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }}>
+        <div className="grid grid-cols-1 items-start gap-10 md:grid-cols-2 md:gap-20">
           {/* Timeline */}
-          <div className="credentials-timeline">
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }} style={{ marginBottom: 56 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-                <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.35)" }} />
+          <div className="order-2 md:order-1">
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }} className="mb-14">
+              <div className="mb-4 flex items-center gap-3.5">
+                <div className="h-px w-10 bg-white/35" />
                 <span className="eyebrow">Career Journey</span>
               </div>
-              <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(28px,4vw,48px)", color: "#fff", lineHeight: 1.1 }}>
-                Built on <em style={{ fontWeight: 600 }}>Hard Work</em> & Global Experience
+              <h2 className="font-display text-[clamp(28px,4vw,48px)] font-light leading-[1.1] text-white">
+                Built on <em className="font-semibold">Hard Work</em> & Global Experience
               </h2>
             </motion.div>
 
-            <div style={{ position: "relative" }}>
+            <div className="relative">
               {/* Line */}
               <motion.div initial={{ scaleY: 0 }} animate={inView ? { scaleY: 1 } : {}} transition={{ duration: 1.4, delay: 0.3 }}
-                style={{ position: "absolute", left: 6, top: 0, bottom: 0, width: 1, background: "linear-gradient(to bottom, rgba(255,255,255,0.25), rgba(255,255,255,0.03))", transformOrigin: "top" }} />
+                className="absolute bottom-0 left-1.5 top-0 w-px origin-top bg-[linear-gradient(to_bottom,rgba(255,255,255,0.25),rgba(255,255,255,0.03))]" />
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+              <div className="flex flex-col gap-0">
                 {timeline.map((item, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.6, delay: i * 0.12 + 0.3 }}
-                    style={{ display: "flex", gap: 20, padding: "20px 0", paddingLeft: 28, position: "relative", cursor: "default" }} className="timeline-item">
+                    className="group relative flex cursor-default gap-5 py-5 pl-7">
                     {/* Dot */}
-                    <div style={{ position: "absolute", left: 0, top: 28, width: 13, height: 13, border: "1px solid rgba(255,255,255,0.35)", background: "var(--navy-900)", borderRadius: "50%", zIndex: 1, transition: "background 0.3s" }} className="timeline-dot" />
+                    <div className="absolute left-0 top-7 z-[1] h-[13px] w-[13px] rounded-full border border-white/35 bg-navy-900 transition-colors duration-300 group-hover:bg-white/30" />
                     <div>
-                      <div style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "3px", color: "rgba(255,255,255,0.4)", marginBottom: 6, textTransform: "uppercase" }}>{item.year}</div>
-                      <h4 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 19, color: "#fff", fontWeight: 500, marginBottom: 4 }}>{item.title}</h4>
-                      <div style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "1px", color: "rgba(255,255,255,0.4)", marginBottom: 8, textTransform: "uppercase" }}>{item.org}</div>
-                      <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(255,255,255,0.45)" }}>{item.detail}</p>
+                      <div className="mb-1.5 font-title text-[9px] uppercase tracking-[3px] text-white/40">{item.year}</div>
+                      <h4 className="mb-1 font-display text-[19px] font-medium text-white">{item.title}</h4>
+                      <div className="mb-2 font-title text-[9px] uppercase tracking-[1px] text-white/40">{item.org}</div>
+                      <p className="text-[13px] leading-[1.8] text-white/45">{item.detail}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -60,49 +60,31 @@ export default function Credentials() {
 
           {/* Images */}
           <motion.div
-            className="credentials-images"
             initial={{ opacity: 0, x: 40 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            style={{ display: "flex", flexDirection: "column", gap: 16, position: "sticky", top: 96 }}
+            className="order-1 flex flex-col gap-4 md:sticky md:top-24 md:order-2"
           >
-            <div className="img-zoom" style={{ position: "relative", aspectRatio: "3/4", overflow: "hidden", maxHeight: 420, borderRadius: 12 }}>
-              <Image src="/images/grad-pensive.webp" alt="Dr. Okafor doctoral regalia" fill style={{ objectFit: "cover", objectPosition: "center 18%" }} sizes="(max-width: 768px) 100vw, 40vw" />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,13,26,0.7) 0%, transparent 50%)" }} />
-              <div style={{ position: "absolute", bottom: 20, left: 20, right: 20 }}>
-                <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: 17, color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>
+            <div className="img-zoom relative aspect-[3/4] max-h-[420px] overflow-hidden rounded-xl">
+              <Image src="/images/grad-pensive.webp" alt="Dr. Okafor doctoral regalia" fill className="object-cover object-[center_18%]" sizes="(max-width: 768px) 100vw, 40vw" />
+              <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.7)_0%,transparent_50%)]" />
+              <div className="absolute bottom-5 left-5 right-5">
+                <p className="font-display text-[17px] italic leading-[1.5] text-white/85">
                   &ldquo;The goal is not just to earn degrees — it is to use knowledge to build safer roads and better lives.&rdquo;
                 </p>
               </div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <div className="img-zoom" style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden", borderRadius: 12 }}>
-                <Image src="/images/msc-graduation.jpg" alt="MSc graduation UK" fill style={{ objectFit: "cover", objectPosition: "top" }} sizes="(max-width: 768px) 50vw, 20vw" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="img-zoom relative aspect-square overflow-hidden rounded-xl">
+                <Image src="/images/msc-graduation.jpg" alt="MSc graduation UK" fill className="object-cover object-top" sizes="(max-width: 768px) 50vw, 20vw" />
               </div>
-              <div className="img-zoom" style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden", borderRadius: 12 }}>
-                <Image src="/images/garver-award-1.png" alt="Garver Award" fill style={{ objectFit: "cover" }} sizes="(max-width: 768px) 50vw, 20vw" />
+              <div className="img-zoom relative aspect-square overflow-hidden rounded-xl">
+                <Image src="/images/garver-award-1.png" alt="Garver Award" fill className="object-cover" sizes="(max-width: 768px) 50vw, 20vw" />
               </div>
             </div>
           </motion.div>
         </div>
       </div>
-      <style>{`
-        .timeline-item:hover .timeline-dot{background:rgba(255,255,255,0.3)!important}
-        @media (max-width: 768px) {
-          .credentials-grid {
-            grid-template-columns: 1fr !important;
-            gap: 40px !important;
-          }
-          .credentials-images {
-            order: -1;
-            position: relative !important;
-            top: auto !important;
-          }
-          .credentials-timeline {
-            order: 1;
-          }
-        }
-      `}</style>
     </section>
   );
 }

@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+
+const siteTitle =
+  "Dr. Sunday Okafor, PhD – Do not let the difficult days deter you from moving forward, keep going everyday.";
+const siteDescription =
+  "Official portfolio of Dr. Sunday Okafor — researcher, scholar, and academic leader.";
 
 export const metadata: Metadata = {
-  title: "Dr. Sunday Okafor, PhD",
-  description: "Official portfolio of Dr. Sunday Okafor — researcher, scholar, and academic leader.",
+  metadataBase: new URL("https://dr-okafor.com"),
+  title: siteTitle,
+  description: siteDescription,
   keywords: ["Dr. Sunday Okafor", "PhD", "researcher", "transportation", "University of Alabama"],
   icons: {
     icon: [
@@ -14,9 +22,16 @@ export const metadata: Metadata = {
     shortcut: "/favicon.png",
   },
   openGraph: {
-    title: "Dr. Sunday Okafor, PhD",
-    description: "Official portfolio of Dr. Sunday Okafor — researcher, scholar, and academic leader.",
+    title: siteTitle,
+    description: siteDescription,
     type: "website",
+    siteName: "Dr. Sunday Okafor",
+    url: "https://dr-okafor.com",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription,
   },
 };
 
@@ -35,7 +50,11 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <Navbar />
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }

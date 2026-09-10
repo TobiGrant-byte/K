@@ -61,165 +61,60 @@ export default function PressSection() {
   return (
     <section
       id="press"
-      className="section-pad"
-      style={{ background: "var(--navy-800)", position: "relative", overflow: "hidden" }}
+      className="section-pad relative overflow-hidden bg-navy-800"
     >
       <div className="container">
         {/* Header — explicitly centered */}
-        <div
-          style={{
-            textAlign: "center",
-            maxWidth: 640,
-            marginLeft: "auto",
-            marginRight: "auto",
-            marginBottom: 64,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 14,
-              marginBottom: 16,
-            }}
-          >
-            <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.25)" }} />
-            <span className="eyebrow">Press &amp; Recognition</span>
-            <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.25)" }} />
+        <div className="mx-auto mb-16 max-w-[640px] text-center">
+          <div className="mb-4 flex items-center justify-center gap-3.5">
+            <div className="h-px w-10 bg-white/25" />
+            <span className="eyebrow">Publications</span>
+            <div className="h-px w-10 bg-white/25" />
           </div>
-          <h2
-            style={{
-              fontFamily: "'Cormorant Garamond',serif",
-              fontWeight: 300,
-              fontSize: "clamp(32px,5vw,58px)",
-              color: "#fff",
-              lineHeight: 1.1,
-              margin: 0,
-            }}
-          >
+          <h2 className="m-0 font-display text-[clamp(32px,5vw,58px)] font-light leading-[1.1] text-white">
             Featured{" "}
-            <em style={{ fontWeight: 600 }}>In The Press</em>
+            <em className="font-semibold">In Print & Online</em>
           </h2>
-          <p
-            style={{
-              fontFamily: "'Cormorant Garamond',serif",
-              fontStyle: "italic",
-              fontSize: 18,
-              color: "rgba(255,255,255,0.45)",
-              marginTop: 16,
-              lineHeight: 1.6,
-            }}
-          >
+          <p className="mt-4 font-display text-lg italic leading-[1.6] text-white/45">
             A journey covered by leading platforms — celebrating excellence,
             scholarship, and impact.
           </p>
         </div>
 
         {/* Cards — centered rows */}
-        <div
-          className="press-grid"
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: 28,
-          }}
-        >
+        <div className="flex flex-wrap justify-center gap-7">
           {pressItems.map((item) => (
             <a
               key={item.href}
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="press-card"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                width: "100%",
-                maxWidth: 360,
-                background: "var(--navy-700)",
-                border: "1px solid rgba(255,255,255,0.14)",
-                borderRadius: 16,
-                overflow: "hidden",
-                textDecoration: "none",
-                transition: "border-color 0.3s, transform 0.3s",
-              }}
+              className="flex w-full max-w-[360px] flex-col overflow-hidden rounded-2xl border border-white/14 bg-navy-700 no-underline transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-white/35 sm:w-[calc(50%-14px)] sm:max-w-none lg:w-[calc(33.333%-19px)]"
             >
-              <div
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  height: 228,
-                  flexShrink: 0,
-                  overflow: "hidden",
-                }}
-              >
+              <div className="relative h-[228px] w-full shrink-0 overflow-hidden">
                 <Image
                   src={item.image}
                   alt={item.title}
                   fill
                   sizes="360px"
+                  className="object-cover"
                   style={{
-                    objectFit: "cover",
                     objectPosition: item.objectPosition || "center",
                     transform: item.zoom ? `scale(${item.zoom})` : undefined,
                     transformOrigin: item.objectPosition || "center center",
                   }}
                 />
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background:
-                      "linear-gradient(to top, rgba(5,13,26,0.85) 0%, transparent 55%)",
-                  }}
-                />
+                <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.85)_0%,transparent_55%)]" />
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  flex: 1,
-                  padding: "28px 28px 32px",
-                  gap: 14,
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "'Cinzel',serif",
-                    fontSize: 10,
-                    letterSpacing: "2px",
-                    textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.4)",
-                  }}
-                >
+              <div className="flex flex-1 flex-col gap-3.5 px-7 pb-8 pt-7">
+                <span className="font-title text-[10px] uppercase tracking-[2px] text-white/40">
                   {item.source} · {item.date}
                 </span>
-                <h3
-                  style={{
-                    fontFamily: "'Cormorant Garamond',serif",
-                    fontSize: 20,
-                    fontWeight: 500,
-                    color: "#fff",
-                    lineHeight: 1.35,
-                    margin: 0,
-                  }}
-                >
+                <h3 className="m-0 font-display text-xl font-medium leading-[1.35] text-white">
                   {item.title}
                 </h3>
-                <span
-                  style={{
-                    marginTop: "auto",
-                    paddingTop: 8,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    fontSize: 13,
-                    color: "rgba(255,255,255,0.45)",
-                  }}
-                >
+                <span className="mt-auto inline-flex items-center gap-1.5 pt-2 text-[13px] text-white/45">
                   Read Feature
                   <svg
                     width="14"
@@ -241,24 +136,6 @@ export default function PressSection() {
           ))}
         </div>
       </div>
-
-      <style>{`
-        .press-card:hover {
-          border-color: rgba(255,255,255,0.35) !important;
-          transform: translateY(-4px);
-        }
-        @media (min-width: 640px) {
-          .press-card {
-            width: calc(50% - 14px) !important;
-            max-width: none !important;
-          }
-        }
-        @media (min-width: 1024px) {
-          .press-card {
-            width: calc(33.333% - 19px) !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }

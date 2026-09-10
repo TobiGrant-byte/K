@@ -5,6 +5,9 @@ import { motion, useInView } from "framer-motion";
 type Status = "idle"|"loading"|"success"|"error";
 type FormState = { name: string; email: string; subject: string; message: string };
 
+const inputClass =
+  "w-full px-4 py-3.5 bg-white/5 border border-white/12 text-white font-sans text-sm outline-none transition-[border-color] duration-300 focus:border-white/40";
+
 export default function Contact() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
@@ -26,44 +29,37 @@ export default function Contact() {
     } catch { setStatus("error"); setErrMsg("Network error. Please try again."); }
   };
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%", padding: "14px 16px", background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(255,255,255,0.12)", color: "#fff",
-    fontFamily: "'Inter',sans-serif", fontSize: 14, outline: "none",
-    transition: "border-color 0.3s",
-  };
-
   return (
-    <section id="contact" ref={ref} style={{ background: "var(--navy-800)", position: "relative", overflow: "hidden" }} className="section-pad">
-      <div style={{ position: "absolute", inset: 0, opacity: 0.04, backgroundImage: "radial-gradient(circle at 70% 30%, #fff 0%, transparent 55%)", pointerEvents: "none" }} />
+    <section id="contact" ref={ref} className="section-pad bg-navy-800 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle_at_70%_30%,#fff_0%,transparent_55%)] pointer-events-none" />
 
       <div className="container">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-start">
 
           {/* Info */}
           <motion.div initial={{ opacity: 0, x: -36 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.9 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-              <div style={{ width: 40, height: 1, background: "rgba(255,255,255,0.35)" }} />
+            <div className="flex items-center gap-3.5 mb-4">
+              <div className="w-10 h-px bg-white/35" />
               <span className="eyebrow">Contact</span>
             </div>
-            <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 300, fontSize: "clamp(32px,4vw,56px)", color: "#fff", lineHeight: 1.1, marginBottom: 20 }}>
-              Let&apos;s Start a <em style={{ fontWeight: 600 }}>Conversation</em>
+            <h2 className="font-display font-light text-[clamp(32px,4vw,56px)] text-white leading-[1.1] mb-5">
+              Let&apos;s Start a <em className="font-semibold">Conversation</em>
             </h2>
-            <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontStyle: "italic", color: "rgba(255,255,255,0.55)", lineHeight: 1.7, marginBottom: 44 }}>
+            <p className="font-display text-lg italic text-white/55 leading-[1.7] mb-11">
               Whether you&apos;re interested in research collaboration, speaking engagements, mentorship, or professional consultation — Dr. Okafor welcomes your message.
             </p>
-            <div style={{ height: 1, background: "rgba(255,255,255,0.08)", marginBottom: 36 }} />
+            <div className="h-px bg-white/[0.08] mb-9" />
             {[
               { label: "Research & Publications", detail: "Academic collaborations & joint research" },
               { label: "Speaking & Conferences", detail: "Keynotes, panels & university talks" },
               { label: "Mentorship", detail: "Graduate students & young engineers" },
               { label: "Professional Enquiries", detail: "Consulting & project partnerships" },
             ].map(item => (
-              <div key={item.label} style={{ display: "flex", gap: 14, marginBottom: 20 }}>
-                <div style={{ width: 6, height: 6, borderRadius: "50%", background: "rgba(255,255,255,0.4)", flexShrink: 0, marginTop: 6 }} />
+              <div key={item.label} className="flex gap-3.5 mb-5">
+                <div className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0 mt-1.5" />
                 <div>
-                  <div style={{ fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", marginBottom: 3 }}>{item.label}</div>
-                  <div style={{ fontSize: 13, color: "rgba(255,255,255,0.65)" }}>{item.detail}</div>
+                  <div className="font-title text-[10px] tracking-[2px] uppercase text-white/50 mb-[3px]">{item.label}</div>
+                  <div className="text-[13px] text-white/65">{item.detail}</div>
                 </div>
               </div>
             ))}
@@ -72,46 +68,63 @@ export default function Contact() {
           {/* Form */}
           <motion.div initial={{ opacity: 0, x: 36 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.9, delay: 0.15 }}>
             {status === "success" ? (
-              <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
-                style={{ border: "1px solid rgba(255,255,255,0.12)", padding: "60px 40px", textAlign: "center" }}>
-                <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 0.5 }}
-                  style={{ width: 56, height: 56, border: "1px solid rgba(255,255,255,0.3)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", fontSize: 22, color: "#fff" }}>✓</motion.div>
-                <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 28, color: "#fff", marginBottom: 12 }}>Message Sent</h3>
-                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, lineHeight: 1.7 }}>Thank you for reaching out. Dr. Okafor will respond shortly.<br/>A confirmation has been sent to your email.</p>
-                <button onClick={() => setStatus("idle")} style={{ marginTop: 28, padding: "12px 28px", background: "none", border: "1px solid rgba(255,255,255,0.25)", color: "rgba(255,255,255,0.7)", fontFamily: "'Cinzel',serif", fontSize: "10px", letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer" }}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="border border-white/12 px-10 py-[60px] text-center"
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 0.5 }}
+                  className="w-14 h-14 border border-white/30 rounded-full flex items-center justify-center mx-auto mb-6 text-[22px] text-white"
+                >
+                  ✓
+                </motion.div>
+                <h3 className="font-display text-[28px] text-white mb-3">Message Sent</h3>
+                <p className="text-white/50 text-sm leading-[1.7]">Thank you for reaching out. Dr. Okafor will respond shortly.<br/>A confirmation has been sent to your email.</p>
+                <button
+                  onClick={() => setStatus("idle")}
+                  className="mt-7 px-7 py-3 bg-transparent border border-white/25 text-white/70 font-title text-[10px] tracking-[2px] uppercase cursor-pointer"
+                >
                   Send Another
                 </button>
               </motion.div>
             ) : (
-              <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <form onSubmit={submit} className="flex flex-col gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   {[{ n: "name" as const, ph: "Full name", label: "Name" }, { n: "email" as const, ph: "your@email.com", label: "Email" }].map(f => (
                     <div key={f.n}>
-                      <div style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>{f.label}</div>
-                      <input type={f.n === "email" ? "email" : "text"} name={f.n} value={form[f.n]} onChange={update} required placeholder={f.ph} style={inputStyle}
-                        onFocus={e => e.target.style.borderColor = "rgba(255,255,255,0.4)"}
-                        onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.12)"} />
+                      <div className="font-title text-[9px] tracking-[2px] uppercase text-white/40 mb-2">{f.label}</div>
+                      <input type={f.n === "email" ? "email" : "text"} name={f.n} value={form[f.n]} onChange={update} required placeholder={f.ph} className={inputClass} />
                     </div>
                   ))}
                 </div>
                 <div>
-                  <div style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>Subject</div>
-                  <input type="text" name="subject" value={form.subject} onChange={update} required placeholder="What is this regarding?" style={inputStyle}
-                    onFocus={e => e.target.style.borderColor = "rgba(255,255,255,0.4)"}
-                    onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.12)"} />
+                  <div className="font-title text-[9px] tracking-[2px] uppercase text-white/40 mb-2">Subject</div>
+                  <input type="text" name="subject" value={form.subject} onChange={update} required placeholder="What is this regarding?" className={inputClass} />
                 </div>
                 <div>
-                  <div style={{ fontFamily: "'Cinzel',serif", fontSize: "9px", letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>Message</div>
-                  <textarea name="message" value={form.message} onChange={update} required rows={6} placeholder="Write your message here..." style={{ ...inputStyle, resize: "vertical" }}
-                    onFocus={e => e.target.style.borderColor = "rgba(255,255,255,0.4)"}
-                    onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.12)"} />
+                  <div className="font-title text-[9px] tracking-[2px] uppercase text-white/40 mb-2">Message</div>
+                  <textarea name="message" value={form.message} onChange={update} required rows={6} placeholder="Write your message here..." className={`${inputClass} resize-y`} />
                 </div>
                 {status === "error" && (
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ padding: "12px 16px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#fca5a5", fontSize: 13 }}>{errMsg}</motion.p>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="px-4 py-3 bg-red-500/10 border border-red-500/30 text-red-300 text-[13px]"
+                  >
+                    {errMsg}
+                  </motion.p>
                 )}
-                <motion.button type="submit" disabled={status === "loading"}
-                  whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                  style={{ padding: "16px", background: "#fff", color: "var(--navy-800)", border: "none", fontFamily: "'Cinzel',serif", fontSize: "11px", letterSpacing: "3px", textTransform: "uppercase", fontWeight: 600, cursor: "pointer", opacity: status === "loading" ? 0.6 : 1, transition: "opacity 0.2s" }}>
+                <motion.button
+                  type="submit"
+                  disabled={status === "loading"}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className={`p-4 bg-white text-navy-800 border-none font-title text-[11px] tracking-[3px] uppercase font-semibold cursor-pointer transition-opacity duration-200 ${
+                    status === "loading" ? "opacity-60" : "opacity-100"
+                  }`}
+                >
                   {status === "loading" ? "Sending..." : "Send Message"}
                 </motion.button>
               </form>
@@ -119,7 +132,6 @@ export default function Contact() {
           </motion.div>
         </div>
       </div>
-      <style>{`@media(max-width:768px){#contact .container>div{grid-template-columns:1fr!important}}`}</style>
     </section>
   );
 }
