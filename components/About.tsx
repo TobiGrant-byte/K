@@ -28,7 +28,7 @@ export default function About() {
           >
             <div className="relative w-full max-w-[min(360px,100%)] pb-7 pl-4 md:pb-14 md:pl-7">
               {/* Frame */}
-              <div className="absolute top-2.5 left-5 w-[calc(100%-8px)] md:left-[38px] md:w-full md:max-w-[360px] aspect-[360/480] border border-[rgba(10,22,40,0.15)] z-0" />
+              <div className="absolute top-2.5 left-5 w-[calc(100%-8px)] md:left-[38px] md:w-full md:max-w-[360px] aspect-[360/480] border border-accent/25 z-0" />
               {/* Main */}
               <div className="img-zoom relative w-full aspect-[360/480] z-[1]">
                 <Image src="/images/headshot.jpg" alt="Dr. Sunday Okafor" fill className="object-cover" sizes="(max-width: 768px) 100vw, 360px" />
@@ -44,12 +44,12 @@ export default function About() {
             transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="flex items-center gap-3.5 mb-5">
-              <div className="w-10 h-px bg-navy-800 opacity-40 shrink-0" />
-              <span className="font-title text-[10px] tracking-[4px] uppercase text-navy-500 opacity-70">About</span>
+              <div className="section-rule" />
+              <span className="font-title text-[10px] tracking-[4px] uppercase text-black">About</span>
             </div>
-            <h2 className="font-display font-light text-[clamp(26px,7vw,36px)] md:text-[clamp(28px,4vw,52px)] text-navy-800 leading-[1.2] mb-6">
+            <h2 className="font-display font-light text-[clamp(26px,7vw,36px)] md:text-[clamp(28px,4vw,52px)] text-black leading-[1.2] mb-6">
                 A Civil Engineer Dedicated to the Future of Safe,{" "}
-              <em className="font-semibold">Smart Transportation Infrastructure.</em>
+              <em className="font-semibold text-accent">Smart Transportation Infrastructure.</em>
             </h2>
             <div className="flex flex-col gap-4 mb-8">
               <p className="font-display text-[15px] md:text-[19px] leading-[1.75] text-text-secondary font-normal">

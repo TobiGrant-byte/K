@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { navLinks } from "@/lib/nav";
+import SiteSearch from "@/components/SiteSearch";
 
 const links = navLinks;
 
@@ -51,15 +52,15 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop */}
-        <div className="hidden min-[1101px]:flex items-center gap-[22px] h-full flex-nowrap">
+        <div className="hidden min-[1101px]:flex items-center gap-[18px] h-full flex-nowrap">
           {links.map((l, i) => {
             const active = pathname === l.href;
             return (
               <motion.div key={l.href} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 + 0.2 }}>
                 <Link
                   href={l.href}
-                  className={`font-title text-xs tracking-[1.5px] uppercase no-underline relative inline-flex items-center h-10 whitespace-nowrap transition-colors duration-300 after:content-[''] after:absolute after:bottom-2 after:left-0 after:h-px after:w-0 after:bg-white/60 after:transition-[width] after:duration-300 hover:after:w-full hover:text-white ${
-                    active ? "text-white" : "text-white/75"
+                  className={`font-title text-xs tracking-[1.5px] uppercase no-underline relative inline-flex items-center h-10 whitespace-nowrap transition-colors duration-300 after:content-[''] after:absolute after:bottom-2 after:left-0 after:h-px after:w-0 after:bg-accent after:transition-[width] after:duration-300 hover:after:w-full hover:text-accent-light ${
+                    active ? "text-accent-light" : "text-white/75"
                   }`}
                 >
                   {l.label}
@@ -69,28 +70,31 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Hamburger */}
-        <button
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
-          aria-expanded={open}
-          className="flex min-[1101px]:hidden flex-col items-center justify-center gap-[5px] p-0 w-10 h-10 shrink-0 z-[2] bg-transparent border-none cursor-pointer"
-        >
-          {[0, 1, 2].map((i) => (
-            <motion.span
-              key={i}
-              animate={{
-                rotate: open && i !== 1 ? (i === 0 ? 45 : -45) : 0,
-                y: open && i !== 1 ? (i === 0 ? 6.5 : -6.5) : 0,
-                opacity: open && i === 1 ? 0 : 1,
-              }}
-              transition={{ duration: 0.25 }}
-              className="block w-[22px] h-[1.5px] bg-white origin-center"
-            />
-          ))}
-        </button>
+        <div className="flex items-center gap-2">
+          <SiteSearch />
+          <button
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Toggle menu"
+            aria-expanded={open}
+            className="flex min-[1101px]:hidden flex-col items-center justify-center gap-[5px] p-0 w-10 h-10 shrink-0 z-[2] rounded-full border border-transparent bg-transparent cursor-pointer transition-colors hover:border-accent/40"
+          >
+            {[0, 1, 2].map((i) => (
+              <motion.span
+                key={i}
+                animate={{
+                  rotate: open && i !== 1 ? (i === 0 ? 45 : -45) : 0,
+                  y: open && i !== 1 ? (i === 0 ? 6.5 : -6.5) : 0,
+                  opacity: open && i === 1 ? 0 : 1,
+                  backgroundColor: open ? "var(--color-accent-light)" : "#ffffff",
+                }}
+                transition={{ duration: 0.25 }}
+                className="block w-[22px] h-[1.5px] bg-white origin-center"
+              />
+            ))}
+          </button>
+        </div>
 
-        {/* Mobile dropdown (not fullscreen) */}
+        {/* Mobile dropdown */}
         <AnimatePresence>
           {open && (
             <motion.div
@@ -98,8 +102,9 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0, scaleY: 1 }}
               exit={{ opacity: 0, y: -8, scaleY: 0.96 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute top-[calc(100%+8px)] right-6 left-6 origin-top bg-[rgba(5,13,26,0.98)] border border-white/12 rounded-xl py-3 px-2 shadow-[0_16px_48px_rgba(0,0,0,0.45)] z-[60] min-[1101px]:hidden block"
+              className="absolute top-[calc(100%+8px)] right-6 left-6 origin-top overflow-hidden rounded-xl border border-accent/25 bg-[rgba(5,13,26,0.98)] py-3 px-2 shadow-[0_16px_48px_rgba(0,0,0,0.45),0_0_40px_rgba(74,143,232,0.08)] z-[60] min-[1101px]:hidden block"
             >
+              <div className="pointer-events-none absolute inset-0 opacity-[0.07] bg-[radial-gradient(ellipse_at_100%_0%,var(--color-accent)_0%,transparent_55%)]" />
               {links.map((l, i) => {
                 const active = pathname === l.href;
                 return (
@@ -108,12 +113,15 @@ export default function Navbar() {
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.04 * i + 0.05 }}
+                    className="relative"
                   >
                     <Link
                       href={l.href}
                       onClick={() => setOpen(false)}
-                      className={`block py-3.5 px-4 font-display text-[22px] no-underline rounded-lg ${
-                        active ? "font-medium text-white" : "font-light text-white/75"
+                      className={`block rounded-lg py-3.5 px-4 font-display text-[22px] no-underline transition-colors duration-200 ${
+                        active
+                          ? "font-medium text-accent-light"
+                          : "font-light text-white/75 hover:text-accent-light"
                       }`}
                     >
                       {l.label}

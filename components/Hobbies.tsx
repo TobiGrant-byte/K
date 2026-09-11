@@ -26,8 +26,7 @@ export default function Hobbies() {
 
   return (
     <section id="hobbies" ref={ref} className="section-pad bg-navy-700 relative overflow-hidden">
-      {/* Soft radial glow */}
-      <div className="absolute inset-0 opacity-5 bg-[radial-gradient(ellipse_at_50%_100%,#fff_0%,transparent_60%)] pointer-events-none" />
+      <div className="accent-wash" />
 
       <div className="container">
         {/* Header */}
@@ -38,12 +37,12 @@ export default function Hobbies() {
           className="mb-[72px] text-center"
         >
           <div className="flex items-center justify-center gap-3.5 mb-4">
-            <div className="w-10 h-px bg-white/25" />
+            <div className="section-rule-light" />
             <span className="eyebrow">Beyond the Lab</span>
-            <div className="w-10 h-px bg-white/25" />
+            <div className="section-rule-light" />
           </div>
           <h2 className="font-display font-light text-[clamp(32px,5vw,58px)] text-white leading-[1.1]">
-            The Man Behind the <em className="font-semibold">PhD</em>
+            The Man Behind the <em className="font-semibold text-accent-light">PhD</em>
           </h2>
           <p className="font-display italic text-lg text-white/45 mt-3.5 max-w-[480px] mx-auto">
             Excellence in engineering begins with a life well-lived outside of it.

@@ -4,6 +4,6 @@ export const navLinks = [
   { label: "Research and Development", href: "/research" },
   { label: "Publications", href: "/publications" },
   { label: "Gallery", href: "/gallery" },
-  { label: "Scholarship", href: "/scholarship" },
+  { label: "Philanthropy", href: "/philanthropy" },
   { label: "Achievements", href: "/achievements" },
 ] as const;

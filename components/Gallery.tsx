@@ -11,7 +11,7 @@ const allPhotos: {
   transformOrigin?: string;
 }[] = [
   { src: "/images/credentials.png",       caption: "Engineering Credentials" },
-  { src: "/images/grad-pensive.webp",       caption: "Graduation · University of Alabama", objectPosition: "center 28%", transformOrigin: "center 28%" },
+  { src: "/images/grad-pensive.webp",       caption: "Graduation · The University of Alabama", objectPosition: "center 28%", transformOrigin: "center 28%" },
   { src: "/images/graduation-denny.webp",   caption: "Denny Chimes · Tuscaloosa, Alabama", objectPosition: "center 38%", zoom: 1.25, transformOrigin: "center 38%" },
   { src: "/images/garver-award-1.png",       caption: "Garver Award Ceremony", objectPosition: "center 30%" },
   { src: "/images/lifesavers-conf.webp",     caption: "LIFESAVERS 2023 · Seattle, WA", objectPosition: "center 28%" },
@@ -19,14 +19,14 @@ const allPhotos: {
   { src: "/images/traffic-safety-scholars.jpg", caption: "Traffic Safety Scholars · LIFESAVERS 2023" },
   { src: "/images/graduation-mentor.webp",  caption: "Doctoral Hooding Ceremony" },
   { src: "/images/msc-graduation.jpg",      caption: "MSc Graduation · Nottingham Trent, UK", objectPosition: "top center", zoom: 1.18, transformOrigin: "top center" },
-  { src: "/images/africa-ball.jpg",         caption: "Africa Ball · University of Alabama", objectPosition: "center 35%", zoom: 1.15, transformOrigin: "center 35%" },
+  { src: "/images/africa-ball.jpg",         caption: "Africa Ball · The University of Alabama", objectPosition: "center 35%", zoom: 1.15, transformOrigin: "center 35%" },
   { src: "/images/headshot.jpg",            caption: "Professional Portrait", objectPosition: "center 20%", transformOrigin: "center 20%" },
-  { src: "/images/grad-lean.webp",          caption: "Graduation — University of Alabama", objectPosition: "center 20%", transformOrigin: "center 20%" },
+  { src: "/images/grad-lean.webp",          caption: "Graduation — The University of Alabama", objectPosition: "center 20%", transformOrigin: "center 20%" },
   { src: "/images/lecture-hall.jpg",        caption: "Socio-Cultural Adaptation Talk" },
   { src: "/images/speaking.webp",           caption: "Cultural Event MC", zoom: 1.32, transformOrigin: "center center" },
   { src: "/images/garver-award-2.webp",     caption: "Garver Recognition" },
   { src: "/images/grad-close.webp",         caption: "Graduation Portrait", objectPosition: "center 15%", transformOrigin: "center 15%" },
-  { src: "/images/seated.webp",             caption: "University of Alabama Campus", objectPosition: "center 40%", transformOrigin: "center 40%" },
+  { src: "/images/seated.webp",             caption: "The University of Alabama Campus", objectPosition: "center 40%", transformOrigin: "center 40%" },
 ];
 
 const strip = [...allPhotos, ...allPhotos];
@@ -69,17 +69,17 @@ export default function Gallery() {
 
   return (
     <section id="gallery" ref={ref} className="section-pad relative overflow-hidden bg-navy-800">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,#fff_0%,transparent_55%)] opacity-[0.03]" />
+      <div className="accent-wash" />
 
       {/* Header */}
       <div className="container mb-14">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }}>
           <div className="mb-4 flex items-center gap-3.5">
-            <div className="h-px w-10 bg-white/35" />
+            <div className="section-rule" />
             <span className="eyebrow">Gallery</span>
           </div>
           <h2 className="font-display text-[clamp(32px,5vw,58px)] font-light leading-[1.1] text-white">
-            A Life in{" "}<em className="font-semibold">Motion</em>
+            A Life in{" "}<em className="font-semibold text-accent-light">Motion</em>
           </h2>
         </motion.div>
       </div>
