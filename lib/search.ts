@@ -37,6 +37,13 @@ export const searchIndex: SearchEntry[] = [
     keywords: ["publications", "press", "articles", "scholarship tips", "bamagrad"],
   },
   {
+    title: "Blog",
+    description: "Reflections on family, career, and society.",
+    href: "/blog",
+    category: "Page",
+    keywords: ["blog", "reflections", "family", "career", "society", "writing"],
+  },
+  {
     title: "Gallery",
     description: "Moments from campus, conferences, and community.",
     href: "/gallery",

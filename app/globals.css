@@ -79,6 +79,23 @@ mark[data-search-hit].search-hit-fade {
     @apply bg-navy-800 text-white font-sans font-light antialiased overflow-x-hidden;
   }
 
+  button,
+  [type="button"],
+  [type="submit"],
+  [type="reset"],
+  [role="button"],
+  a[href].button,
+  label[for],
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [type="button"]:disabled,
+  [type="submit"]:disabled {
+    cursor: not-allowed;
+  }
+
   ::selection {
     @apply bg-accent text-white;
   }
