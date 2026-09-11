@@ -14,7 +14,7 @@ type FormState = {
 const WEB3FORMS_ACCESS_KEY = "491e7ee9-f5a0-4295-9665-23a72925f4ab";
 
 const inputClass =
-  "w-full px-4 py-3.5 bg-white/5 border border-white/12 text-white font-sans text-sm outline-none transition-[border-color] duration-300 focus:border-white/40 disabled:opacity-70";
+  "w-full px-4 py-3.5 bg-white/5 border border-white/12 rounded-lg text-white font-sans text-sm outline-none transition-[border-color] duration-300 focus:border-accent/60 disabled:opacity-70";
 
 export default function Contact() {
   const router = useRouter();
@@ -92,7 +92,7 @@ export default function Contact() {
       ref={ref}
       className="section-pad bg-navy-800 relative overflow-hidden"
     >
-      <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle_at_70%_30%,#fff_0%,transparent_55%)] pointer-events-none" />
+      <div className="accent-wash" />
 
       <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-start">
@@ -103,18 +103,19 @@ export default function Contact() {
             transition={{ duration: 0.9 }}
           >
             <div className="flex items-center gap-3.5 mb-4">
-              <div className="w-10 h-px bg-white/35" />
+              <div className="section-rule" />
               <span className="eyebrow">Contact</span>
             </div>
             <h2 className="font-display font-light text-[clamp(32px,4vw,56px)] text-white leading-[1.1] mb-5">
-              Let&apos;s Start a <em className="font-semibold">Conversation</em>
+              Let&apos;s Start a{" "}
+              <em className="font-semibold text-accent-light">Conversation</em>
             </h2>
             <p className="font-display text-lg italic text-white/55 leading-[1.7] mb-11">
               Whether you&apos;re interested in research collaboration, speaking
               engagements, mentorship, or professional consultation — Dr. Okafor
               welcomes your message.
             </p>
-            <div className="h-px bg-white/[0.08] mb-9" />
+            <div className="h-px bg-gradient-to-r from-accent/35 to-transparent mb-9" />
             {[
               {
                 label: "Research & Publications",
@@ -134,7 +135,7 @@ export default function Contact() {
               },
             ].map((item) => (
               <div key={item.label} className="flex gap-3.5 mb-5">
-                <div className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0 mt-1.5" />
+                <div className="w-1.5 h-1.5 rounded-full bg-accent/70 shrink-0 mt-1.5" />
                 <div>
                   <div className="font-title text-[10px] tracking-[2px] uppercase text-white/50 mb-[3px]">
                     {item.label}
@@ -241,7 +242,7 @@ export default function Contact() {
                 disabled={status === "loading"}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
-                className={`p-4 bg-white text-navy-800 border-none font-title text-[11px] tracking-[3px] uppercase font-semibold cursor-pointer transition-opacity duration-200 ${
+                className={`rounded-lg p-4 bg-accent text-white border-none font-title text-[11px] tracking-[3px] uppercase font-semibold cursor-pointer transition-[opacity,background-color] duration-200 hover:bg-accent-light ${
                   status === "loading" ? "opacity-60" : "opacity-100"
                 }`}
               >

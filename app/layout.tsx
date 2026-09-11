@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SearchHighlight from "@/components/SearchHighlight";
 
 const siteTitle =
   "Dr. Sunday Okafor, PhD – Do not let the difficult days deter you from moving forward, keep going everyday.";
@@ -54,6 +55,7 @@ export default function RootLayout({
         <Navbar />
         {children}
         <Footer />
+        <SearchHighlight />
       </body>
     </html>
   );

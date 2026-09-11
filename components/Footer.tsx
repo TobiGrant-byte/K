@@ -45,7 +45,7 @@ export default function Footer() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="font-title text-[10px] tracking-[3px] uppercase text-white/40 no-underline transition-colors duration-300 hover:text-white"
+                className="font-title text-[10px] tracking-[3px] uppercase text-white/40 no-underline transition-colors duration-300 hover:text-accent-light"
               >
                 {l.label}
               </Link>
@@ -65,7 +65,7 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.08 }}
-              whileHover={{ y: -4, borderColor: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.08)" }}
+              whileHover={{ y: -4, borderColor: "rgba(74,143,232,0.55)", background: "rgba(74,143,232,0.12)", color: "#7ab3f0" }}
               className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center text-white/60 transition-all duration-300"
             >
               <Icon />

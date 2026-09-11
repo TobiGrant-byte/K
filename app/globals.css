@@ -2,6 +2,28 @@
 
 @import "tailwindcss";
 
+/* Search highlight marks */
+mark[data-search-hit] {
+  background: rgba(74, 143, 232, 0.42);
+  color: inherit;
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px rgba(74, 143, 232, 0.28);
+  padding: 0 0.1em;
+  transition:
+    background 0.85s ease,
+    box-shadow 0.85s ease;
+}
+
+mark[data-search-hit][data-active="true"] {
+  background: rgba(74, 143, 232, 0.72);
+  box-shadow: 0 0 0 3px rgba(122, 179, 240, 0.55);
+}
+
+mark[data-search-hit].search-hit-fade {
+  background: transparent;
+  box-shadow: none;
+}
+
 @theme {
   --color-navy-900: #050d1a;
   --color-navy-800: #0a1628;
@@ -13,6 +35,7 @@
   --color-off-white: #f7f8fa;
   --color-accent: #4a8fe8;
   --color-accent-light: #7ab3f0;
+  --color-accent-soft: #3d7fd4;
   --color-text-primary: #0a1628;
   --color-text-secondary: #374151;
   --color-text-muted: #6b7280;
@@ -67,7 +90,7 @@
     background: var(--color-navy-900);
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--color-navy-400);
+    background: color-mix(in srgb, var(--color-accent) 55%, var(--color-navy-400));
     border-radius: 4px;
   }
 }
@@ -88,6 +111,23 @@
 
   .eyebrow {
     @apply font-title text-[10px] uppercase tracking-[4px] text-accent-light;
+  }
+
+  /* Thin accent mark used beside section labels */
+  .section-rule {
+    @apply h-px w-10 shrink-0 bg-accent/70;
+  }
+
+  .section-rule-light {
+    @apply h-px w-10 shrink-0 bg-accent/45;
+  }
+
+  /* Soft blue atmosphere on dark sections — barely there */
+  .accent-wash {
+    @apply pointer-events-none absolute inset-0 opacity-[0.055];
+    background:
+      radial-gradient(ellipse 70% 50% at 85% 10%, var(--color-accent) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 8% 90%, var(--color-accent-light) 0%, transparent 50%);
   }
 
   .font-display {
