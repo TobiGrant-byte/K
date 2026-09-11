@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { searchSite, type SearchEntry } from "@/lib/search";
+import { withHighlightQuery } from "@/lib/search-highlight";
 
 function isExternal(href: string) {
   return href.startsWith("http");
@@ -45,12 +46,13 @@ export default function SiteSearch() {
     if (!open) setQuery("");
   }, [open]);
 
-  const go = (entry: SearchEntry) => {
+  const goExternal = (entry: SearchEntry) => {
     close();
-    if (isExternal(entry.href)) {
-      window.open(entry.href, "_blank", "noopener,noreferrer");
-    }
+    window.open(entry.href, "_blank", "noopener,noreferrer");
   };
+
+  const resultHref = (entry: SearchEntry) =>
+    withHighlightQuery(entry.href, query);
 
   return (
     <>
@@ -140,7 +142,7 @@ export default function SiteSearch() {
                         <button
                           key={entry.href + entry.title}
                           type="button"
-                          onClick={() => go(entry)}
+                          onClick={() => goExternal(entry)}
                           className="block w-full border-none bg-transparent px-5 py-3.5 text-left transition-colors hover:bg-white/[0.04]"
                         >
                           {content}
@@ -151,7 +153,7 @@ export default function SiteSearch() {
                     return (
                       <Link
                         key={entry.href + entry.title}
-                        href={entry.href}
+                        href={resultHref(entry)}
                         onClick={close}
                         className="block px-5 py-3.5 no-underline transition-colors hover:bg-white/[0.04]"
                       >

@@ -34,7 +34,11 @@ export default function Philanthropy() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section id="philanthropy" ref={ref} className="section-pad relative overflow-hidden bg-navy-800">
+    <section
+      id="philanthropy"
+      ref={ref}
+      className="section-pad relative overflow-hidden bg-navy-800"
+    >
       <div className="accent-wash" />
 
       <div className="container relative">
@@ -53,8 +57,9 @@ export default function Philanthropy() {
             <em className="font-semibold text-accent-light">Society</em>
           </h2>
           <p className="mt-5 font-display text-lg italic leading-[1.7] text-white/50">
-            Beyond credentials and awards — a commitment to lift others: mentoring scholars,
-            strengthening community, and advancing safer transportation for the public good.
+            Beyond credentials and awards — a commitment to lift others:
+            mentoring scholars, strengthening community, and advancing safer
+            transportation for the public good.
           </p>
         </motion.div>
 
@@ -77,7 +82,9 @@ export default function Philanthropy() {
                   <h3 className="mb-3 font-display text-[22px] font-medium leading-[1.25] text-white">
                     {p.title}
                   </h3>
-                  <p className="text-[14px] leading-[1.8] text-white/55">{p.desc}</p>
+                  <p className="text-[14px] leading-[1.8] text-white/55">
+                    {p.desc}
+                  </p>
                   {p.cta ? (
                     <span className="mt-5 inline-flex items-center gap-1.5 font-title text-[9px] uppercase tracking-[2px] text-white/50 transition-colors group-hover:text-white/80">
                       {p.cta}
@@ -120,8 +127,8 @@ export default function Philanthropy() {
           className="mt-14 flex flex-col items-start justify-between gap-6 border-t border-white/10 pt-10 md:flex-row md:items-center"
         >
           <p className="max-w-xl font-display text-base italic leading-[1.7] text-white/45">
-            Career awards and funded opportunities are collected in Achievements —
-            this space is for impact beyond the résumé.
+            Career awards and funded opportunities are collected in Achievements
+            — this space is for impact beyond the résumé.
           </p>
           <Link
             href="/achievements"

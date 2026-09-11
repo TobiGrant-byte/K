@@ -2,6 +2,28 @@
 
 @import "tailwindcss";
 
+/* Search highlight marks */
+mark[data-search-hit] {
+  background: rgba(74, 143, 232, 0.42);
+  color: inherit;
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px rgba(74, 143, 232, 0.28);
+  padding: 0 0.1em;
+  transition:
+    background 0.85s ease,
+    box-shadow 0.85s ease;
+}
+
+mark[data-search-hit][data-active="true"] {
+  background: rgba(74, 143, 232, 0.72);
+  box-shadow: 0 0 0 3px rgba(122, 179, 240, 0.55);
+}
+
+mark[data-search-hit].search-hit-fade {
+  background: transparent;
+  box-shadow: none;
+}
+
 @theme {
   --color-navy-900: #050d1a;
   --color-navy-800: #0a1628;

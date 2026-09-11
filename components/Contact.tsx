@@ -107,34 +107,35 @@ export default function Contact() {
               <span className="eyebrow">Contact</span>
             </div>
             <h2 className="font-display font-light text-[clamp(32px,4vw,56px)] text-white leading-[1.1] mb-5">
-              Let&apos;s Start a <em className="font-semibold text-accent-light">Conversation</em>
+              Let&apos;s Start a{" "}
+              <em className="font-semibold text-accent-light">Conversation</em>
             </h2>
             <p className="font-display text-lg italic text-white/55 leading-[1.7] mb-11">
               Whether you&apos;re interested in research collaboration, speaking
               engagements, mentorship, or professional consultation — Dr. Okafor
               welcomes your message.
             </p>
-              <div className="h-px bg-gradient-to-r from-accent/35 to-transparent mb-9" />
-              {[
-                {
-                  label: "Research & Publications",
-                  detail: "Academic collaborations & joint research",
-                },
-                {
-                  label: "Speaking & Conferences",
-                  detail: "Keynotes, panels & university talks",
-                },
-                {
-                  label: "Mentorship",
-                  detail: "Graduate students & young engineers",
-                },
-                {
-                  label: "Professional Enquiries",
-                  detail: "Consulting & project partnerships",
-                },
-              ].map((item) => (
-                <div key={item.label} className="flex gap-3.5 mb-5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent/70 shrink-0 mt-1.5" />
+            <div className="h-px bg-gradient-to-r from-accent/35 to-transparent mb-9" />
+            {[
+              {
+                label: "Research & Publications",
+                detail: "Academic collaborations & joint research",
+              },
+              {
+                label: "Speaking & Conferences",
+                detail: "Keynotes, panels & university talks",
+              },
+              {
+                label: "Mentorship",
+                detail: "Graduate students & young engineers",
+              },
+              {
+                label: "Professional Enquiries",
+                detail: "Consulting & project partnerships",
+              },
+            ].map((item) => (
+              <div key={item.label} className="flex gap-3.5 mb-5">
+                <div className="w-1.5 h-1.5 rounded-full bg-accent/70 shrink-0 mt-1.5" />
                 <div>
                   <div className="font-title text-[10px] tracking-[2px] uppercase text-white/50 mb-[3px]">
                     {item.label}
