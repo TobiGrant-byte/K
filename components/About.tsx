@@ -69,7 +69,7 @@ export default function About() {
               </em>
             </h2>
             <div className="flex flex-col gap-4 mb-8">
-              <p className="font-display text-[15px] md:text-[19px] leading-[1.75] text-text-secondary font-normal">
+              <p className="font-display text-[16px] md:text-[20px] leading-[1.75] text-text-secondary font-normal">
                 Dr. Sunday Okafor is a licensed Professional Engineer operating
                 at the critical nexus of traffic safety analytics, connected
                 vehicle systems, and complex infrastructure delivery. His work
