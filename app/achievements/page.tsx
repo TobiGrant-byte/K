@@ -5,7 +5,8 @@ import Credentials from "@/components/Credentials";
 
 export const metadata: Metadata = {
   title: "Achievements | Dr. Sunday Okafor",
-  description: "Career achievements, milestones, and credentials of Dr. Sunday Okafor.",
+  description:
+    "Career milestones, professional credentials, and awards — from PE licensure to national recognition.",
 };
 
 export default function AchievementsPage() {

@@ -5,7 +5,7 @@ import Philanthropy from "@/components/Philanthropy";
 export const metadata: Metadata = {
   title: "Philanthropy | Dr. Sunday Okafor",
   description:
-    "Giving back through mentorship, community, and safer transportation — Dr. Sunday Okafor’s commitment to society.",
+    "Mentorship, community leadership, and public talks — how Dr. Sunday Okafor gives back beyond the job.",
 };
 
 export default function PhilanthropyPage() {
