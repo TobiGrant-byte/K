@@ -14,10 +14,20 @@ const pillars = [
     cta: "Read scholarship tips",
   },
   {
+    title: "Socio-Cultural Adaptation Talk",
+    desc: "Spoke to young scholars from the United States and India on mobility gaps, transport safety, and equity across developed and developing nations — arguing that roads are for people first, and that pedestrians, cyclists, and transit users deserve the same safety priority as motorists. Presented with The University of Alabama and Stillman College.",
+    img: "/images/lecture-hall.jpg",
+    objectPosition: "center 40%",
+    href: "https://www.linkedin.com/posts/sunday-okafor_earlier-today-i-had-the-privilege-of-delivering-ugcPost-7077728496348762112-8act",
+    cta: "View LinkedIn post",
+  },
+  {
     title: "Building Inclusive Community",
     desc: "As former President of the African Students Association at The University of Alabama, he fostered belonging for international scholars — organizing cultural programs and support that made campus feel like home.",
     img: "/images/asa-board.jpg",
     objectPosition: "center 25%",
+    href: "https://www.linkedin.com/posts/sunday-okafor_i-am-delighted-to-announce-my-election-as-activity-6923901748248002560-AvzO",
+    cta: "View LinkedIn post",
   },
   {
     title: "Safer Roads for Everyone",
@@ -63,7 +73,7 @@ export default function Philanthropy() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {pillars.map((p, i) => {
             const inner = (
               <>

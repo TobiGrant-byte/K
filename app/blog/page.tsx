@@ -5,7 +5,7 @@ import BlogList from "@/components/blog/BlogList";
 export const metadata: Metadata = {
   title: "Blog | Dr. Sunday Okafor",
   description:
-    "Reflections on family, career, and society from Dr. Sunday Okafor.",
+    "Thoughts on family, career, and society from Dr. Sunday Okafor — Transportation Engineer, Researcher, and Leader.",
 };
 
 export default function BlogPage() {

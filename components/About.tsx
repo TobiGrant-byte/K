@@ -93,11 +93,16 @@ export default function About() {
                 Today, Dr. Okafor brings this academic rigor to the corporate
                 sector as a Project Engineer at Garver, where he designs safer,
                 more efficient roadway networks for communities across the
-                United States. An active member of ASCE and ITE, he is also a
-                dedicated community builder, having previously served as
-                President of the African Students Association at the University
-                of Alabama, fostering a vibrant and inclusive environment for
-                international scholars.
+                United States. An active member of ITE, he is also a dedicated
+                community builder, having previously served as President of the
+                African Students Association, Vice President ITE Student Chapter,
+                Graduate School Ambassador, and International Peer Advisory
+                Council Member at The University of Alabama.
+              </p>
+              <p className="text-[15px] leading-[1.8] text-text-muted">
+                Dr. Okafor is happily married to Maryjane, and they are
+                dedicated to building a strong relationship that will honor God
+                and serve as role model to the younger generation.
               </p>
             </div>
 

@@ -4,7 +4,8 @@ import Research from "@/components/Research";
 
 export const metadata: Metadata = {
   title: "Research and Development | Dr. Sunday Okafor",
-  description: "Research and development focus areas in traffic safety, connected infrastructure, and inclusive mobility.",
+  description:
+    "Traffic safety, connected infrastructure, and inclusive mobility — R&D focus areas for safer transportation systems.",
 };
 
 export default function ResearchPage() {

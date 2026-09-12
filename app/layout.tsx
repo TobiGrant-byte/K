@@ -7,13 +7,22 @@ import SearchHighlight from "@/components/SearchHighlight";
 const siteTitle =
   "Dr. Sunday Okafor, PhD – Do not let the difficult days deter you from moving forward, keep going everyday.";
 const siteDescription =
-  "Official portfolio of Dr. Sunday Okafor — researcher, scholar, and academic leader.";
+  "Official website of Dr. Sunday Okafor — Transportation Engineer, Researcher, and Leader.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://dr-okafor.com"),
   title: siteTitle,
   description: siteDescription,
-  keywords: ["Dr. Sunday Okafor", "PhD", "researcher", "transportation", "University of Alabama"],
+  keywords: [
+    "Dr. Sunday Okafor",
+    "Professional Engineer",
+    "Transportation Engineer",
+    "Researcher",
+    "Leader",
+    "Mentor",
+    "Garver",
+    "road safety",
+  ],
   icons: {
     icon: [
       { url: "/favicon.png", type: "image/png", sizes: "32x32" },

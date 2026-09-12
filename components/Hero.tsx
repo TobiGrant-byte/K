@@ -31,8 +31,6 @@ export default function Hero() {
         <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,1)_0%,rgba(5,13,26,0.3)_40%,transparent_70%)]" />
       </motion.div>
 
-      <div className="absolute inset-0 z-[1] opacity-[0.07] bg-[radial-gradient(circle,rgba(255,255,255,0.8)_1px,transparent_1px)] [background-size:48px_48px]" />
-
       <motion.div className="relative z-10 w-full" style={{ y: textY, opacity }}>
         <div className="container pb-[72px]">
           <motion.div

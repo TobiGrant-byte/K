@@ -56,6 +56,7 @@ export default function AdminApp() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [messageError, setMessageError] = useState(false);
+  const [messageId, setMessageId] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [cropQueue, setCropQueue] = useState<{ src: string; asCover: boolean }[]>([]);
   const [recropSrc, setRecropSrc] = useState<string | null>(null);
@@ -67,6 +68,16 @@ export default function AdminApp() {
     refresh();
     setReady(true);
   }, []);
+
+  /** Flash banners auto-clear after a few hours; X dismisses sooner. */
+  useEffect(() => {
+    if (!message) return;
+    const t = window.setTimeout(() => {
+      setMessage("");
+      setMessageError(false);
+    }, 3 * 60 * 60 * 1000);
+    return () => window.clearTimeout(t);
+  }, [message, messageId]);
 
   const sorted = useMemo(
     () => [...posts].sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt)),
@@ -92,6 +103,7 @@ export default function AdminApp() {
   const flash = (text: string, error = false) => {
     setMessage(text);
     setMessageError(error);
+    setMessageId((n) => n + 1);
   };
 
   const clearMessage = () => {
@@ -398,22 +410,34 @@ export default function AdminApp() {
 
       <div className="mx-auto max-w-6xl px-6 py-10">
         {message ? (
-          <p
-            className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
+          <div
+            className={`mb-6 flex items-start gap-3 rounded-lg border px-4 py-3 text-sm ${
               messageError
                 ? "border-red-400/40 bg-red-500/10 text-red-300"
                 : "border-accent/25 bg-accent/10 text-accent-light"
             }`}
             role={messageError ? "alert" : "status"}
           >
-            {message}
-          </p>
+            <p className="min-w-0 flex-1 leading-relaxed">{message}</p>
+            <button
+              type="button"
+              onClick={clearMessage}
+              aria-label="Dismiss message"
+              className={`-mr-1 -mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border text-sm transition-colors ${
+                messageError
+                  ? "border-red-400/30 text-red-200/80 hover:bg-red-500/15 hover:text-red-100"
+                  : "border-accent/30 text-accent-light/80 hover:bg-accent/15 hover:text-accent-light"
+              }`}
+            >
+              ✕
+            </button>
+          </div>
         ) : null}
 
-        <div className="mb-4 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-[12px] text-white/40">
+        {/* <div className="mb-4 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-[12px] text-white/40">
           Local preview only — posts live in this browser&apos;s storage. Firebase comes next; this
           data can be cleared anytime.
-        </div>
+        </div> */}
 
         {mode === "list" ? (
           <>
@@ -754,11 +778,11 @@ export default function AdminApp() {
             <p className="mt-3 text-[14px] leading-relaxed text-white/55">
               {deleteTarget ? (
                 <>
-                  “{deleteTarget.title}” will be permanently removed from local storage. This cannot be
+                  “{deleteTarget.title}” will be permanently deleted. This cannot be
                   undone.
                 </>
               ) : (
-                <>This post will be permanently removed from local storage.</>
+                <>This post will be permanently deleted.</>
               )}
             </p>
             <div className="mt-8 flex flex-wrap justify-end gap-3">

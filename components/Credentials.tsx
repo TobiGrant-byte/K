@@ -5,7 +5,7 @@ import Image from "next/image";
 
 const timeline = [
   {
-    year: "2025",
+    year: "2024",
     title: "Garver — Project Engineer",
     org: "Garver, USA",
     detail:
@@ -19,7 +19,7 @@ const timeline = [
       "Dissertation research on integrating connected vehicle data for proactive road safety improvement at the Alabama Transportation Institute — one of the nation's premier transportation research centers.",
   },
   {
-    year: "2024",
+    year: "2026",
     title: "Licensed Professional Engineer (PE)",
     org: "Texas Board of Professional Engineers and Land Surveyors",
     detail:

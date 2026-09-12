@@ -52,59 +52,25 @@ export function createId(): string {
   return `post_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-const seedPosts: BlogPost[] = [
-  {
-    id: "seed_1",
-    slug: "keeping-going-every-day",
-    title: "Keeping Going Every Day",
-    excerpt:
-      "A short reflection on persistence — in the classroom, on the corridor, and at home.",
-    body: `Difficult days come. The work does not wait for perfect conditions, and neither do the people who depend on us.
-
-I have learned that progress is often quiet: one more analysis, one more conversation, one more evening present with family. Keep going every day — not because it is easy, but because the road ahead is built that way.
-
-This space will hold reflections on career, society, and the life behind the résumé.`,
-    category: "Reflections",
-    coverImage: "/images/hero-picture.jpeg",
-    images: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    published: true,
-  },
-  {
-    id: "seed_2",
-    slug: "safer-roads-and-shared-responsibility",
-    title: "Safer Roads and Shared Responsibility",
-    excerpt:
-      "Why road safety is not only an engineering problem — it is a societal one.",
-    body: `Engineering can model risk, redesign corridors, and bring connected vehicle data into the light. But safer roads also ask something of communities, institutions, and culture.
-
-When we talk about crash analytics or inclusive mobility, we are talking about people getting home. That is the through-line of my work — and a theme I will return to here.`,
-    category: "Society",
-    coverImage: "/images/traffic-safety-scholars.jpg",
-    images: [],
-    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-    published: true,
-  },
-];
-
 function canUseStorage(): boolean {
   return typeof window !== "undefined" && typeof localStorage !== "undefined";
 }
 
 export function loadPosts(): BlogPost[] {
-  if (!canUseStorage()) return seedPosts;
+  if (!canUseStorage()) return [];
   try {
     const raw = localStorage.getItem(BLOG_STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(BLOG_STORAGE_KEY, JSON.stringify(seedPosts));
-      return seedPosts;
-    }
+    if (!raw) return [];
     const parsed = JSON.parse(raw) as BlogPost[];
-    return Array.isArray(parsed) ? parsed : seedPosts;
+    if (!Array.isArray(parsed)) return [];
+    // Remove legacy demo/seed posts if still present
+    const cleaned = parsed.filter((p) => !String(p.id).startsWith("seed_"));
+    if (cleaned.length !== parsed.length) {
+      localStorage.setItem(BLOG_STORAGE_KEY, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch {
-    return seedPosts;
+    return [];
   }
 }
 

@@ -4,7 +4,8 @@ import Gallery from "@/components/Gallery";
 
 export const metadata: Metadata = {
   title: "Gallery | Dr. Sunday Okafor",
-  description: "Photo gallery from the life and career of Dr. Sunday Okafor.",
+  description:
+    "Moments from work, campus, and community — a visual story of Dr. Sunday Okafor’s journey.",
 };
 
 export default function GalleryPage() {

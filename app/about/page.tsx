@@ -5,7 +5,8 @@ import Hobbies from "@/components/Hobbies";
 
 export const metadata: Metadata = {
   title: "About | Dr. Sunday Okafor",
-  description: "About Dr. Sunday Okafor — Professional Engineer, scholar, and academic leader.",
+  description:
+    "Meet Dr. Sunday Okafor — Transportation Engineer, Researcher, and Leader dedicated to safer roads and stronger communities.",
 };
 
 export default function AboutPage() {
