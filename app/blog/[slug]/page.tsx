@@ -30,8 +30,14 @@ export async function generateMetadata({
   const description =
     truncateShareExcerpt(post.excerpt) ||
     "A personal reflection from Dr. Sunday Okafor on life, work, and society.";
-  const image = post.coverImage || post.images[0];
   const url = `/blog/${post.slug}`;
+  // Same-origin OG/Twitter image routes (PNG) — scrapers often reject ImageKit WebP.
+  const shareImage = {
+    url: `/blog/${post.slug}/opengraph-image`,
+    width: BLOG_IMAGE_WIDTH,
+    height: BLOG_IMAGE_HEIGHT,
+    alt: title,
+  };
 
   return {
     title: `${title} | Dr. Sunday Okafor`,
@@ -45,24 +51,13 @@ export async function generateMetadata({
       siteName: "Dr. Sunday Okafor",
       publishedTime: post.createdAt,
       modifiedTime: post.updatedAt,
-      ...(image
-        ? {
-            images: [
-              {
-                url: image,
-                width: BLOG_IMAGE_WIDTH,
-                height: BLOG_IMAGE_HEIGHT,
-                alt: title,
-              },
-            ],
-          }
-        : {}),
+      images: [shareImage],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      ...(image ? { images: [image] } : {}),
+      images: [shareImage.url],
     },
   };
 }
