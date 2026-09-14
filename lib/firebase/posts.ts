@@ -104,13 +104,17 @@ export function subscribeToAllPosts(
 }
 
 export async function getPublishedPostBySlug(slug: string): Promise<BlogPost | null> {
-  // Single-field slug query (auto-indexed). Filter published in memory.
+  // Must constrain published==true so public Firestore rules accept the query.
+  // (Slug-only queries fail for anonymous users and look like "Post not found".)
   const result = await getDocs(
-    query(collection(getFirebaseFirestore(), "posts"), where("slug", "==", slug)),
+    query(
+      collection(getFirebaseFirestore(), "posts"),
+      where("published", "==", true),
+    ),
   );
   const match = result.docs
     .map(postFromSnapshot)
-    .find((post) => post.published && post.slug === slug);
+    .find((post) => post.slug === slug);
   return match ?? null;
 }
 
