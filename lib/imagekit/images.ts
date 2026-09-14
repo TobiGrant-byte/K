@@ -2,6 +2,10 @@
 
 import { getFirebaseAuth } from "@/lib/firebase/config";
 import { MAX_BLOG_IMAGES } from "@/lib/blog";
+import {
+  imageKitPublicKey,
+  imageKitUrlEndpoint,
+} from "@/lib/imagekit/config";
 
 function isPendingImage(source: string): boolean {
   return source.startsWith("data:image/");
@@ -19,7 +23,9 @@ async function uploadAuthentication() {
     cache: "no-store",
   });
   if (!response.ok) {
-    throw new Error((await response.text()) || "Image upload authorization failed.");
+    throw new Error(
+      (await response.text()) || "Image upload authorization failed.",
+    );
   }
   return (await response.json()) as {
     token: string;
@@ -29,12 +35,6 @@ async function uploadAuthentication() {
 }
 
 async function uploadImage(source: string, postId: string): Promise<string> {
-  const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY;
-  const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
-  if (!publicKey || !urlEndpoint) {
-    throw new Error("ImageKit public configuration is incomplete.");
-  }
-
   const [authentication, fileResponse] = await Promise.all([
     uploadAuthentication(),
     fetch(source),
@@ -46,23 +46,29 @@ async function uploadImage(source: string, postId: string): Promise<string> {
   formData.append("file", await fileResponse.blob(), fileName);
   formData.append("fileName", fileName);
   formData.append("folder", `/blog/${postId}`);
-  formData.append("publicKey", publicKey);
+  formData.append("publicKey", imageKitPublicKey);
   formData.append("token", authentication.token);
   formData.append("expire", String(authentication.expire));
   formData.append("signature", authentication.signature);
   formData.append("useUniqueFileName", "false");
 
-  const response = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
-    method: "POST",
-    body: formData,
-  });
+  const response = await fetch(
+    "https://upload.imagekit.io/api/v1/files/upload",
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
   if (!response.ok) {
     const message = await response.text();
     throw new Error(message || `ImageKit upload failed (${response.status}).`);
   }
 
   const uploaded = (await response.json()) as { url?: string };
-  if (!uploaded.url || !uploaded.url.startsWith(urlEndpoint.replace(/\/+$/, ""))) {
+  if (
+    !uploaded.url ||
+    !uploaded.url.startsWith(imageKitUrlEndpoint.replace(/\/+$/, ""))
+  ) {
     throw new Error("ImageKit returned an invalid image URL.");
   }
   return uploaded.url;
@@ -77,8 +83,8 @@ export async function uploadCroppedBlogImage(
 }
 
 export function isImageKitBlogUrl(url: string): boolean {
-  const endpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT?.replace(/\/+$/, "");
-  return Boolean(endpoint && url.startsWith(`${endpoint}/blog/`));
+  const endpoint = imageKitUrlEndpoint.replace(/\/+$/, "");
+  return url.startsWith(`${endpoint}/blog/`);
 }
 
 export type SyncedImages = {
@@ -119,14 +125,16 @@ export async function syncPostImages({
     throw error;
   }
 
-  const images = uniqueSources.map((source) => sourceToUrl.get(source) ?? source);
+  const images = uniqueSources.map(
+    (source) => sourceToUrl.get(source) ?? source,
+  );
   const retainedExistingImages = uniqueSources.filter(
     (source) => !isPendingImage(source),
   );
   return {
     images,
     coverImage: coverSource
-      ? sourceToUrl.get(coverSource) ?? coverSource
+      ? (sourceToUrl.get(coverSource) ?? coverSource)
       : images[0],
     removedImages: previousImages.filter(
       (url) => !retainedExistingImages.includes(url),
@@ -135,9 +143,10 @@ export async function syncPostImages({
 }
 
 export async function deleteImageKitImages(urls: string[]): Promise<void> {
-  const endpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT?.replace(/\/+$/, "");
-  if (!endpoint) throw new Error("ImageKit public configuration is incomplete.");
-  const imageKitUrls = urls.filter((url) => url.startsWith(`${endpoint}/blog/`));
+  const endpoint = imageKitUrlEndpoint.replace(/\/+$/, "");
+  const imageKitUrls = urls.filter((url) =>
+    url.startsWith(`${endpoint}/blog/`),
+  );
   if (!imageKitUrls.length) return;
 
   const response = await fetch("/api/imagekit/delete", {

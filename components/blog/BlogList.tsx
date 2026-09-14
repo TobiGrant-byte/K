@@ -78,13 +78,14 @@ export default function BlogList() {
             No published reflections in this category yet.
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((post, i) => (
               <motion.div
                 key={post.id}
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, delay: i * 0.06 }}
+                className="h-full"
               >
                 <BlogCard post={post} />
               </motion.div>

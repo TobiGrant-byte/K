@@ -3,11 +3,11 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyCZyhAsu-DKrN8qKU90mFnZk7218jApy9A",
+  authDomain: "dr-sunday-okafor.firebaseapp.com",
+  projectId: "dr-sunday-okafor",
+  messagingSenderId: "101837043061",
+  appId: "1:101837043061:web:e3d2acc23032be403f8f3c",
 };
 
 const environmentVariables = {

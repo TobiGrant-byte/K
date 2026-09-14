@@ -107,7 +107,7 @@ export default function ImageCropModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-navy-900/85 px-3 py-4 backdrop-blur-sm sm:px-4 sm:py-6"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-navy-900/85 px-3 py-3 backdrop-blur-sm sm:px-4 sm:py-4"
       role="presentation"
       onClick={onCancel}
     >
@@ -115,47 +115,45 @@ export default function ImageCropModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="crop-title"
-        className="flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-white/12 bg-navy-800 shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
+        className="flex max-h-[min(92vh,820px)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-white/12 bg-navy-800 shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="border-b border-white/10 px-4 py-4 sm:px-6">
+        <div className="shrink-0 border-b border-white/10 px-4 py-3 sm:px-6 sm:py-4">
           <div className="font-title text-[9px] uppercase tracking-[2px] text-accent-light">
             Crop image
           </div>
           <h2
             id="crop-title"
-            className="mt-1 font-display text-2xl font-light text-white"
+            className="mt-1 font-display text-xl font-light text-white sm:text-2xl"
           >
             Fit the 16:10 frame
           </h2>
-          <p className="mt-1 text-[13px] text-white/45">
+          <p className="mt-1 hidden text-[13px] text-white/45 sm:block">
             Zoom out to fit more in the frame, or zoom in to focus. Keep faces
             inside the bright box.
           </p>
         </div>
 
-        <div className="relative mx-auto w-full max-w-3xl bg-navy-900">
-          <div className="relative aspect-[16/10] w-full">
-            <Cropper
-              image={imageSrc}
-              crop={crop}
-              zoom={zoom}
-              aspect={BLOG_IMAGE_ASPECT}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
-              objectFit="contain"
-              minZoom={MIN_ZOOM}
-              maxZoom={MAX_ZOOM}
-              showGrid
-              classes={{
-                containerClassName: "!bg-navy-900",
-              }}
-            />
-          </div>
+        <div className="relative h-[min(38vh,320px)] w-full shrink-0 bg-navy-900 sm:h-[min(44vh,400px)] lg:h-[min(48vh,460px)]">
+          <Cropper
+            image={imageSrc}
+            crop={crop}
+            zoom={zoom}
+            aspect={BLOG_IMAGE_ASPECT}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
+            onCropComplete={onCropComplete}
+            objectFit="contain"
+            minZoom={MIN_ZOOM}
+            maxZoom={MAX_ZOOM}
+            showGrid
+            classes={{
+              containerClassName: "!bg-navy-900",
+            }}
+          />
         </div>
 
-        <div className="space-y-4 border-t border-white/10 px-4 py-4 sm:px-6 sm:py-5">
+        <div className="shrink-0 space-y-3 border-t border-white/10 px-4 py-3 sm:space-y-4 sm:px-6 sm:py-4">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -201,7 +199,7 @@ export default function ImageCropModal({
             <button
               type="button"
               onClick={onCancel}
-              className="rounded-lg border border-white/15 px-5 py-3 font-title text-[10px] uppercase tracking-[2px] text-white/70 hover:border-white/30 hover:text-white"
+              className="rounded-lg border border-white/15 px-5 py-2.5 font-title text-[10px] uppercase tracking-[2px] text-white/70 hover:border-white/30 hover:text-white sm:py-3"
             >
               Cancel
             </button>
@@ -209,7 +207,7 @@ export default function ImageCropModal({
               type="button"
               onClick={apply}
               disabled={busy || !croppedAreaPixels}
-              className="rounded-lg bg-accent px-5 py-3 font-title text-[10px] uppercase tracking-[2px] text-white hover:bg-accent-light disabled:opacity-60"
+              className="rounded-lg bg-accent px-5 py-2.5 font-title text-[10px] uppercase tracking-[2px] text-white hover:bg-accent-light disabled:opacity-60 sm:py-3"
             >
               {busy ? "Cropping…" : "Use cropped image"}
             </button>
