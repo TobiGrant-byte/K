@@ -5,7 +5,7 @@ import Image from "next/image";
 
 const hobbies = [
   {
-    title: "Talking to His Wife",
+    title: "Talking with His Wife",
     desc: "His favourite thing to do is engaging in daily gists with his Achalaugo, Maryjane — the conversations that ground every day.",
     img: "/images/couple.png",
     icon: "♡",
