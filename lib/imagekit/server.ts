@@ -1,38 +1,38 @@
 import "server-only";
 
 import { createHmac, randomUUID } from "node:crypto";
+import { imageKitUrlEndpoint } from "@/lib/imagekit/config";
 
-function privateKey(): string {
-  const key = process.env.IMAGEKIT_PRIVATE_KEY;
-  if (!key) throw new Error("IMAGEKIT_PRIVATE_KEY is not configured.");
-  return key;
-}
+const imageKitPrivateKey = "private_ur6ZjNxipETuZGEDGvna0v31ZBk=";
 
 export function createImageKitUploadAuthentication() {
   const token = randomUUID();
   const expire = Math.floor(Date.now() / 1000) + 30 * 60;
-  const signature = createHmac("sha1", privateKey())
+  const signature = createHmac("sha1", imageKitPrivateKey)
     .update(token + expire)
     .digest("hex");
   return { token, expire, signature };
 }
 
 function imageKitAuthorization(): string {
-  return `Basic ${Buffer.from(`${privateKey()}:`).toString("base64")}`;
+  return `Basic ${Buffer.from(`${imageKitPrivateKey}:`).toString("base64")}`;
 }
 
-function imageKitPath(url: string): { folder: string; name: string; path: string } {
-  const endpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
-  if (!endpoint) {
-    throw new Error("NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT is not configured.");
-  }
-
-  const normalizedEndpoint = endpoint.replace(/\/+$/, "");
+function imageKitPath(url: string): {
+  folder: string;
+  name: string;
+  path: string;
+} {
+  const normalizedEndpoint = imageKitUrlEndpoint.replace(/\/+$/, "");
   if (!url.startsWith(`${normalizedEndpoint}/blog/`)) {
-    throw new Error("Only blog images from this ImageKit account can be deleted.");
+    throw new Error(
+      "Only blog images from this ImageKit account can be deleted.",
+    );
   }
 
-  const path = decodeURIComponent(url.slice(normalizedEndpoint.length).split("?")[0]);
+  const path = decodeURIComponent(
+    url.slice(normalizedEndpoint.length).split("?")[0],
+  );
   const slash = path.lastIndexOf("/");
   if (slash <= 0) throw new Error("Invalid ImageKit image URL.");
   return {
