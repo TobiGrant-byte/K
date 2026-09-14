@@ -69,6 +69,31 @@ export function truncateShareExcerpt(
   return `${base.trimEnd()}…`;
 }
 
+export const SITE_URL = "https://dr-okafor.com";
+
+/** Force a JPEG CDN URL scrapers (WhatsApp/X/Facebook) accept. */
+export function toShareJpegUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes("imagekit.io")) {
+      parsed.searchParams.set("tr", "f-jpg,w-1200,h-630,c-at_max,q-80");
+      return parsed.toString();
+    }
+  } catch {
+    /* keep original */
+  }
+  return url;
+}
+
+/** Same-origin .jpg path — WhatsApp is picky about extensionless OG routes. */
+export function blogShareImagePath(slug: string): string {
+  return `/og/${encodeURIComponent(slug)}.jpg`;
+}
+
+export function blogShareImageAbsoluteUrl(slug: string): string {
+  return `${SITE_URL}${blogShareImagePath(slug)}`;
+}
+
 export function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

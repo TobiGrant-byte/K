@@ -4,6 +4,8 @@ import BlogPostView from "@/components/blog/BlogPostView";
 import {
   BLOG_IMAGE_HEIGHT,
   BLOG_IMAGE_WIDTH,
+  SITE_URL,
+  blogShareImageAbsoluteUrl,
   truncateShareExcerpt,
 } from "@/lib/blog";
 import { getPublishedPostBySlug } from "@/lib/firebase/posts";
@@ -30,10 +32,13 @@ export async function generateMetadata({
   const description =
     truncateShareExcerpt(post.excerpt) ||
     "A personal reflection from Dr. Sunday Okafor on life, work, and society.";
-  const url = `/blog/${post.slug}`;
-  // Same-origin OG/Twitter image routes (PNG) — scrapers often reject ImageKit WebP.
+  const path = `/blog/${post.slug}`;
+  const pageUrl = `${SITE_URL}${path}`;
+  const imageUrl = blogShareImageAbsoluteUrl(post.slug);
   const shareImage = {
-    url: `/blog/${post.slug}/opengraph-image`,
+    url: imageUrl,
+    secureUrl: imageUrl,
+    type: "image/jpeg",
     width: BLOG_IMAGE_WIDTH,
     height: BLOG_IMAGE_HEIGHT,
     alt: title,
@@ -42,13 +47,14 @@ export async function generateMetadata({
   return {
     title: `${title} | Dr. Sunday Okafor`,
     description,
-    alternates: { canonical: url },
+    alternates: { canonical: path },
     openGraph: {
       title,
       description,
       type: "article",
-      url,
+      url: pageUrl,
       siteName: "Dr. Sunday Okafor",
+      locale: "en_US",
       publishedTime: post.createdAt,
       modifiedTime: post.updatedAt,
       images: [shareImage],
@@ -57,7 +63,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [shareImage.url],
+      images: [imageUrl],
     },
   };
 }
