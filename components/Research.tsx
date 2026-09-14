@@ -214,9 +214,7 @@ export default function Research() {
           <h2 className="font-display text-[clamp(32px,5vw,62px)] font-light leading-[1.1] text-white">
             Ideas That Shape How <em className="font-semibold italic text-accent-light">We Move</em>
           </h2>
-          <p className="mt-5 max-w-[560px] font-display text-lg italic leading-[1.7] text-white/45">
-            From crash analytics to connected infrastructure — research that informs safer, smarter transportation systems.
-          </p>
+      
         </motion.div>
 
         {/* Focus areas */}

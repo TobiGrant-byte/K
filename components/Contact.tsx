@@ -118,20 +118,20 @@ export default function Contact() {
             <div className="h-px bg-gradient-to-r from-accent/35 to-transparent mb-9" />
             {[
               {
-                label: "Research & Publications",
-                detail: "Academic collaborations & joint research",
+                label: "Professional Engagement",
+                detail: "Consulting and partnerships",
               },
               {
-                label: "Speaking & Conferences",
-                detail: "Keynotes, panels & university talks",
+                label: "Public Speaking",
+                detail: "Keynotes and panel discussion",
+              },
+              {
+                label: "Academic Collaboration",
+                detail: "Research and social promotion",
               },
               {
                 label: "Mentorship",
-                detail: "Graduate students & young engineers",
-              },
-              {
-                label: "Professional Enquiries",
-                detail: "Consulting & project partnerships",
+                detail: "Career and personal development",
               },
             ].map((item) => (
               <div key={item.label} className="flex gap-3.5 mb-5">

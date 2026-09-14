@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { isNavGroup, navItems, pathInGroup, type NavGroup, type NavLink } from "@/lib/nav";
-import { isAdminLoggedIn } from "@/lib/blog";
+import { subscribeToAdminAuth } from "@/lib/firebase/auth";
 import SiteSearch from "@/components/SiteSearch";
 
 function linkActive(pathname: string, href: string) {
@@ -225,18 +225,9 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    const sync = () => setAdminAuthed(isAdminLoggedIn());
-    sync();
-    window.addEventListener("okafor-blog-auth", sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener("okafor-blog-auth", sync);
-      window.removeEventListener("storage", sync);
-    };
+    return subscribeToAdminAuth((state) => {
+      setAdminAuthed(state.status === "admin");
+    });
   }, []);
 
   const closeMobile = () => setOpen(false);

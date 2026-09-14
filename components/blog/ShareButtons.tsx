@@ -5,44 +5,52 @@ type ShareButtonsProps = {
   url: string;
 };
 
+function absoluteUrl(url: string) {
+  return new URL(url, window.location.origin).href;
+}
+
 function shareLinkedIn(url: string) {
+  const resolvedUrl = absoluteUrl(url);
   window.open(
-    `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+    `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resolvedUrl)}`,
     "_blank",
     "noopener,noreferrer",
   );
 }
 
 function shareX(title: string, url: string) {
+  const resolvedUrl = absoluteUrl(url);
   window.open(
-    `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`,
+    `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(resolvedUrl)}`,
     "_blank",
     "noopener,noreferrer",
   );
 }
 
 function shareFacebook(url: string) {
+  const resolvedUrl = absoluteUrl(url);
   window.open(
-    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resolvedUrl)}`,
     "_blank",
     "noopener,noreferrer",
   );
 }
 
 async function shareNative(title: string, url: string) {
+  const resolvedUrl = absoluteUrl(url);
   if (typeof navigator !== "undefined" && navigator.share) {
     try {
-      await navigator.share({ title, url, text: title });
+      await navigator.share({ title, url: resolvedUrl, text: title });
       return;
     } catch {
       /* user cancelled */
     }
   }
   try {
-    await navigator.clipboard.writeText(url);
+    await navigator.clipboard.writeText(resolvedUrl);
     alert("Link copied to clipboard.");
   } catch {
-    prompt("Copy this link:", url);
+    prompt("Copy this link:", resolvedUrl);
   }
 }
 

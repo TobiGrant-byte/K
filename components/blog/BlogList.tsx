@@ -3,28 +3,27 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import BlogCard from "@/components/blog/BlogCard";
-import {
-  BLOG_CATEGORIES,
-  getPublishedPosts,
-  type BlogCategory,
-  type BlogPost,
-} from "@/lib/blog";
+import { BLOG_CATEGORIES, type BlogCategory, type BlogPost } from "@/lib/blog";
+import { subscribeToPublishedPosts } from "@/lib/firebase/posts";
 
 export default function BlogList() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [category, setCategory] = useState<BlogCategory | "All">("All");
-
-  const refresh = () => setPosts(getPublishedPosts());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    refresh();
-    const onUpdate = () => refresh();
-    window.addEventListener("okafor-blog-updated", onUpdate);
-    window.addEventListener("storage", onUpdate);
-    return () => {
-      window.removeEventListener("okafor-blog-updated", onUpdate);
-      window.removeEventListener("storage", onUpdate);
-    };
+    return subscribeToPublishedPosts(
+      (nextPosts) => {
+        setPosts(nextPosts);
+        setLoading(false);
+        setError("");
+      },
+      (nextError) => {
+        setError(`Could not load blog posts: ${nextError.message}`);
+        setLoading(false);
+      },
+    );
   }, []);
 
   const filtered =
@@ -70,7 +69,11 @@ export default function BlogList() {
           ))}
         </div>
 
-        {filtered.length === 0 ? (
+        {loading ? (
+          <p className="font-display text-lg italic text-white/40">Loading…</p>
+        ) : error ? (
+          <p className="text-sm text-red-300" role="alert">{error}</p>
+        ) : filtered.length === 0 ? (
           <p className="font-display text-lg italic text-white/40">
             No published reflections in this category yet.
           </p>

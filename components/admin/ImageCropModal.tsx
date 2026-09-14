@@ -15,8 +15,8 @@ const DEFAULT_ZOOM = 1;
 async function getCroppedDataUrl(
   imageSrc: string,
   pixelCrop: Area,
-  mime = "image/jpeg",
-  quality = 0.9,
+  mime = "image/webp",
+  quality = 0.86,
 ): Promise<string> {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
@@ -57,6 +57,7 @@ async function getCroppedDataUrl(
 function createImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.addEventListener("load", () => resolve(img));
     img.addEventListener("error", (e) => reject(e));
     img.src = url;
@@ -99,7 +100,9 @@ export default function ImageCropModal({
   };
 
   const nudgeZoom = (delta: number) => {
-    setZoom((z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Number((z + delta).toFixed(2)))));
+    setZoom((z) =>
+      Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Number((z + delta).toFixed(2)))),
+    );
   };
 
   return (
@@ -119,11 +122,15 @@ export default function ImageCropModal({
           <div className="font-title text-[9px] uppercase tracking-[2px] text-accent-light">
             Crop image
           </div>
-          <h2 id="crop-title" className="mt-1 font-display text-2xl font-light text-white">
+          <h2
+            id="crop-title"
+            className="mt-1 font-display text-2xl font-light text-white"
+          >
             Fit the 16:10 frame
           </h2>
           <p className="mt-1 text-[13px] text-white/45">
-            Zoom out to fit more in the frame, or zoom in to focus. Keep faces inside the bright box.
+            Zoom out to fit more in the frame, or zoom in to focus. Keep faces
+            inside the bright box.
           </p>
         </div>
 
@@ -184,7 +191,10 @@ export default function ImageCropModal({
 
           <div className="flex flex-wrap justify-end gap-3">
             {error ? (
-              <p className="mr-auto self-center text-sm text-red-300" role="alert">
+              <p
+                className="mr-auto self-center text-sm text-red-300"
+                role="alert"
+              >
                 {error}
               </p>
             ) : null}
