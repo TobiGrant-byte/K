@@ -977,8 +977,7 @@ export default function AdminApp() {
                   <p className="mt-3 text-[12px] text-white/35">
                     Up to {MAX_BLOG_IMAGES} images including the cover. Every
                     upload is cropped to a fixed 16:10 frame (1200×750) so
-                    nothing gets cut off oddly on mobile or desktop. Images
-                    upload to ImageKit as soon as you finish cropping.
+                    nothing gets cut off oddly on mobile or desktop.
                   </p>
                 )}
               </div>
