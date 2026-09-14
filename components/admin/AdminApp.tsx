@@ -1,27 +1,46 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import ImageCropModal from "@/components/admin/ImageCropModal";
 import {
   BLOG_CATEGORIES,
-  DEMO_ADMIN,
   MAX_BLOG_IMAGES,
   createId,
-  deletePost,
   fileToDataUrl,
   formatPostDate,
-  getPostById,
-  isAdminLoggedIn,
-  loadPosts,
-  loginAdmin,
-  logoutAdmin,
   slugify,
-  upsertPost,
   type BlogPost,
 } from "@/lib/blog";
+import {
+  signInAdminWithGoogle,
+  signOutAdmin,
+  subscribeToAdminAuth,
+  type AdminAuthState,
+} from "@/lib/firebase/auth";
+import {
+  assertUniqueSlug,
+  removePost,
+  savePost,
+  subscribeToAllPosts,
+} from "@/lib/firebase/posts";
+import {
+  deleteImageKitImages,
+  isImageKitBlogUrl,
+  syncPostImages,
+  uploadCroppedBlogImage,
+} from "@/lib/imagekit/images";
 
 type Mode = "list" | "create" | "edit";
+
+type UploadingImage = {
+  id: string;
+  preview: string;
+  asCover: boolean;
+  /** Existing ImageKit/data URL being replaced by a recrop. */
+  replaces?: string;
+  error?: string;
+};
 
 const inputClass =
   "w-full rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-[border-color] focus:border-accent/60 placeholder:text-white/30";
@@ -43,12 +62,13 @@ function emptyDraft(): Omit<BlogPost, "id" | "createdAt" | "updatedAt"> & {
 }
 
 export default function AdminApp() {
-  const [authed, setAuthed] = useState(false);
-  const [ready, setReady] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [authState, setAuthState] = useState<AdminAuthState>({
+    status: "loading",
+    user: null,
+    isAdmin: false,
+  });
   const [loginError, setLoginError] = useState("");
+  const [signingIn, setSigningIn] = useState(false);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [mode, setMode] = useState<Mode>("list");
   const [draft, setDraft] = useState(emptyDraft());
@@ -58,71 +78,123 @@ export default function AdminApp() {
   const [messageError, setMessageError] = useState(false);
   const [messageId, setMessageId] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [cropQueue, setCropQueue] = useState<{ src: string; asCover: boolean }[]>([]);
+  const [cropQueue, setCropQueue] = useState<
+    { src: string; asCover: boolean }[]
+  >([]);
   const [recropSrc, setRecropSrc] = useState<string | null>(null);
+  const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
+  /** Stable post id for ImageKit folder while creating/editing. */
+  const [workingPostId, setWorkingPostId] = useState<string | null>(null);
 
-  const refresh = () => setPosts(loadPosts());
-
-  useEffect(() => {
-    setAuthed(isAdminLoggedIn());
-    refresh();
-    setReady(true);
-  }, []);
-
-  /** Flash banners auto-clear after a few hours; X dismisses sooner. */
-  useEffect(() => {
-    if (!message) return;
-    const t = window.setTimeout(() => {
-      setMessage("");
-      setMessageError(false);
-    }, 3 * 60 * 60 * 1000);
-    return () => window.clearTimeout(t);
-  }, [message, messageId]);
-
-  const sorted = useMemo(
-    () => [...posts].sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt)),
-    [posts],
-  );
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError("");
-    if (loginAdmin(email, password)) {
-      setAuthed(true);
-    } else {
-      setLoginError("Invalid email or password.");
-    }
-  };
-
-  const handleLogout = () => {
-    logoutAdmin();
-    setAuthed(false);
-    setMode("list");
-  };
-
-  const flash = (text: string, error = false) => {
+  const flash = useCallback((text: string, error = false) => {
     setMessage(text);
     setMessageError(error);
     setMessageId((n) => n + 1);
-  };
+  }, []);
 
   const clearMessage = () => {
     setMessage("");
     setMessageError(false);
   };
 
+  useEffect(() => {
+    return subscribeToAdminAuth(setAuthState);
+  }, []);
+
+  // Auto-dismiss unauthorized / auth error alerts after a few seconds.
+  useEffect(() => {
+    if (authState.status !== "unauthorized" && authState.status !== "error") {
+      return;
+    }
+    const t = window.setTimeout(() => {
+      setLoginError("");
+      setAuthState({ status: "signed-out", user: null, isAdmin: false });
+    }, 8000);
+    return () => window.clearTimeout(t);
+  }, [authState]);
+
+  const authAlert =
+    loginError ||
+    (authState.status === "unauthorized"
+      ? "This Google account is not authorized to view this page. Please contact Dr. Sunday Okafor for access."
+      : "") ||
+    (authState.status === "error" ? authState.message : "");
+  useEffect(() => {
+    if (authState.status !== "admin") return;
+    return subscribeToAllPosts(setPosts, (error) =>
+      flash(
+        `Could not load posts (Firestore posts query): ${error.message}`,
+        true,
+      ),
+    );
+  }, [authState.status, flash]);
+
+  /** Flash banners auto-clear after a few hours; X dismisses sooner. */
+  useEffect(() => {
+    if (!message) return;
+    const t = window.setTimeout(
+      () => {
+        setMessage("");
+        setMessageError(false);
+      },
+      3 * 60 * 60 * 1000,
+    );
+    return () => window.clearTimeout(t);
+  }, [message, messageId]);
+
+  const sorted = useMemo(
+    () =>
+      [...posts].sort(
+        (a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt),
+      ),
+    [posts],
+  );
+
+  const handleLogin = async () => {
+    setLoginError("");
+    setSigningIn(true);
+    try {
+      // Popup only — admin getDoc runs in subscribeToAdminAuth after Auth state
+      // is restored and the ID token is ready.
+      await signInAdminWithGoogle();
+    } catch (error) {
+      const details = error as Error & { code?: string };
+      if (
+        details.code !== "auth/popup-closed-by-user" &&
+        details.code !== "auth/cancelled-popup-request"
+      ) {
+        setLoginError(details.message || "Google sign-in failed.");
+      }
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOutAdmin();
+    setMode("list");
+  };
+
   const openCreate = () => {
     setEditingId(null);
+    setWorkingPostId(createId());
     setDraft(emptyDraft());
+    setUploadingImages([]);
+    setCropQueue([]);
+    setRecropSrc(null);
     setMode("create");
     clearMessage();
   };
 
   const openEdit = (id: string) => {
-    const post = getPostById(id);
+    const post = posts.find((item) => item.id === id);
     if (!post) return;
     setEditingId(id);
+    setWorkingPostId(id);
     setDraft({ ...post });
+    setUploadingImages([]);
+    setCropQueue([]);
+    setRecropSrc(null);
     setMode("edit");
     clearMessage();
   };
@@ -140,13 +212,23 @@ export default function AdminApp() {
     if (draft.coverImage) set.add(draft.coverImage);
     return set.size;
   })();
-  const imageCount = uniqueImageCount;
-  const slotsLeft = Math.max(0, MAX_BLOG_IMAGES - imageCount - cropQueue.length);
+  const imageCount = uniqueImageCount + uploadingImages.length;
+  const slotsLeft = Math.max(
+    0,
+    MAX_BLOG_IMAGES - imageCount - cropQueue.length,
+  );
+  const imagesBusy =
+    uploadingImages.some((item) => !item.error) ||
+    cropQueue.length > 0 ||
+    Boolean(recropSrc);
 
   const onFiles = async (files: FileList | null, asCover = false) => {
     if (!files?.length) return;
     if (slotsLeft <= 0) {
-      flash(`Maximum of ${MAX_BLOG_IMAGES} images (including cover). Remove one to add another.`, true);
+      flash(
+        `Maximum of ${MAX_BLOG_IMAGES} images (including cover). Remove one to add another.`,
+        true,
+      );
       return;
     }
 
@@ -177,30 +259,112 @@ export default function AdminApp() {
 
   const currentCrop = cropQueue[0] || null;
 
+  const beginImageUpload = (
+    croppedDataUrl: string,
+    options: { asCover: boolean; replaces?: string },
+  ) => {
+    const postId = workingPostId || editingId || createId();
+    if (!workingPostId) setWorkingPostId(postId);
+
+    const uploadId = createId();
+    setUploadingImages((items) => [
+      ...items,
+      {
+        id: uploadId,
+        preview: croppedDataUrl,
+        asCover: options.asCover,
+        replaces: options.replaces,
+      },
+    ]);
+
+    void (async () => {
+      try {
+        const url = await uploadCroppedBlogImage(croppedDataUrl, postId);
+        setUploadingImages((items) =>
+          items.filter((item) => item.id !== uploadId),
+        );
+        setDraft((d) => {
+          if (options.replaces) {
+            const images = d.images.some((img) => img === options.replaces)
+              ? d.images.map((img) => (img === options.replaces ? url : img))
+              : [...d.images, url];
+            return {
+              ...d,
+              images,
+              coverImage:
+                options.asCover ||
+                !d.coverImage ||
+                d.coverImage === options.replaces
+                  ? url
+                  : d.coverImage,
+            };
+          }
+          const existing = new Set(d.images);
+          if (d.coverImage) existing.add(d.coverImage);
+          if (existing.size >= MAX_BLOG_IMAGES) return d;
+          return {
+            ...d,
+            coverImage: options.asCover || !d.coverImage ? url : d.coverImage,
+            images: [...d.images, url],
+          };
+        });
+
+        if (options.replaces && isImageKitBlogUrl(options.replaces)) {
+          // Editing: defer delete until save via syncPostImages.
+          // Creating: old file was never in Firestore — delete now.
+          if (!editingId) {
+            void deleteImageKitImages([options.replaces]).catch(console.error);
+          }
+        }
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Image upload failed.";
+        setUploadingImages((items) =>
+          items.map((item) =>
+            item.id === uploadId ? { ...item, error: message } : item,
+          ),
+        );
+        if (options.replaces) {
+          setDraft((d) => ({
+            ...d,
+            images: d.images.includes(options.replaces!)
+              ? d.images
+              : [...d.images, options.replaces!],
+            coverImage: options.asCover ? options.replaces : d.coverImage,
+          }));
+        }
+        flash(message, true);
+      }
+    })();
+  };
+
   const finishCrop = (croppedDataUrl: string) => {
     if (recropSrc) {
+      const replacing = recropSrc;
+      setRecropSrc(null);
+      // Drop the old preview from the draft while the replacement uploads.
       setDraft((d) => ({
         ...d,
-        coverImage: d.coverImage === recropSrc ? croppedDataUrl : d.coverImage,
-        images: d.images.map((img) => (img === recropSrc ? croppedDataUrl : img)),
+        images: d.images.filter((img) => img !== replacing),
+        coverImage:
+          d.coverImage === replacing
+            ? d.images.find((img) => img !== replacing)
+            : d.coverImage,
       }));
-      setRecropSrc(null);
+      beginImageUpload(croppedDataUrl, {
+        asCover: draft.coverImage === replacing,
+        replaces: replacing,
+      });
       return;
     }
 
     const job = cropQueue[0];
     if (!job) return;
-    setDraft((d) => {
-      const existing = new Set(d.images);
-      if (d.coverImage) existing.add(d.coverImage);
-      if (existing.size >= MAX_BLOG_IMAGES) return d;
-      return {
-        ...d,
-        coverImage: job.asCover || !d.coverImage ? croppedDataUrl : d.coverImage,
-        images: [...d.images, croppedDataUrl],
-      };
-    });
     setCropQueue((q) => q.slice(1));
+    beginImageUpload(croppedDataUrl, {
+      asCover:
+        job.asCover || (!draft.coverImage && uploadingImages.length === 0),
+    });
   };
 
   const cancelCrop = () => {
@@ -211,163 +375,167 @@ export default function AdminApp() {
     setCropQueue((q) => q.slice(1));
   };
 
+  const removeUploadingImage = (id: string) => {
+    setUploadingImages((items) => items.filter((item) => item.id !== id));
+  };
+
+  const retryUpload = (item: UploadingImage) => {
+    setUploadingImages((items) =>
+      items.filter((entry) => entry.id !== item.id),
+    );
+    beginImageUpload(item.preview, {
+      asCover: item.asCover,
+      replaces: item.replaces,
+    });
+  };
+
   const removeImage = (src: string) => {
     setDraft((d) => ({
       ...d,
       images: d.images.filter((i) => i !== src),
-      coverImage: d.coverImage === src ? d.images.find((i) => i !== src) : d.coverImage,
+      coverImage:
+        d.coverImage === src ? d.images.find((i) => i !== src) : d.coverImage,
     }));
+    // New post: file is not referenced in Firestore yet — clean up ImageKit now.
+    if (!editingId && isImageKitBlogUrl(src)) {
+      void deleteImageKitImages([src]).catch(console.error);
+    }
   };
 
-  const save = (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!draft.title.trim() || !draft.body.trim()) {
       flash("Title and body are required.", true);
       return;
     }
-    setSaving(true);
-    const now = new Date().toISOString();
-    const slugBase = slugify(draft.slug || draft.title) || createId();
-    const existing = loadPosts();
-    let slug = slugBase;
-    let n = 2;
-    while (existing.some((p) => p.slug === slug && p.id !== editingId)) {
-      slug = `${slugBase}-${n++}`;
+    if (imagesBusy || uploadingImages.some((item) => item.error)) {
+      flash(
+        uploadingImages.some((item) => item.error)
+          ? "Fix or remove failed image uploads before publishing."
+          : "Wait for image uploads to finish before publishing.",
+        true,
+      );
+      return;
     }
+    setSaving(true);
+    try {
+      const now = new Date().toISOString();
+      const postId = workingPostId || editingId || createId();
+      const slug = slugify(draft.slug || draft.title) || postId;
+      await assertUniqueSlug(slug, editingId ?? undefined);
 
-    const post: BlogPost = {
-      id: editingId || createId(),
-      slug,
-      title: draft.title.trim(),
-      excerpt: draft.excerpt.trim() || draft.body.trim().slice(0, 160),
-      body: draft.body.trim(),
-      category: draft.category,
-      coverImage: draft.coverImage,
-      images: draft.images,
-      published: draft.published,
-      createdAt: draft.createdAt || now,
-      updatedAt: now,
-    };
+      const previousImages = editingId
+        ? (posts.find((post) => post.id === editingId)?.images ?? [])
+        : [];
+      // Images should already be ImageKit URLs; this only maps through and
+      // computes removals (plus any leftover data URLs as a safety net).
+      const synced = await syncPostImages({
+        postId,
+        imageSources: draft.images,
+        coverSource: draft.coverImage,
+        previousImages,
+      });
 
-    upsertPost(post);
-    refresh();
-    setSaving(false);
-    flash(editingId ? "Post updated." : "Post created.");
-    setMode("list");
-    setEditingId(null);
-    setDraft(emptyDraft());
+      const post: BlogPost = {
+        id: postId,
+        slug,
+        title: draft.title.trim(),
+        excerpt: draft.excerpt.trim() || draft.body.trim().slice(0, 160),
+        body: draft.body.trim(),
+        category: draft.category,
+        coverImage: synced.coverImage,
+        images: synced.images,
+        published: draft.published,
+        createdAt: draft.createdAt || now,
+        updatedAt: now,
+      };
+
+      await savePost(post, { creating: !editingId });
+      try {
+        await deleteImageKitImages(synced.removedImages);
+      } catch (cleanupError) {
+        console.error(
+          "Post saved, but removed image cleanup failed.",
+          cleanupError,
+        );
+      }
+      flash(editingId ? "Post updated." : "Post created.");
+      setMode("list");
+      setEditingId(null);
+      setWorkingPostId(null);
+      setUploadingImages([]);
+      setDraft(emptyDraft());
+    } catch (error) {
+      flash(
+        error instanceof Error ? error.message : "Could not save this post.",
+        true,
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   const remove = (id: string) => {
     setDeleteId(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteId) return;
-    deletePost(deleteId);
-    refresh();
-    setDeleteId(null);
-    flash("Post deleted.");
+    try {
+      const target = posts.find((post) => post.id === deleteId);
+      if (target?.images.length) {
+        await deleteImageKitImages(target.images);
+      }
+      await removePost(deleteId);
+      setDeleteId(null);
+      flash("Post deleted.");
+    } catch (error) {
+      flash(
+        error instanceof Error ? error.message : "Could not delete this post.",
+        true,
+      );
+    }
   };
 
   const deleteTarget = deleteId ? posts.find((p) => p.id === deleteId) : null;
 
-  if (!ready) {
+  if (authState.status === "loading") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-navy-900 text-white/50">
+      <div className="flex min-h-screen items-center justify-center bg-navy-900 pt-[72px] text-white/50">
         Loading…
       </div>
     );
   }
 
-  if (!authed) {
+  if (authState.status !== "admin") {
     return (
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy-900 px-6">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy-900 px-6 pt-[72px]">
         <div className="accent-wash" />
-        <form
-          onSubmit={handleLogin}
-          className="relative w-full max-w-md rounded-2xl border border-white/12 bg-navy-800/90 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.45)]"
-        >
+        <div className="relative w-full max-w-md rounded-2xl border border-white/12 bg-navy-800/90 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
           <div className="mb-2 font-title text-[10px] uppercase tracking-[3px] text-accent-light">
             Admin
           </div>
-          <h1 className="mb-2 font-display text-3xl font-light text-white">Sign in</h1>
+          <h1 className="mb-2 font-display text-3xl font-light text-white">
+            Sign in
+          </h1>
           <p className="mb-8 text-[13px] leading-relaxed text-white/45">
-            Temporary demo login. Firebase Auth will replace this later.
+            Continue with an authorized Google account.
           </p>
 
-          <label className="mb-4 block">
-            <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/40">
-              Email
-            </span>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-              autoComplete="username"
-              required
-            />
-          </label>
-          <label className="mb-6 block">
-            <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/40">
-              Password
-            </span>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`${inputClass} pr-12`}
-                autoComplete="current-password"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md border-none bg-transparent text-white/45 transition-colors hover:text-accent-light"
-              >
-                {showPassword ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" strokeLinecap="round" />
-                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" strokeLinecap="round" />
-                    <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" strokeLinecap="round" />
-                    <path d="M1 1l22 22" strokeLinecap="round" />
-                  </svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                )}
-              </button>
-            </div>
-          </label>
-
-          {loginError ? (
+          {authAlert ? (
             <p className="mb-4 text-sm text-red-300" role="alert">
-              {loginError}
+              {authAlert}
             </p>
           ) : null}
 
           <button
-            type="submit"
-            className="w-full rounded-lg bg-accent py-3.5 font-title text-[11px] uppercase tracking-[2.5px] text-white transition-colors hover:bg-accent-light"
+            type="button"
+            onClick={handleLogin}
+            disabled={signingIn}
+            className="w-full rounded-lg bg-accent py-3.5 font-title text-[11px] uppercase tracking-[2.5px] text-white transition-colors hover:bg-accent-light disabled:opacity-60"
           >
-            Enter dashboard
+            {signingIn ? "Signing in…" : "Continue with Google"}
           </button>
-
-          <div className="mt-6 rounded-lg border border-accent/20 bg-accent/5 px-4 py-3 text-[12px] leading-relaxed text-white/55">
-            <div className="mb-1 font-title text-[8px] uppercase tracking-[2px] text-accent-light">
-              Demo credentials
-            </div>
-            <div>
-              {DEMO_ADMIN.email}
-              <br />
-              {DEMO_ADMIN.password}
-            </div>
-          </div>
 
           <Link
             href="/"
@@ -375,20 +543,19 @@ export default function AdminApp() {
           >
             ← Back to site
           </Link>
-        </form>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-navy-900 text-white">
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-navy-900/95 backdrop-blur-md">
+    <div className="min-h-screen bg-navy-900 pt-[72px] text-white">
+      <header className="sticky top-[72px] z-40 border-b border-white/10 bg-navy-900/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <div>
             <div className="font-title text-[10px] uppercase tracking-[3px] text-accent-light">
               Blog Admin
             </div>
-            <div className="font-display text-lg text-white/90">Dr. Sunday Okafor</div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Link
@@ -444,7 +611,9 @@ export default function AdminApp() {
             <div className="mb-8 flex items-center justify-between gap-4">
               <div>
                 <h1 className="font-display text-3xl font-light">Posts</h1>
-                <p className="mt-1 text-sm text-white/45">{sorted.length} total</p>
+                <p className="mt-1 text-sm text-white/45">
+                  {sorted.length} total
+                </p>
               </div>
               <button
                 type="button"
@@ -481,13 +650,17 @@ export default function AdminApp() {
                   <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
                     <div className="min-w-0 flex-1">
                       <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 font-title text-[8px] uppercase tracking-[2px] text-white/40">
-                        <span className="text-accent-light">{post.category}</span>
+                        <span className="text-accent-light">
+                          {post.category}
+                        </span>
                         <span className="text-white/20" aria-hidden>
                           ·
                         </span>
                         <span
                           className={
-                            post.published ? "text-emerald-300/80" : "text-amber-200/70"
+                            post.published
+                              ? "text-emerald-300/80"
+                              : "text-amber-200/70"
                           }
                         >
                           {post.published ? "Published" : "Draft"}
@@ -533,7 +706,9 @@ export default function AdminApp() {
                 </article>
               ))}
               {sorted.length === 0 ? (
-                <p className="font-display italic text-white/40">No posts yet — create the first one.</p>
+                <p className="font-display italic text-white/40">
+                  No posts yet — create the first one.
+                </p>
               ) : null}
             </div>
           </>
@@ -576,7 +751,9 @@ export default function AdminApp() {
                 <input
                   className={inputClass}
                   value={draft.slug}
-                  onChange={(e) => setDraft((d) => ({ ...d, slug: slugify(e.target.value) }))}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, slug: slugify(e.target.value) }))
+                  }
                   placeholder="keeping-going-every-day"
                 />
               </label>
@@ -585,7 +762,11 @@ export default function AdminApp() {
                 <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/40">
                   Category
                 </span>
-                <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Category">
+                <div
+                  className="flex flex-wrap gap-2"
+                  role="radiogroup"
+                  aria-label="Category"
+                >
                   {BLOG_CATEGORIES.map((c) => {
                     const selected = draft.category === c;
                     return (
@@ -612,7 +793,9 @@ export default function AdminApp() {
                 <input
                   type="checkbox"
                   checked={draft.published}
-                  onChange={(e) => setDraft((d) => ({ ...d, published: e.target.checked }))}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, published: e.target.checked }))
+                  }
                   className="h-4 w-4 accent-[var(--color-accent)]"
                 />
                 <span className="font-title text-[9px] uppercase tracking-[2px] text-white/50">
@@ -627,7 +810,9 @@ export default function AdminApp() {
                 <textarea
                   className={`${inputClass} min-h-[80px] resize-y`}
                   value={draft.excerpt}
-                  onChange={(e) => setDraft((d) => ({ ...d, excerpt: e.target.value }))}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, excerpt: e.target.value }))
+                  }
                   placeholder="One or two sentences for the blog cards…"
                 />
               </label>
@@ -639,9 +824,11 @@ export default function AdminApp() {
                 <textarea
                   className={`${inputClass} min-h-[220px] resize-y`}
                   value={draft.body}
-                  onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, body: e.target.value }))
+                  }
                   required
-                  placeholder="Write the reflection… Separate paragraphs with a blank line."
+                  placeholder="Write or paste the post content here… Separate paragraphs with a blank line."
                 />
               </label>
 
@@ -657,7 +844,9 @@ export default function AdminApp() {
                 <div className="flex flex-wrap gap-3">
                   <label
                     className={`rounded-lg border border-dashed border-accent/35 bg-accent/5 px-4 py-3 font-title text-[9px] uppercase tracking-[2px] text-accent-light hover:bg-accent/10 ${
-                      slotsLeft <= 0 ? "pointer-events-none opacity-40" : "cursor-pointer"
+                      slotsLeft <= 0
+                        ? "pointer-events-none opacity-40"
+                        : "cursor-pointer"
                     }`}
                   >
                     {slotsLeft <= 1 ? "Upload image" : "Upload image(s)"}
@@ -693,19 +882,73 @@ export default function AdminApp() {
                     />
                   </label>
                 </div>
-                {draft.images.length || draft.coverImage ? (
+                {draft.images.length ||
+                draft.coverImage ||
+                uploadingImages.length ? (
                   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    {(draft.coverImage && !draft.images.includes(draft.coverImage)
+                    {uploadingImages.map((item) => (
+                      <div
+                        key={item.id}
+                        className="relative overflow-hidden rounded-lg border border-white/10"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={item.preview}
+                          alt=""
+                          className="aspect-[16/10] w-full object-contain object-center bg-navy-900 opacity-40"
+                        />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-navy-900/70 px-3 text-center">
+                          {item.error ? (
+                            <>
+                              <p className="text-[11px] leading-snug text-red-300">
+                                Upload failed
+                              </p>
+                              <div className="flex gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => retryUpload(item)}
+                                  className="rounded border border-accent/35 px-2 py-1 font-title text-[7px] uppercase tracking-[1px] text-accent-light"
+                                >
+                                  Retry
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => removeUploadingImage(item.id)}
+                                  className="rounded border border-red-400/30 px-2 py-1 font-title text-[7px] uppercase tracking-[1px] text-red-300/80"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            <p className="font-title text-[9px] uppercase tracking-[2px] text-accent-light">
+                              Uploading…
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {(draft.coverImage &&
+                    !draft.images.includes(draft.coverImage)
                       ? [draft.coverImage, ...draft.images]
                       : draft.images
                     ).map((src) => (
-                      <div key={src.slice(0, 64)} className="relative overflow-hidden rounded-lg border border-white/10">
+                      <div
+                        key={src}
+                        className="relative overflow-hidden rounded-lg border border-white/10"
+                      >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={src} alt="" className="aspect-[16/10] w-full object-contain object-center bg-navy-900" />
+                        <img
+                          src={src}
+                          alt=""
+                          className="aspect-[16/10] w-full object-contain object-center bg-navy-900"
+                        />
                         <div className="absolute inset-x-0 bottom-0 flex gap-1 bg-navy-900/80 p-1.5">
                           <button
                             type="button"
-                            onClick={() => setDraft((d) => ({ ...d, coverImage: src }))}
+                            onClick={() =>
+                              setDraft((d) => ({ ...d, coverImage: src }))
+                            }
                             className="flex-1 rounded border border-white/15 py-1 font-title text-[7px] uppercase tracking-[1px] text-white/70 hover:text-accent-light"
                           >
                             {draft.coverImage === src ? "Cover" : "Make cover"}
@@ -713,14 +956,16 @@ export default function AdminApp() {
                           <button
                             type="button"
                             onClick={() => setRecropSrc(src)}
-                            className="rounded border border-accent/35 px-2 py-1 font-title text-[7px] uppercase tracking-[1px] text-accent-light"
+                            disabled={imagesBusy}
+                            className="rounded border border-accent/35 px-2 py-1 font-title text-[7px] uppercase tracking-[1px] text-accent-light disabled:opacity-40"
                           >
                             Recrop
                           </button>
                           <button
                             type="button"
                             onClick={() => removeImage(src)}
-                            className="rounded border border-red-400/30 px-2 py-1 font-title text-[7px] uppercase tracking-[1px] text-red-300/80"
+                            disabled={imagesBusy}
+                            className="rounded border border-red-400/30 px-2 py-1 font-title text-[7px] uppercase tracking-[1px] text-red-300/80 disabled:opacity-40"
                           >
                             Remove
                           </button>
@@ -730,25 +975,37 @@ export default function AdminApp() {
                   </div>
                 ) : (
                   <p className="mt-3 text-[12px] text-white/35">
-                    Up to {MAX_BLOG_IMAGES} images including the cover. Every upload is cropped to a
-                    fixed 16:10 frame (1200×750) so nothing gets cut off oddly on mobile or desktop.
+                    Up to {MAX_BLOG_IMAGES} images including the cover. Every
+                    upload is cropped to a fixed 16:10 frame (1200×750) so
+                    nothing gets cut off oddly on mobile or desktop. Images
+                    upload to ImageKit as soon as you finish cropping.
                   </p>
                 )}
               </div>
 
               <button
                 type="submit"
-                disabled={saving}
+                disabled={
+                  saving ||
+                  imagesBusy ||
+                  uploadingImages.some((item) => Boolean(item.error))
+                }
                 className="mt-2 rounded-lg bg-accent py-4 font-title text-[11px] uppercase tracking-[2.5px] text-white hover:bg-accent-light disabled:opacity-60"
               >
-                {saving ? "Saving…" : mode === "edit" ? "Update post" : "Publish post"}
+                {saving
+                  ? "Saving…"
+                  : imagesBusy
+                    ? "Uploading images…"
+                    : mode === "edit"
+                      ? "Update post"
+                      : "Publish post"}
               </button>
             </div>
           </form>
         )}
       </div>
 
-      {(currentCrop || recropSrc) ? (
+      {currentCrop || recropSrc ? (
         <ImageCropModal
           imageSrc={recropSrc || currentCrop!.src}
           onCancel={cancelCrop}
@@ -772,14 +1029,17 @@ export default function AdminApp() {
             <div className="mb-2 font-title text-[9px] uppercase tracking-[2px] text-red-300/80">
               Delete post
             </div>
-            <h2 id="delete-post-title" className="font-display text-2xl font-light text-white">
+            <h2
+              id="delete-post-title"
+              className="font-display text-2xl font-light text-white"
+            >
               Remove this post?
             </h2>
             <p className="mt-3 text-[14px] leading-relaxed text-white/55">
               {deleteTarget ? (
                 <>
-                  “{deleteTarget.title}” will be permanently deleted. This cannot be
-                  undone.
+                  “{deleteTarget.title}” will be permanently deleted. This
+                  cannot be undone.
                 </>
               ) : (
                 <>This post will be permanently deleted.</>

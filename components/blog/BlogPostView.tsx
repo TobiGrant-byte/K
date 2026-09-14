@@ -6,23 +6,26 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import ShareButtons from "@/components/blog/ShareButtons";
 import BlogImage from "@/components/blog/BlogImage";
-import { formatPostDate, getPostBySlug, type BlogPost } from "@/lib/blog";
+import { formatPostDate, type BlogPost } from "@/lib/blog";
+import { getPublishedPostBySlug } from "@/lib/firebase/posts";
 
 export default function BlogPostView() {
   const params = useParams();
   const slug = String(params.slug || "");
   const [post, setPost] = useState<BlogPost | null | undefined>(undefined);
-  const [shareUrl, setShareUrl] = useState("");
 
   useEffect(() => {
-    const found = getPostBySlug(slug);
-    setPost(found && found.published ? found : null);
-  }, [slug]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setShareUrl(window.location.href);
-    }
+    let active = true;
+    getPublishedPostBySlug(slug)
+      .then((found) => {
+        if (active) setPost(found);
+      })
+      .catch(() => {
+        if (active) setPost(null);
+      });
+    return () => {
+      active = false;
+    };
   }, [slug]);
 
   if (post === undefined) {
@@ -39,7 +42,9 @@ export default function BlogPostView() {
     return (
       <section className="section-pad bg-navy-800">
         <div className="container max-w-xl text-center">
-          <h1 className="font-display text-4xl font-light text-white">Post not found</h1>
+          <h1 className="font-display text-4xl font-light text-white">
+            Post not found
+          </h1>
           <p className="mt-3 font-display italic text-white/45">
             This reflection may have been removed or is not published yet.
           </p>
@@ -117,7 +122,10 @@ export default function BlogPostView() {
           {gallery.length > 1 ? (
             <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {gallery.slice(1).map((src, i) => (
-                <div key={i} className="overflow-hidden rounded-lg border border-white/10">
+                <div
+                  key={i}
+                  className="overflow-hidden rounded-lg border border-white/10"
+                >
                   <BlogImage src={src} alt="" />
                 </div>
               ))}
@@ -128,10 +136,10 @@ export default function BlogPostView() {
             <div className="mb-4 font-title text-[9px] uppercase tracking-[2px] text-white/40">
               Share this reflection
             </div>
-            <ShareButtons title={post.title} url={shareUrl || `/blog/${post.slug}`} />
+            <ShareButtons title={post.title} url={`/blog/${post.slug}`} />
             <p className="mt-4 text-[12px] leading-relaxed text-white/35">
-              LinkedIn, X, and Facebook open their share windows with this page&apos;s link.
-              No special API keys are required for basic sharing.
+              LinkedIn, X, and Facebook open their share windows with this
+              page&apos;s link.
             </p>
           </div>
         </motion.div>
