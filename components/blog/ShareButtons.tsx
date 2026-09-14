@@ -3,6 +3,7 @@
 type ShareButtonsProps = {
   title: string;
   url: string;
+  text?: string;
 };
 
 function absoluteUrl(url: string) {
@@ -36,11 +37,15 @@ function shareFacebook(url: string) {
   );
 }
 
-async function shareNative(title: string, url: string) {
+async function shareNative(title: string, url: string, text?: string) {
   const resolvedUrl = absoluteUrl(url);
   if (typeof navigator !== "undefined" && navigator.share) {
     try {
-      await navigator.share({ title, url: resolvedUrl, text: title });
+      await navigator.share({
+        title,
+        url: resolvedUrl,
+        text: text || title,
+      });
       return;
     } catch {
       /* user cancelled */
@@ -57,7 +62,7 @@ async function shareNative(title: string, url: string) {
 const btn =
   "inline-flex items-center gap-2 rounded-lg border border-white/15 px-4 py-2.5 font-title text-[9px] uppercase tracking-[2px] text-white/70 no-underline transition-colors hover:border-accent/45 hover:text-accent-light";
 
-export default function ShareButtons({ title, url }: ShareButtonsProps) {
+export default function ShareButtons({ title, url, text }: ShareButtonsProps) {
   return (
     <div className="flex flex-wrap gap-2.5">
       <button type="button" className={btn} onClick={() => shareLinkedIn(url)}>
@@ -69,7 +74,11 @@ export default function ShareButtons({ title, url }: ShareButtonsProps) {
       <button type="button" className={btn} onClick={() => shareFacebook(url)}>
         Facebook
       </button>
-      <button type="button" className={btn} onClick={() => shareNative(title, url)}>
+      <button
+        type="button"
+        className={btn}
+        onClick={() => shareNative(title, url, text)}
+      >
         Share / Copy
       </button>
     </div>

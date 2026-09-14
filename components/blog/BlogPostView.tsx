@@ -6,7 +6,11 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import ShareButtons from "@/components/blog/ShareButtons";
 import BlogImage from "@/components/blog/BlogImage";
-import { formatPostDate, type BlogPost } from "@/lib/blog";
+import {
+  formatPostDate,
+  truncateShareExcerpt,
+  type BlogPost,
+} from "@/lib/blog";
 import { getPublishedPostBySlug } from "@/lib/firebase/posts";
 
 export default function BlogPostView() {
@@ -136,10 +140,15 @@ export default function BlogPostView() {
             <div className="mb-4 font-title text-[9px] uppercase tracking-[2px] text-white/40">
               Share this reflection
             </div>
-            <ShareButtons title={post.title} url={`/blog/${post.slug}`} />
+            <ShareButtons
+              title={post.title}
+              text={truncateShareExcerpt(post.excerpt) || undefined}
+              url={`/blog/${post.slug}`}
+            />
             <p className="mt-4 text-[12px] leading-relaxed text-white/35">
               LinkedIn, X, and Facebook open their share windows with this
-              page&apos;s link.
+              page&apos;s link — preview title, text, and image come from this
+              reflection.
             </p>
           </div>
         </motion.div>

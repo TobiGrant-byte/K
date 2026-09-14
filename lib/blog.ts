@@ -55,6 +55,20 @@ export function formatPostDate(iso: string): string {
   }
 }
 
+/** Short blurb for social/share previews — title stays separate. */
+export function truncateShareExcerpt(
+  excerpt: string,
+  maxLength = 110,
+): string {
+  const text = excerpt.replace(/\s+/g, " ").trim();
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  const clipped = text.slice(0, maxLength - 1);
+  const lastSpace = clipped.lastIndexOf(" ");
+  const base = lastSpace > 40 ? clipped.slice(0, lastSpace) : clipped;
+  return `${base.trimEnd()}…`;
+}
+
 export function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
