@@ -104,16 +104,13 @@ export function subscribeToAllPosts(
 }
 
 export async function getPublishedPostBySlug(slug: string): Promise<BlogPost | null> {
-  // Avoid composite index (slug + published): load published posts and match slug.
+  // Single-field slug query (auto-indexed). Filter published in memory.
   const result = await getDocs(
-    query(
-      collection(getFirebaseFirestore(), "posts"),
-      where("published", "==", true),
-    ),
+    query(collection(getFirebaseFirestore(), "posts"), where("slug", "==", slug)),
   );
   const match = result.docs
     .map(postFromSnapshot)
-    .find((post) => post.slug === slug);
+    .find((post) => post.published && post.slug === slug);
   return match ?? null;
 }
 
