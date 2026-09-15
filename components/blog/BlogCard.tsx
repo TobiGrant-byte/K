@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import BlogImage from "@/components/blog/BlogImage";
-import type { BlogPost } from "@/lib/blog";
-import { formatPostDate } from "@/lib/blog";
+import { DEFAULT_BLOG_AUTHOR, formatPostDate, type BlogPost } from "@/lib/blog";
 
 export default function BlogCard({ post }: { post: BlogPost }) {
   const img = post.coverImage || post.images[0];
@@ -32,6 +31,9 @@ export default function BlogCard({ post }: { post: BlogPost }) {
         <span className="mb-2 font-title text-[9px] uppercase tracking-[2px] text-white/35">
           {formatPostDate(post.createdAt)}
         </span>
+        <span className="mb-2 text-[12px] text-white/35">
+          By {post.author || DEFAULT_BLOG_AUTHOR}
+        </span>
         <h3 className="mb-2 font-display text-[22px] font-medium leading-[1.25] text-white transition-colors group-hover:text-accent-light">
           {post.title}
         </h3>
@@ -39,7 +41,7 @@ export default function BlogCard({ post }: { post: BlogPost }) {
           {post.excerpt}
         </p>
         <span className="mt-4 inline-flex items-center gap-1.5 font-title text-[9px] uppercase tracking-[2px] text-white/35 transition-colors group-hover:text-accent-light">
-          Read reflection
+          Read post
           <span aria-hidden>→</span>
         </span>
       </div>

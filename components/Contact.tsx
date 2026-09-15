@@ -57,7 +57,7 @@ export default function Contact() {
         body: JSON.stringify({
           access_key: WEB3FORMS_ACCESS_KEY,
           subject: form.subject || "New message to Dr. Okafor ",
-          from_name: "Dr. Sunday Okafor Portfolio Form Submission",
+          from_name: "Dr. Sunday Okafor Website Form Submission",
           name: form.name,
           email: form.email,
           message: form.message,

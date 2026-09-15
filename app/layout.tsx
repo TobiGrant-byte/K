@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   description: siteDescription,
   keywords: [
     "Dr. Sunday Okafor",
+    "sundayokafor.com",
     "Professional Engineer",
     "Transportation Engineer",
     "Researcher",

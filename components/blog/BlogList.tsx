@@ -44,7 +44,7 @@ export default function BlogList() {
             <span className="eyebrow">Blog</span>
           </div>
           <h1 className="font-display text-[clamp(32px,5vw,58px)] font-light leading-[1.1] text-white">
-            Reflections on life,{" "}
+            Posts on life,{" "}
             <em className="font-semibold text-accent-light">work &amp; society</em>
           </h1>
           <p className="mt-4 font-display text-lg italic leading-[1.7] text-white/45">

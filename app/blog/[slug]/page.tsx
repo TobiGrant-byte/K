@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import BlogPostView from "@/components/blog/BlogPostView";
 import {
+  DEFAULT_BLOG_AUTHOR,
   SITE_URL,
   toShareJpegUrl,
   truncateShareExcerpt,
@@ -29,6 +30,7 @@ export async function generateMetadata({
   }
 
   const title = post.title;
+  const author = post.author || DEFAULT_BLOG_AUTHOR;
   const description =
     truncateShareExcerpt(post.excerpt) ||
     "A personal reflection from Dr. Sunday Okafor on life, work, and society.";
@@ -60,6 +62,7 @@ export async function generateMetadata({
       url: pageUrl,
       siteName: "Dr. Sunday Okafor",
       locale: "en_US",
+      authors: [author],
       publishedTime: post.createdAt,
       modifiedTime: post.updatedAt,
       images: [shareImage],
