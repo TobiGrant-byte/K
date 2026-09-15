@@ -5,7 +5,7 @@ import Contact from "@/components/Contact";
 export const metadata: Metadata = {
   title: "Dr. Sunday Okafor — Transportation Engineer, Researcher, and Leader",
   description:
-    "Official website of Dr. Sunday Okafor — Transportation Engineer, Researcher, and Leader. Designing safer roads, mentoring others, and leading with purpose.",
+    "Dr. Sunday Okafor, PhD — Transportation Engineer, Researcher, and Leader. Designing safer roads, mentoring emerging professionals, and leading with purpose.",
 };
 
 export default function Home() {
