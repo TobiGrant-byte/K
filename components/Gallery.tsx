@@ -234,14 +234,6 @@ export default function Gallery() {
     };
   }, [lightbox, go]);
 
-  useEffect(() => {
-    setLightbox((i) => {
-      if (i === null) return null;
-      if (i >= photos.length) return null;
-      return i;
-    });
-  }, [photos]);
-
   const strip = useMemo(() => [...allPhotos, ...allPhotos], []);
 
   return (
@@ -337,7 +329,10 @@ export default function Gallery() {
                 type="button"
                 role="tab"
                 aria-selected={selected}
-                onClick={() => setFilter(c)}
+                onClick={() => {
+                  setFilter(c);
+                  setLightbox(null);
+                }}
                 className={`rounded-full border px-4 py-2 font-title text-[9px] uppercase tracking-[2px] transition-colors ${
                   selected
                     ? "border-accent/50 bg-accent/15 text-accent-light"

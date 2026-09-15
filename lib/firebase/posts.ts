@@ -19,7 +19,7 @@ import {
   getFirebaseFirestore,
   missingFirebaseEnvironmentVariables,
 } from "./config";
-import type { BlogPost } from "@/lib/blog";
+import { DEFAULT_BLOG_AUTHOR, type BlogPost } from "@/lib/blog";
 
 export class DuplicateSlugError extends Error {
   constructor(slug: string) {
@@ -40,6 +40,7 @@ function postFromSnapshot(snapshot: QueryDocumentSnapshot<DocumentData>): BlogPo
     id: snapshot.id,
     title: String(data.title ?? ""),
     slug: String(data.slug ?? ""),
+    author: String(data.author ?? DEFAULT_BLOG_AUTHOR),
     category: data.category as BlogPost["category"],
     published: Boolean(data.published),
     excerpt: String(data.excerpt ?? ""),
@@ -143,6 +144,7 @@ export async function savePost(
   const data = {
     title: post.title,
     slug: post.slug,
+    author: post.author,
     category: post.category,
     published: post.published,
     excerpt: post.excerpt,

@@ -1,9 +1,11 @@
 export type BlogCategory = "Family" | "Career" | "Society" | "Reflections";
+export const DEFAULT_BLOG_AUTHOR = "Dr. Sunday Okafor";
 
 export type BlogPost = {
   id: string;
   slug: string;
   title: string;
+  author: string;
   excerpt: string;
   body: string;
   category: BlogCategory;

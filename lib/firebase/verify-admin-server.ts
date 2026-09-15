@@ -1,4 +1,5 @@
 import "server-only";
+import { firebaseApiKey, firebaseProjectId } from "@/lib/firebase/config";
 
 type VerifiedAdmin = {
   uid: string;
@@ -19,8 +20,9 @@ function bearerToken(request: Request): string {
  * the source of truth, so no Firebase service-account key is needed here.
  */
 export async function verifyFirebaseAdmin(request: Request): Promise<VerifiedAdmin> {
-  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || firebaseApiKey;
+  const projectId =
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || firebaseProjectId;
   if (!apiKey || !projectId) {
     throw new Response("Firebase server configuration is incomplete.", {
       status: 500,

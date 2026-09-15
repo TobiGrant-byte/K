@@ -10,6 +10,9 @@ const firebaseConfig = {
   appId: "1:101837043061:web:e3d2acc23032be403f8f3c",
 };
 
+export const firebaseApiKey = firebaseConfig.apiKey;
+export const firebaseProjectId = firebaseConfig.projectId;
+
 const environmentVariables = {
   NEXT_PUBLIC_FIREBASE_API_KEY: firebaseConfig.apiKey,
   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: firebaseConfig.authDomain,

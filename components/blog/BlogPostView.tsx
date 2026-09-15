@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import ShareButtons from "@/components/blog/ShareButtons";
 import BlogImage from "@/components/blog/BlogImage";
 import {
+  DEFAULT_BLOG_AUTHOR,
   formatPostDate,
   truncateShareExcerpt,
   type BlogPost,
@@ -50,7 +51,7 @@ export default function BlogPostView() {
             Post not found
           </h1>
           <p className="mt-3 font-display italic text-white/45">
-            This reflection may have been removed or is not published yet.
+            This post may have been removed or is not published yet.
           </p>
           <Link
             href="/blog"
@@ -98,6 +99,10 @@ export default function BlogPostView() {
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <span className="font-title text-[9px] uppercase tracking-[2px] text-accent-light">
               {post.category}
+            </span>
+            <span className="text-white/25">·</span>
+            <span className="font-title text-[9px] uppercase tracking-[2px] text-white/50">
+              {post.author || DEFAULT_BLOG_AUTHOR}
             </span>
             <span className="text-white/25">·</span>
             <span className="font-title text-[9px] uppercase tracking-[2px] text-white/40">

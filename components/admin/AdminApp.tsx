@@ -5,6 +5,7 @@ import Link from "next/link";
 import ImageCropModal from "@/components/admin/ImageCropModal";
 import {
   BLOG_CATEGORIES,
+  DEFAULT_BLOG_AUTHOR,
   MAX_BLOG_IMAGES,
   createId,
   fileToDataUrl,
@@ -52,6 +53,7 @@ function emptyDraft(): Omit<BlogPost, "id" | "createdAt" | "updatedAt"> & {
   return {
     slug: "",
     title: "",
+    author: DEFAULT_BLOG_AUTHOR,
     excerpt: "",
     body: "",
     category: "Reflections",
@@ -404,8 +406,21 @@ export default function AdminApp() {
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!draft.title.trim() || !draft.body.trim()) {
-      flash("Title and body are required.", true);
+    const title = draft.title.trim();
+    const author = draft.author.trim();
+    const slug = slugify(draft.slug || draft.title);
+    const excerpt = draft.excerpt.trim();
+    const body = draft.body.trim();
+
+    if (!title || !author || !slug || !excerpt || !body || !draft.category) {
+      flash(
+        "Please fill in title, author, URL slug, category, short excerpt, and body before submitting.",
+        true,
+      );
+      return;
+    }
+    if (!draft.coverImage && draft.images.length === 0) {
+      flash("Please add at least one image before submitting.", true);
       return;
     }
     if (imagesBusy || uploadingImages.some((item) => item.error)) {
@@ -421,27 +436,40 @@ export default function AdminApp() {
     try {
       const now = new Date().toISOString();
       const postId = workingPostId || editingId || createId();
-      const slug = slugify(draft.slug || draft.title) || postId;
       await assertUniqueSlug(slug, editingId ?? undefined);
 
       const previousImages = editingId
         ? (posts.find((post) => post.id === editingId)?.images ?? [])
         : [];
+      const imageSources =
+        draft.coverImage && !draft.images.includes(draft.coverImage)
+          ? [draft.coverImage, ...draft.images]
+          : draft.images.length
+            ? draft.images
+            : draft.coverImage
+              ? [draft.coverImage]
+              : [];
       // Images should already be ImageKit URLs; this only maps through and
       // computes removals (plus any leftover data URLs as a safety net).
       const synced = await syncPostImages({
         postId,
-        imageSources: draft.images,
-        coverSource: draft.coverImage,
+        imageSources,
+        coverSource: draft.coverImage || imageSources[0],
         previousImages,
       });
+
+      if (!synced.coverImage || synced.images.length === 0) {
+        flash("Please add at least one image before submitting.", true);
+        return;
+      }
 
       const post: BlogPost = {
         id: postId,
         slug,
-        title: draft.title.trim(),
-        excerpt: draft.excerpt.trim() || draft.body.trim().slice(0, 160),
-        body: draft.body.trim(),
+        title,
+        author,
+        excerpt,
+        body,
         category: draft.category,
         coverImage: synced.coverImage,
         images: synced.images,
@@ -673,6 +701,9 @@ export default function AdminApp() {
                       <h2 className="font-display text-[22px] leading-snug text-white sm:truncate sm:text-xl">
                         {post.title}
                       </h2>
+                      <p className="mt-1 text-[12px] text-white/35">
+                        By {post.author || DEFAULT_BLOG_AUTHOR}
+                      </p>
                       {post.excerpt ? (
                         <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-white/45 sm:line-clamp-1">
                           {post.excerpt}
@@ -746,6 +777,21 @@ export default function AdminApp() {
 
               <label>
                 <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/40">
+                  Author
+                </span>
+                <input
+                  className={inputClass}
+                  value={draft.author}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, author: e.target.value }))
+                  }
+                  required
+                  placeholder="Dr. Sunday Okafor"
+                />
+              </label>
+
+              <label>
+                <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/40">
                   URL slug
                 </span>
                 <input
@@ -754,6 +800,7 @@ export default function AdminApp() {
                   onChange={(e) =>
                     setDraft((d) => ({ ...d, slug: slugify(e.target.value) }))
                   }
+                  required
                   placeholder="keeping-going-every-day"
                 />
               </label>
@@ -813,6 +860,7 @@ export default function AdminApp() {
                   onChange={(e) =>
                     setDraft((d) => ({ ...d, excerpt: e.target.value }))
                   }
+                  required
                   placeholder="One or two sentences for the blog cards…"
                 />
               </label>
