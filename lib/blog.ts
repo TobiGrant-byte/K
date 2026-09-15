@@ -56,10 +56,7 @@ export function formatPostDate(iso: string): string {
 }
 
 /** Short blurb for social/share previews — title stays separate. */
-export function truncateShareExcerpt(
-  excerpt: string,
-  maxLength = 110,
-): string {
+export function truncateShareExcerpt(excerpt: string, maxLength = 110): string {
   const text = excerpt.replace(/\s+/g, " ").trim();
   if (!text) return "";
   if (text.length <= maxLength) return text;
@@ -69,7 +66,7 @@ export function truncateShareExcerpt(
   return `${base.trimEnd()}…`;
 }
 
-export const SITE_URL = "https://dr-okafor.com";
+export const SITE_URL = "https://sundayokafor.com/";
 
 /**
  * Absolute JPEG URL for WhatsApp / X / Facebook.

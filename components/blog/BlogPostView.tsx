@@ -92,7 +92,7 @@ export default function BlogPostView() {
             href="/blog"
             className="mb-8 inline-flex items-center gap-2 font-title text-[9px] uppercase tracking-[2px] text-white/40 no-underline hover:text-accent-light"
           >
-            ← All reflections
+            ← All posts
           </Link>
 
           <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -138,7 +138,7 @@ export default function BlogPostView() {
 
           <div className="mt-14 border-t border-white/10 pt-8">
             <div className="mb-4 font-title text-[9px] uppercase tracking-[2px] text-white/40">
-              Share this reflection
+              Share this post
             </div>
             <ShareButtons
               title={post.title}
@@ -146,11 +146,11 @@ export default function BlogPostView() {
               url={`/blog/${post.slug}`}
               version={post.updatedAt || post.createdAt}
             />
-            <p className="mt-4 text-[12px] leading-relaxed text-white/35">
+            {/* <p className="mt-4 text-[12px] leading-relaxed text-white/35">
               LinkedIn, X, and Facebook open their share windows with this
               page&apos;s link — preview title, text, and image come from this
-              reflection.
-            </p>
+              post.
+            </p> */}
           </div>
         </motion.div>
       </div>

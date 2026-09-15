@@ -10,7 +10,7 @@ const siteDescription =
   "Official website of Dr. Sunday Okafor — Transportation Engineer, Researcher, and Leader.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://dr-okafor.com"),
+  metadataBase: new URL("https://sundayokafor.com/"),
   title: siteTitle,
   description: siteDescription,
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     description: siteDescription,
     type: "website",
     siteName: "Dr. Sunday Okafor",
-    url: "https://dr-okafor.com",
+    url: "https://sundayokafor.com/",
     images: [
       {
         url: "/images/hero-picture.jpeg",

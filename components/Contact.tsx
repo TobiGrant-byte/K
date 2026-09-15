@@ -90,6 +90,7 @@ export default function Contact() {
     <section
       id="contact"
       ref={ref}
+      data-nosnippet
       className="section-pad bg-navy-800 relative overflow-hidden"
     >
       <div className="accent-wash" />
