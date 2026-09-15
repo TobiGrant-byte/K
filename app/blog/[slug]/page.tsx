@@ -2,10 +2,8 @@ import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import BlogPostView from "@/components/blog/BlogPostView";
 import {
-  BLOG_IMAGE_HEIGHT,
-  BLOG_IMAGE_WIDTH,
   SITE_URL,
-  blogShareImageAbsoluteUrl,
+  toShareJpegUrl,
   truncateShareExcerpt,
 } from "@/lib/blog";
 import { getPublishedPostBySlug } from "@/lib/firebase/posts";
@@ -13,6 +11,8 @@ import { getPublishedPostBySlug } from "@/lib/firebase/posts";
 type BlogPostPageProps = {
   params: Promise<{ slug: string }>;
 };
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -34,13 +34,18 @@ export async function generateMetadata({
     "A personal reflection from Dr. Sunday Okafor on life, work, and society.";
   const path = `/blog/${post.slug}`;
   const pageUrl = `${SITE_URL}${path}`;
-  const imageUrl = blogShareImageAbsoluteUrl(post.slug);
+  const rawImage = post.coverImage || post.images[0];
+  // Direct ImageKit JPEG (absolute .jpg URL) — WhatsApp/X fetch this themselves.
+  const imageUrl = rawImage
+    ? toShareJpegUrl(rawImage)
+    : `${SITE_URL}/images/hero-picture.jpeg`;
+
   const shareImage = {
     url: imageUrl,
     secureUrl: imageUrl,
-    type: "image/jpeg",
-    width: BLOG_IMAGE_WIDTH,
-    height: BLOG_IMAGE_HEIGHT,
+    type: "image/jpeg" as const,
+    width: 1200,
+    height: 630,
     alt: title,
   };
 

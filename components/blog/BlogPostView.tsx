@@ -144,6 +144,7 @@ export default function BlogPostView() {
               title={post.title}
               text={truncateShareExcerpt(post.excerpt) || undefined}
               url={`/blog/${post.slug}`}
+              version={post.updatedAt || post.createdAt}
             />
             <p className="mt-4 text-[12px] leading-relaxed text-white/35">
               LinkedIn, X, and Facebook open their share windows with this

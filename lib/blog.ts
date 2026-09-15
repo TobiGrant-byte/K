@@ -71,27 +71,33 @@ export function truncateShareExcerpt(
 
 export const SITE_URL = "https://dr-okafor.com";
 
-/** Force a JPEG CDN URL scrapers (WhatsApp/X/Facebook) accept. */
+/**
+ * Absolute JPEG URL for WhatsApp / X / Facebook.
+ * - Forces a .jpg path (many scrapers require an image extension)
+ * - Compresses so the file stays under WhatsApp's ~600KB limit
+ */
 export function toShareJpegUrl(url: string): string {
   try {
     const parsed = new URL(url);
-    if (parsed.hostname.includes("imagekit.io")) {
-      parsed.searchParams.set("tr", "f-jpg,w-1200,h-630,c-at_max,q-80");
-      return parsed.toString();
+    if (!parsed.hostname.includes("imagekit.io")) return url;
+
+    parsed.pathname = parsed.pathname.replace(/\.(webp|png|jpe?g)$/i, ".jpg");
+    if (!/\.jpg$/i.test(parsed.pathname)) {
+      parsed.pathname = `${parsed.pathname.replace(/\/+$/, "")}.jpg`;
     }
+    parsed.search = "";
+    parsed.searchParams.set("tr", "f-jpg,w-1200,h-630,c-at_max,q-65");
+    return parsed.toString();
   } catch {
-    /* keep original */
+    return url;
   }
-  return url;
 }
 
-/** Same-origin .jpg path — WhatsApp is picky about extensionless OG routes. */
-export function blogShareImagePath(slug: string): string {
-  return `/og/${encodeURIComponent(slug)}.jpg`;
-}
-
-export function blogShareImageAbsoluteUrl(slug: string): string {
-  return `${SITE_URL}${blogShareImagePath(slug)}`;
+/** Cache-bust query for share links so WhatsApp/Facebook re-fetch previews. */
+export function withShareCacheBust(pathOrUrl: string, version: string): string {
+  const url = new URL(pathOrUrl, SITE_URL);
+  url.searchParams.set("v", version.slice(0, 12) || "1");
+  return url.toString();
 }
 
 export function fileToDataUrl(file: File): Promise<string> {
