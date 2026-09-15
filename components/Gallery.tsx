@@ -286,7 +286,7 @@ export default function Gallery() {
       >
         <div className="container mb-4 flex items-end justify-between gap-4">
           <p className="font-title text-[9px] uppercase tracking-[2px] text-white/35">
-            Continuity reel
+            Featured moments
           </p>
           <p className="hidden font-display text-sm italic text-white/30 sm:block">
             Hover to pause · click any frame to open

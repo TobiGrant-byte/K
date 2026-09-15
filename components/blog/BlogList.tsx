@@ -75,7 +75,7 @@ export default function BlogList() {
           <p className="text-sm text-red-300" role="alert">{error}</p>
         ) : filtered.length === 0 ? (
           <p className="font-display text-lg italic text-white/40">
-            No published reflections in this category yet.
+            No published posts in this category yet.
           </p>
         ) : (
           <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
