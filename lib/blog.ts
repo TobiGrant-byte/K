@@ -66,7 +66,7 @@ export function truncateShareExcerpt(excerpt: string, maxLength = 110): string {
   return `${base.trimEnd()}…`;
 }
 
-export const SITE_URL = "https://sundayokafor.com/";
+export const SITE_URL = "https://sundayokafor.com";
 
 /**
  * Absolute JPEG URL for WhatsApp / X / Facebook.
@@ -77,11 +77,6 @@ export function toShareJpegUrl(url: string): string {
   try {
     const parsed = new URL(url);
     if (!parsed.hostname.includes("imagekit.io")) return url;
-
-    parsed.pathname = parsed.pathname.replace(/\.(webp|png|jpe?g)$/i, ".jpg");
-    if (!/\.jpg$/i.test(parsed.pathname)) {
-      parsed.pathname = `${parsed.pathname.replace(/\/+$/, "")}.jpg`;
-    }
     parsed.search = "";
     parsed.searchParams.set("tr", "f-jpg,w-1200,h-630,c-at_max,q-65");
     return parsed.toString();

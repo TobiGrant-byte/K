@@ -33,7 +33,7 @@ export async function generateMetadata({
     truncateShareExcerpt(post.excerpt) ||
     "A personal reflection from Dr. Sunday Okafor on life, work, and society.";
   const path = `/blog/${post.slug}`;
-  const pageUrl = `${SITE_URL}${path}`;
+  const pageUrl = new URL(path, SITE_URL).toString();
   const rawImage = post.coverImage || post.images[0];
   // Direct ImageKit JPEG (absolute .jpg URL) — WhatsApp/X fetch this themselves.
   const imageUrl = rawImage
