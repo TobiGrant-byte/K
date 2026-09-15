@@ -52,6 +52,9 @@ export const metadata: Metadata = {
     description: siteDescription,
     images: ["/images/hero-picture.jpeg"],
   },
+  verification: {
+    google: "OD3gvwtlO-B7ZMt1slCU_QWt6QFhk_lLx8rWFykJJC4",
+  },
 };
 
 export default function RootLayout({
