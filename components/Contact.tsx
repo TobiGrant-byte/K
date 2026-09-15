@@ -112,9 +112,7 @@ export default function Contact() {
               <em className="font-semibold text-accent-light">Conversation</em>
             </h2>
             <p className="font-display text-lg italic text-white/55 leading-[1.7] mb-11">
-              Whether you&apos;re interested in research collaboration, speaking
-              engagements, mentorship, or professional consultation — Dr. Okafor
-              welcomes your message.
+              Get in touch about collaborations, speaking, or mentorship.
             </p>
             <div className="h-px bg-gradient-to-r from-accent/35 to-transparent mb-9" />
             {[
