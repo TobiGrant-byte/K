@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const alt = "Dr. Sunday Okafor";
 export const size = {
   width: 1200,
-  height: 630,
+  height: 1500,
 };
 export const contentType = "image/png";
 
@@ -23,8 +23,6 @@ export default async function Image() {
           width: "100%",
           height: "100%",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
           position: "relative",
           overflow: "hidden",
           background: "#050d1a",
@@ -34,13 +32,16 @@ export default async function Image() {
         <img
           src={src}
           alt=""
-          width={1200}
-          height={630}
+          width={1236}
+          height={1545}
           style={{
-            width: "101.5%",
-            height: "101.5%",
-            objectFit: "contain",
-            objectPosition: "center center",
+            position: "absolute",
+            width: "103%",
+            height: "103%",
+            left: "-1.5%",
+            top: "-1.5%",
+            objectFit: "cover",
+            objectPosition: "center 18%",
           }}
         />
         <div
