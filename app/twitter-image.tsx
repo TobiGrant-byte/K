@@ -23,6 +23,8 @@ export default async function Image() {
           width: "100%",
           height: "100%",
           display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           position: "relative",
           overflow: "hidden",
           background: "#050d1a",
@@ -32,16 +34,13 @@ export default async function Image() {
         <img
           src={src}
           alt=""
-          width={1680}
-          height={882}
+          width={1200}
+          height={630}
           style={{
-            position: "absolute",
-            width: "140%",
-            height: "140%",
-            left: "-12%",
-            top: "-18%",
-            objectFit: "cover",
-            objectPosition: "center 18%",
+            width: "101.5%",
+            height: "101.5%",
+            objectFit: "contain",
+            objectPosition: "center center",
           }}
         />
         <div
