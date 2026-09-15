@@ -38,20 +38,11 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Dr. Sunday Okafor",
     url: "https://sundayokafor.com/",
-    images: [
-      {
-        url: "/images/hero-picture.jpeg",
-        width: 1200,
-        height: 800,
-        alt: "Dr. Sunday Okafor",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: siteTitle,
     description: siteDescription,
-    images: ["/images/hero-picture.jpeg"],
   },
   verification: {
     google: "OD3gvwtlO-B7ZMt1slCU_QWt6QFhk_lLx8rWFykJJC4",
