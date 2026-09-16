@@ -1031,7 +1031,7 @@ export default function AdminApp() {
                   )}
                   disabled={imagesBusy}
                   minHeightClass="min-h-[120px]"
-                  hint="Preview for blog cards. Bold, italic, and at most one image. Drag to reorder; backspace onto an image to remove it; click an image then drag the blue handle to resize."
+                  hint="Preview for blog cards. Bold, italic, bullets, numbers, and at most one image."
                   editorRef={excerptEditorRef}
                 />
                 {editorUploadStatus("excerpt")}
@@ -1059,7 +1059,7 @@ export default function AdminApp() {
                   )}
                   disabled={imagesBusy}
                   minHeightClass="min-h-[300px]"
-                  hint={`Bold, italic, and up to ${MAX_BODY_IMAGES} images. Images insert below your current paragraph. Drag images to move them; backspace onto one to delete; click then use the blue handle to resize.`}
+                  hint={`Bold, italic, bullets, numbers, and up to ${MAX_BODY_IMAGES} images. Images insert below your current paragraph.`}
                   editorRef={bodyEditorRef}
                 />
                 {editorUploadStatus("body")}

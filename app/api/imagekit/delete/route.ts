@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { MAX_BLOG_IMAGES } from "@/lib/blog";
 import {
   errorResponse,
   verifyFirebaseAdmin,
@@ -12,9 +13,16 @@ export async function POST(request: Request) {
     if (
       !Array.isArray(body.urls) ||
       body.urls.some((url) => typeof url !== "string") ||
-      body.urls.length > 3
+      body.urls.length > MAX_BLOG_IMAGES
     ) {
-      return new Response("Provide up to 3 valid image URLs.", { status: 400 });
+      return new Response(
+        `Provide up to ${MAX_BLOG_IMAGES} valid image URLs.`,
+        { status: 400 },
+      );
+    }
+
+    if (body.urls.length === 0) {
+      return NextResponse.json({ deleted: 0 });
     }
 
     await Promise.all(body.urls.map((url) => deleteImageKitAsset(url)));
