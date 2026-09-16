@@ -67,6 +67,26 @@ function enhanceImage(img: HTMLImageElement) {
   img.style.cursor = "grab";
 }
 
+type SpeechRecognitionEventLike = {
+  resultIndex: number;
+  results: ArrayLike<{
+    isFinal: boolean;
+    0: { transcript: string };
+  }>;
+};
+
+type SpeechRecognitionLike = {
+  start: () => void;
+  stop: () => void;
+  abort?: () => void;
+  onresult: ((ev: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((ev: { error?: string }) => void) | null;
+  onend: (() => void) | null;
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+};
+
 export default function RichTextEditor({
   label,
   value,
@@ -116,6 +136,11 @@ export default function RichTextEditor({
   const [stickyEnabled, setStickyEnabled] = useState(false);
   const [stickyTop, setStickyTop] = useState(128);
   const [isStuck, setIsStuck] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const [speechError, setSpeechError] = useState("");
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const syncFromEditorRef = useRef<(sanitize?: boolean) => void>(() => {});
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 900px) and (pointer: fine)");
@@ -123,6 +148,71 @@ export default function RichTextEditor({
     syncMq();
     mq.addEventListener("change", syncMq);
     return () => mq.removeEventListener("change", syncMq);
+  }, []);
+
+  useEffect(() => {
+    const win = window as unknown as {
+      SpeechRecognition?: new () => SpeechRecognitionLike;
+      webkitSpeechRecognition?: new () => SpeechRecognitionLike;
+    };
+    const SpeechCtor = win.SpeechRecognition || win.webkitSpeechRecognition;
+
+    if (!SpeechCtor) {
+      setSpeechSupported(false);
+      return;
+    }
+
+    setSpeechSupported(true);
+    const recognition = new SpeechCtor();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = navigator.language || "en-US";
+
+    recognition.onresult = (event) => {
+      let chunk = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) chunk += result[0].transcript;
+      }
+      const text = chunk.trim();
+      if (!text) return;
+      const el = internalEditorRef.current;
+      el?.focus();
+      const inserted = document.execCommand("insertText", false, `${text} `);
+      if (!inserted) {
+        el?.append(document.createTextNode(`${text} `));
+      }
+      syncFromEditorRef.current(false);
+    };
+
+    recognition.onerror = (event) => {
+      const code = event.error || "speech error";
+      if (code === "aborted" || code === "no-speech") return;
+      setSpeechError(
+        code === "not-allowed"
+          ? "Microphone permission blocked."
+          : "Voice input stopped.",
+      );
+      setListening(false);
+    };
+
+    recognition.onend = () => {
+      setListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    return () => {
+      try {
+        recognition.onresult = null;
+        recognition.onerror = null;
+        recognition.onend = null;
+        recognition.abort?.();
+        recognition.stop();
+      } catch {
+        /* ignore */
+      }
+      recognitionRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -246,6 +336,7 @@ export default function RichTextEditor({
     },
     [enhanceAllImages, onChange],
   );
+  syncFromEditorRef.current = syncFromEditor;
 
   useEffect(() => {
     const el = internalEditorRef.current;
@@ -312,6 +403,30 @@ export default function RichTextEditor({
     if (!canAddImage || disabled) return;
     rememberInsertPoint();
     onRequestImage();
+  };
+
+  const toggleVoice = () => {
+    if (disabled || !speechSupported) return;
+    const recognition = recognitionRef.current;
+    if (!recognition) return;
+    setSpeechError("");
+    if (listening) {
+      try {
+        recognition.stop();
+      } catch {
+        /* ignore */
+      }
+      setListening(false);
+      return;
+    }
+    internalEditorRef.current?.focus();
+    try {
+      recognition.start();
+      setListening(true);
+    } catch {
+      setSpeechError("Could not start microphone.");
+      setListening(false);
+    }
   };
 
   const placeCaretIn = (node: HTMLElement) => {
@@ -652,6 +767,22 @@ export default function RichTextEditor({
           </button>
           <button
             type="button"
+            className={toolBtn(listening)}
+            disabled={disabled || !speechSupported}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={toggleVoice}
+            title={
+              speechSupported
+                ? listening
+                  ? "Stop voice input"
+                  : "Dictate with microphone"
+                : "Voice input not supported in this browser"
+            }
+          >
+            {listening ? "Listening…" : "Voice"}
+          </button>
+          <button
+            type="button"
             className={toolBtn(false)}
             disabled={disabled || !canAddImage}
             onMouseDown={(e) => e.preventDefault()}
@@ -665,6 +796,11 @@ export default function RichTextEditor({
             {uploading ? "Uploading…" : "Add image"}
           </button>
         </div>
+        {speechError ? (
+          <p className="mt-1 text-[11px] text-amber-300/90" role="status">
+            {speechError}
+          </p>
+        ) : null}
 
         <div className="relative" ref={wrapRef}>
           <div

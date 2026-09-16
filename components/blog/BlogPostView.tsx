@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -9,6 +9,12 @@ import BlogBody from "@/components/blog/BlogBody";
 import BlogImage from "@/components/blog/BlogImage";
 import RichHtml from "@/components/blog/RichHtml";
 import {
+  postsAreEqual,
+  readCachedPost,
+  removeCachedPost,
+  writeCachedPost,
+} from "@/lib/blog-cache";
+import {
   DEFAULT_BLOG_AUTHOR,
   formatPostDate,
   truncateShareExcerpt,
@@ -16,26 +22,64 @@ import {
 } from "@/lib/blog";
 import { getPublishedPostBySlug } from "@/lib/firebase/posts";
 
+function subscribeNoop() {
+  return () => {};
+}
+
 export default function BlogPostView() {
   const params = useParams();
   const slug = String(params.slug || "");
-  const [post, setPost] = useState<BlogPost | null | undefined>(undefined);
+  const cached = useSyncExternalStore(
+    subscribeNoop,
+    () => (slug ? readCachedPost(slug) : null),
+    () => null,
+  );
+  const [live, setLive] = useState<{
+    slug: string;
+    post: BlogPost | null;
+  } | null>(null);
+
+  const hasLive = live?.slug === slug;
+  const displayPost = hasLive ? live.post : cached;
+  const fromCache = !hasLive && Boolean(cached);
 
   useEffect(() => {
     let active = true;
+
     getPublishedPostBySlug(slug)
       .then((found) => {
-        if (active) setPost(found);
+        if (!active) return;
+        if (found) {
+          writeCachedPost(found);
+          setLive((prev) => {
+            if (prev?.slug === slug && postsAreEqual(prev.post, found)) {
+              return prev;
+            }
+            const shown =
+              prev?.slug === slug ? prev.post : readCachedPost(slug);
+            if (postsAreEqual(shown, found)) {
+              return { slug, post: shown ?? found };
+            }
+            return { slug, post: found };
+          });
+          return;
+        }
+        removeCachedPost(slug);
+        setLive({ slug, post: null });
       })
       .catch(() => {
-        if (active) setPost(null);
+        if (!active) return;
+        if (!readCachedPost(slug)) {
+          setLive({ slug, post: null });
+        }
       });
+
     return () => {
       active = false;
     };
   }, [slug]);
 
-  if (post === undefined) {
+  if (!displayPost && !hasLive && !cached) {
     return (
       <section className="section-pad min-h-[calc(100vh-72px)] bg-off-white">
         <div className="container">
@@ -47,7 +91,7 @@ export default function BlogPostView() {
     );
   }
 
-  if (!post) {
+  if (!displayPost) {
     return (
       <section className="section-pad min-h-[calc(100vh-72px)] bg-off-white">
         <div className="container max-w-xl text-center">
@@ -68,7 +112,7 @@ export default function BlogPostView() {
     );
   }
 
-  const cover = post.coverImage;
+  const cover = displayPost.coverImage;
 
   return (
     <article className="relative min-h-[calc(100vh-72px)] overflow-hidden bg-off-white">
@@ -86,7 +130,7 @@ export default function BlogPostView() {
 
       <div className="container relative pb-20 pt-10 md:pb-28 md:pt-14">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={fromCache ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           className="mx-auto max-w-[720px]"
@@ -100,36 +144,36 @@ export default function BlogPostView() {
 
           <div className="mb-5 flex flex-wrap items-baseline gap-x-2.5 gap-y-1 font-display text-[16px] leading-none sm:text-[17px]">
             <span className="font-normal text-text-muted">
-              {post.category}
+              {displayPost.category}
             </span>
             <span className="select-none text-navy-800/25" aria-hidden>
               ·
             </span>
             <span className="font-medium text-navy-800">
-              {post.author || DEFAULT_BLOG_AUTHOR}
+              {displayPost.author || DEFAULT_BLOG_AUTHOR}
             </span>
             <span className="select-none text-navy-800/25" aria-hidden>
               ·
             </span>
             <time
-              dateTime={post.createdAt}
+              dateTime={displayPost.createdAt}
               className="font-normal text-text-secondary"
             >
-              {formatPostDate(post.createdAt)}
+              {formatPostDate(displayPost.createdAt)}
             </time>
           </div>
 
           <h1 className="font-display text-[clamp(32px,5vw,52px)] font-bold leading-[1.15] text-navy-800">
-            {post.title}
+            {displayPost.title}
           </h1>
 
-          {post.excerpt ? (
+          {displayPost.excerpt ? (
             <aside className="mt-6 border-l-2 border-navy-800/20 pl-5 sm:pl-6">
               <div className="mb-2.5 font-title text-[9px] uppercase tracking-[2.5px] text-text-muted">
                 Excerpt
               </div>
               <RichHtml
-                html={post.excerpt}
+                html={displayPost.excerpt}
                 tone="light"
                 className="text-[14px] leading-[1.7] text-text-secondary [&_em]:italic [&_img]:mt-4 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold"
               />
@@ -137,7 +181,7 @@ export default function BlogPostView() {
           ) : null}
 
           <div className="mt-10 border-t border-navy-800/10 pt-10">
-            <BlogBody body={post.body} />
+            <BlogBody body={displayPost.body} />
           </div>
 
           <div className="mt-14 border-t border-navy-800/10 pt-8">
@@ -145,10 +189,10 @@ export default function BlogPostView() {
               Share this post
             </div>
             <ShareButtons
-              title={post.title}
-              text={truncateShareExcerpt(post.excerpt) || undefined}
-              url={`/blog/${post.slug}`}
-              version={post.updatedAt || post.createdAt}
+              title={displayPost.title}
+              text={truncateShareExcerpt(displayPost.excerpt) || undefined}
+              url={`/blog/${displayPost.slug}`}
+              version={displayPost.updatedAt || displayPost.createdAt}
               tone="light"
             />
           </div>
