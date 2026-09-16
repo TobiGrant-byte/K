@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import ShareButtons from "@/components/blog/ShareButtons";
 import BlogBody from "@/components/blog/BlogBody";
 import BlogImage from "@/components/blog/BlogImage";
+import RichHtml from "@/components/blog/RichHtml";
 import {
   DEFAULT_BLOG_AUTHOR,
   formatPostDate,
@@ -50,7 +51,7 @@ export default function BlogPostView() {
     return (
       <section className="section-pad min-h-[calc(100vh-72px)] bg-off-white">
         <div className="container max-w-xl text-center">
-          <h1 className="font-display text-4xl font-light text-navy-800">
+          <h1 className="font-display text-4xl font-semibold text-navy-800">
             Post not found
           </h1>
           <p className="mt-3 font-display italic text-text-secondary">
@@ -67,8 +68,7 @@ export default function BlogPostView() {
     );
   }
 
-  const cover = post.coverImage || post.images[0];
-  const extraImages = post.images.filter((img) => img !== cover);
+  const cover = post.coverImage;
 
   return (
     <article className="relative min-h-[calc(100vh-72px)] overflow-hidden bg-off-white">
@@ -99,7 +99,9 @@ export default function BlogPostView() {
           </Link>
 
           <div className="mb-5 flex flex-wrap items-baseline gap-x-2.5 gap-y-1 font-display text-[16px] leading-none sm:text-[17px]">
-            <span className="font-normal text-text-muted">{post.category}</span>
+            <span className="font-normal text-text-muted">
+              {post.category}
+            </span>
             <span className="select-none text-navy-800/25" aria-hidden>
               ·
             </span>
@@ -117,34 +119,26 @@ export default function BlogPostView() {
             </time>
           </div>
 
-          <h1 className="font-display text-[clamp(32px,5vw,52px)] font-light leading-[1.15] text-navy-800">
+          <h1 className="font-display text-[clamp(32px,5vw,52px)] font-bold leading-[1.15] text-navy-800">
             {post.title}
           </h1>
 
           {post.excerpt ? (
-            <p className="mt-5 font-display text-xl italic leading-[1.7] text-navy-800/85">
-              {post.excerpt}
-            </p>
+            <aside className="mt-6 border-l-2 border-navy-800/20 pl-5 sm:pl-6">
+              <div className="mb-2.5 font-title text-[9px] uppercase tracking-[2.5px] text-text-muted">
+                Excerpt
+              </div>
+              <RichHtml
+                html={post.excerpt}
+                tone="light"
+                className="text-[14px] leading-[1.7] text-text-secondary [&_em]:italic [&_img]:mt-4 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold"
+              />
+            </aside>
           ) : null}
 
-          {extraImages.length > 0 ? (
-            <div
-              className={`mt-10 grid gap-4 ${
-                extraImages.length > 1 ? "sm:grid-cols-2" : "grid-cols-1"
-              }`}
-            >
-              {extraImages.map((src) => (
-                <div
-                  key={src}
-                  className="overflow-hidden rounded-xl border border-navy-800/10 bg-white"
-                >
-                  <BlogImage src={src} alt="" className="bg-off-white" />
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          <BlogBody body={post.body} />
+          <div className="mt-10 border-t border-navy-800/10 pt-10">
+            <BlogBody body={post.body} />
+          </div>
 
           <div className="mt-14 border-t border-navy-800/10 pt-8">
             <div className="mb-4 font-title text-[9px] uppercase tracking-[2px] text-text-muted">

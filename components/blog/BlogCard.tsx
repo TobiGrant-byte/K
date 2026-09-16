@@ -2,10 +2,16 @@
 
 import Link from "next/link";
 import BlogImage from "@/components/blog/BlogImage";
-import { DEFAULT_BLOG_AUTHOR, formatPostDate, type BlogPost } from "@/lib/blog";
+import {
+  DEFAULT_BLOG_AUTHOR,
+  formatPostDate,
+  htmlToPlainText,
+  type BlogPost,
+} from "@/lib/blog";
 
 export default function BlogCard({ post }: { post: BlogPost }) {
-  const img = post.coverImage || post.images[0];
+  const img = post.coverImage;
+  const excerptText = htmlToPlainText(post.excerpt);
 
   return (
     <Link
@@ -37,9 +43,11 @@ export default function BlogCard({ post }: { post: BlogPost }) {
         <h3 className="mb-2 font-display text-[22px] font-medium leading-[1.25] text-navy-800 transition-colors group-hover:text-accent">
           {post.title}
         </h3>
-        <p className="line-clamp-3 flex-1 text-[13px] leading-[1.75] text-text-secondary">
-          {post.excerpt}
-        </p>
+        {excerptText ? (
+          <p className="line-clamp-3 flex-1 text-[13px] leading-[1.75] text-text-secondary">
+            {excerptText}
+          </p>
+        ) : null}
         <span className="mt-4 inline-flex items-center gap-1.5 font-title text-[9px] uppercase tracking-[2px] text-text-muted transition-colors group-hover:text-accent">
           Read post
           <span aria-hidden>→</span>

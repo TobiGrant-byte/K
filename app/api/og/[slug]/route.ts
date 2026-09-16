@@ -12,7 +12,7 @@ type RouteProps = {
 export async function GET(_request: Request, { params }: RouteProps) {
   const { slug } = await params;
   const post = await getPublishedPostBySlug(slug).catch(() => null);
-  const source = post?.coverImage || post?.images[0];
+  const source = post?.coverImage;
 
   if (!source) {
     return NextResponse.redirect(`${SITE_URL}/images/hero-picture.jpeg`, 302);

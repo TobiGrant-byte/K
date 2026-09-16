@@ -1,15 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import ImageCropModal from "@/components/admin/ImageCropModal";
+import RichTextEditor, {
+  insertImageIntoEditor,
+} from "@/components/admin/RichTextEditor";
 import {
   BLOG_CATEGORIES,
   DEFAULT_BLOG_AUTHOR,
-  MAX_BLOG_IMAGES,
+  MAX_BODY_IMAGES,
+  MAX_EXCERPT_IMAGES,
+  collectPostImageUrls,
+  countHtmlImages,
   createId,
   fileToDataUrl,
   formatPostDate,
+  htmlToPlainText,
+  migrateLegacyRichHtml,
+  richTextHasContent,
+  sanitizeBlogHtml,
   slugify,
   type BlogPost,
 } from "@/lib/blog";
@@ -34,11 +44,13 @@ import {
 
 type Mode = "list" | "create" | "edit";
 
+type CropTarget = "cover" | "excerpt" | "body";
+type CropJob = { src: string; target: CropTarget; replaces?: string };
+
 type UploadingImage = {
   id: string;
   preview: string;
-  asCover: boolean;
-  /** Existing ImageKit/data URL being replaced by a recrop. */
+  target: CropTarget;
   replaces?: string;
   error?: string;
 };
@@ -58,7 +70,6 @@ function emptyDraft(): Omit<BlogPost, "id" | "createdAt" | "updatedAt"> & {
     body: "",
     category: "Reflections",
     coverImage: undefined,
-    images: [],
     published: true,
   };
 }
@@ -80,13 +91,15 @@ export default function AdminApp() {
   const [messageError, setMessageError] = useState(false);
   const [messageId, setMessageId] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [cropQueue, setCropQueue] = useState<
-    { src: string; asCover: boolean }[]
-  >([]);
+  const [cropQueue, setCropQueue] = useState<CropJob[]>([]);
   const [recropSrc, setRecropSrc] = useState<string | null>(null);
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
   /** Stable post id for ImageKit folder while creating/editing. */
   const [workingPostId, setWorkingPostId] = useState<string | null>(null);
+  const excerptEditorRef = useRef<HTMLDivElement | null>(null);
+  const bodyEditorRef = useRef<HTMLDivElement | null>(null);
+  const excerptFileRef = useRef<HTMLInputElement | null>(null);
+  const bodyFileRef = useRef<HTMLInputElement | null>(null);
 
   const flash = useCallback((text: string, error = false) => {
     setMessage(text);
@@ -193,7 +206,11 @@ export default function AdminApp() {
     if (!post) return;
     setEditingId(id);
     setWorkingPostId(id);
-    setDraft({ ...post });
+    setDraft({
+      ...post,
+      excerpt: migrateLegacyRichHtml(post.excerpt),
+      body: migrateLegacyRichHtml(post.body),
+    });
     setUploadingImages([]);
     setCropQueue([]);
     setRecropSrc(null);
@@ -209,61 +226,60 @@ export default function AdminApp() {
     }));
   };
 
-  const uniqueImageCount = (() => {
-    const set = new Set(draft.images);
-    if (draft.coverImage) set.add(draft.coverImage);
-    return set.size;
-  })();
-  const imageCount = uniqueImageCount + uploadingImages.length;
-  const slotsLeft = Math.max(
-    0,
-    MAX_BLOG_IMAGES - imageCount - cropQueue.length,
-  );
   const imagesBusy =
     uploadingImages.some((item) => !item.error) ||
     cropQueue.length > 0 ||
     Boolean(recropSrc);
 
-  const onFiles = async (files: FileList | null, asCover = false) => {
+  const queueCoverFile = async (files: FileList | null) => {
     if (!files?.length) return;
-    if (slotsLeft <= 0) {
-      flash(
-        `Maximum of ${MAX_BLOG_IMAGES} images (including cover). Remove one to add another.`,
-        true,
-      );
-      return;
-    }
-
-    const list = Array.from(files).filter((f) => f.type.startsWith("image/"));
-    if (!list.length) return;
-
-    if (list.length > slotsLeft) {
-      flash(
-        slotsLeft === 1
-          ? `Only 1 image slot left (max ${MAX_BLOG_IMAGES} including cover). Select a single file.`
-          : `Only ${slotsLeft} image slots left (max ${MAX_BLOG_IMAGES} including cover). Select at most ${slotsLeft} files.`,
-        true,
-      );
-      return;
-    }
-
-    const queued: { src: string; asCover: boolean }[] = [];
-    for (let i = 0; i < list.length; i++) {
-      const src = await fileToDataUrl(list[i]);
-      queued.push({ src, asCover: false });
-    }
-    if (asCover && queued[0]) queued[0].asCover = true;
-    else if (!draft.coverImage && queued[0]) queued[0].asCover = true;
-
+    const file = Array.from(files).find((f) => f.type.startsWith("image/"));
+    if (!file) return;
     clearMessage();
-    setCropQueue((q) => [...q, ...queued]);
+    const src = await fileToDataUrl(file);
+    setCropQueue((q) => [
+      ...q,
+      {
+        src,
+        target: "cover",
+        replaces: draft.coverImage,
+      },
+    ]);
+  };
+
+  const queueEditorFile = async (
+    files: FileList | null,
+    target: "excerpt" | "body",
+  ) => {
+    if (!files?.length) return;
+    const html = target === "excerpt" ? draft.excerpt : draft.body;
+    const maxImages =
+      target === "excerpt" ? MAX_EXCERPT_IMAGES : MAX_BODY_IMAGES;
+    const pending = uploadingImages.filter(
+      (item) => item.target === target,
+    ).length;
+    if (countHtmlImages(html) + pending >= maxImages) {
+      flash(
+        `Maximum of ${maxImages} inline image${maxImages === 1 ? "" : "s"} in the ${target}.`,
+        true,
+      );
+      return;
+    }
+    const file = Array.from(files).find((f) => f.type.startsWith("image/"));
+    if (!file) return;
+    clearMessage();
+    const src = await fileToDataUrl(file);
+    setCropQueue((q) => [...q, { src, target }]);
   };
 
   const currentCrop = cropQueue[0] || null;
 
   const beginImageUpload = (
     croppedDataUrl: string,
-    options: { asCover: boolean; replaces?: string },
+    options: {
+      target: CropTarget;
+      replaces?: string;
+    },
   ) => {
     const postId = workingPostId || editingId || createId();
     if (!workingPostId) setWorkingPostId(postId);
@@ -274,7 +290,7 @@ export default function AdminApp() {
       {
         id: uploadId,
         preview: croppedDataUrl,
-        asCover: options.asCover,
+        target: options.target,
         replaces: options.replaces,
       },
     ]);
@@ -285,35 +301,18 @@ export default function AdminApp() {
         setUploadingImages((items) =>
           items.filter((item) => item.id !== uploadId),
         );
-        setDraft((d) => {
-          if (options.replaces) {
-            const images = d.images.some((img) => img === options.replaces)
-              ? d.images.map((img) => (img === options.replaces ? url : img))
-              : [...d.images, url];
-            return {
-              ...d,
-              images,
-              coverImage:
-                options.asCover ||
-                !d.coverImage ||
-                d.coverImage === options.replaces
-                  ? url
-                  : d.coverImage,
-            };
-          }
-          const existing = new Set(d.images);
-          if (d.coverImage) existing.add(d.coverImage);
-          if (existing.size >= MAX_BLOG_IMAGES) return d;
-          return {
-            ...d,
-            coverImage: options.asCover || !d.coverImage ? url : d.coverImage,
-            images: [...d.images, url],
-          };
-        });
+        if (options.target === "cover") {
+          setDraft((d) => ({ ...d, coverImage: url }));
+        } else {
+          insertImageIntoEditor(
+            options.target === "excerpt"
+              ? excerptEditorRef.current
+              : bodyEditorRef.current,
+            url,
+          );
+        }
 
         if (options.replaces && isImageKitBlogUrl(options.replaces)) {
-          // Editing: defer delete until save via syncPostImages.
-          // Creating: old file was never in Firestore — delete now.
           if (!editingId) {
             void deleteImageKitImages([options.replaces]).catch(console.error);
           }
@@ -326,15 +325,6 @@ export default function AdminApp() {
             item.id === uploadId ? { ...item, error: message } : item,
           ),
         );
-        if (options.replaces) {
-          setDraft((d) => ({
-            ...d,
-            images: d.images.includes(options.replaces!)
-              ? d.images
-              : [...d.images, options.replaces!],
-            coverImage: options.asCover ? options.replaces : d.coverImage,
-          }));
-        }
         flash(message, true);
       }
     })();
@@ -344,17 +334,9 @@ export default function AdminApp() {
     if (recropSrc) {
       const replacing = recropSrc;
       setRecropSrc(null);
-      // Drop the old preview from the draft while the replacement uploads.
-      setDraft((d) => ({
-        ...d,
-        images: d.images.filter((img) => img !== replacing),
-        coverImage:
-          d.coverImage === replacing
-            ? d.images.find((img) => img !== replacing)
-            : d.coverImage,
-      }));
+      setDraft((d) => ({ ...d, coverImage: undefined }));
       beginImageUpload(croppedDataUrl, {
-        asCover: draft.coverImage === replacing,
+        target: "cover",
         replaces: replacing,
       });
       return;
@@ -363,10 +345,14 @@ export default function AdminApp() {
     const job = cropQueue[0];
     if (!job) return;
     setCropQueue((q) => q.slice(1));
-    beginImageUpload(croppedDataUrl, {
-      asCover:
-        job.asCover || (!draft.coverImage && uploadingImages.length === 0),
-    });
+    if (job.target === "cover") {
+      beginImageUpload(croppedDataUrl, {
+        target: "cover",
+        replaces: job.replaces,
+      });
+      return;
+    }
+    beginImageUpload(croppedDataUrl, { target: job.target });
   };
 
   const cancelCrop = () => {
@@ -386,20 +372,51 @@ export default function AdminApp() {
       items.filter((entry) => entry.id !== item.id),
     );
     beginImageUpload(item.preview, {
-      asCover: item.asCover,
+      target: item.target,
       replaces: item.replaces,
     });
   };
 
-  const removeImage = (src: string) => {
-    setDraft((d) => ({
-      ...d,
-      images: d.images.filter((i) => i !== src),
-      coverImage:
-        d.coverImage === src ? d.images.find((i) => i !== src) : d.coverImage,
-    }));
-    // New post: file is not referenced in Firestore yet — clean up ImageKit now.
-    if (!editingId && isImageKitBlogUrl(src)) {
+  const editorUploadStatus = (target: "excerpt" | "body") =>
+    uploadingImages
+      .filter((item) => item.target === target)
+      .map((item) => (
+        <div
+          key={item.id}
+          className={`mt-2 flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-[12px] ${
+            item.error
+              ? "border-red-400/30 bg-red-500/10 text-red-300"
+              : "border-accent/25 bg-accent/10 text-accent-light"
+          }`}
+        >
+          <span>
+            {item.error ? "Image upload failed." : "Uploading image…"}
+          </span>
+          {item.error ? (
+            <span className="flex shrink-0 gap-2">
+              <button
+                type="button"
+                onClick={() => retryUpload(item)}
+                className="font-title text-[8px] uppercase tracking-[1.5px] text-accent-light"
+              >
+                Retry
+              </button>
+              <button
+                type="button"
+                onClick={() => removeUploadingImage(item.id)}
+                className="font-title text-[8px] uppercase tracking-[1.5px] text-red-200"
+              >
+                Remove
+              </button>
+            </span>
+          ) : null}
+        </div>
+      ));
+
+  const removeCover = () => {
+    const src = draft.coverImage;
+    setDraft((d) => ({ ...d, coverImage: undefined }));
+    if (!editingId && src && isImageKitBlogUrl(src)) {
       void deleteImageKitImages([src]).catch(console.error);
     }
   };
@@ -409,18 +426,39 @@ export default function AdminApp() {
     const title = draft.title.trim();
     const author = draft.author.trim();
     const slug = slugify(draft.slug || draft.title);
-    const excerpt = draft.excerpt.trim();
-    const body = draft.body.trim();
+    const excerpt = sanitizeBlogHtml(draft.excerpt);
+    const body = sanitizeBlogHtml(draft.body);
 
-    if (!title || !author || !slug || !excerpt || !body || !draft.category) {
+    if (
+      !title ||
+      !author ||
+      !slug ||
+      !richTextHasContent(excerpt) ||
+      !richTextHasContent(body) ||
+      !draft.category
+    ) {
       flash(
-        "Please fill in title, author, URL slug, category, short excerpt, and body before submitting.",
+        "Please fill in title, author, URL slug, category, short excerpt, and body text before submitting.",
         true,
       );
       return;
     }
-    if (!draft.coverImage && draft.images.length === 0) {
-      flash("Please add at least one image before submitting.", true);
+    if (!draft.coverImage) {
+      flash("Please add a cover photo before submitting.", true);
+      return;
+    }
+    if (countHtmlImages(excerpt) > MAX_EXCERPT_IMAGES) {
+      flash(
+        `The short excerpt can include at most ${MAX_EXCERPT_IMAGES} inline image.`,
+        true,
+      );
+      return;
+    }
+    if (countHtmlImages(body) > MAX_BODY_IMAGES) {
+      flash(
+        `The body can include at most ${MAX_BODY_IMAGES} inline images.`,
+        true,
+      );
       return;
     }
     if (imagesBusy || uploadingImages.some((item) => item.error)) {
@@ -438,28 +476,30 @@ export default function AdminApp() {
       const postId = workingPostId || editingId || createId();
       await assertUniqueSlug(slug, editingId ?? undefined);
 
-      const previousImages = editingId
-        ? (posts.find((post) => post.id === editingId)?.images ?? [])
+      const previous = editingId
+        ? posts.find((post) => post.id === editingId)
+        : undefined;
+      const previousImages = previous
+        ? collectPostImageUrls(
+            previous.coverImage,
+            previous.excerpt,
+            previous.body,
+          )
         : [];
-      const imageSources =
-        draft.coverImage && !draft.images.includes(draft.coverImage)
-          ? [draft.coverImage, ...draft.images]
-          : draft.images.length
-            ? draft.images
-            : draft.coverImage
-              ? [draft.coverImage]
-              : [];
-      // Images should already be ImageKit URLs; this only maps through and
-      // computes removals (plus any leftover data URLs as a safety net).
+      const imageSources = collectPostImageUrls(
+        draft.coverImage,
+        excerpt,
+        body,
+      );
       const synced = await syncPostImages({
         postId,
         imageSources,
-        coverSource: draft.coverImage || imageSources[0],
+        coverSource: draft.coverImage,
         previousImages,
       });
 
-      if (!synced.coverImage || synced.images.length === 0) {
-        flash("Please add at least one image before submitting.", true);
+      if (!synced.coverImage) {
+        flash("Please add a cover photo before submitting.", true);
         return;
       }
 
@@ -472,7 +512,6 @@ export default function AdminApp() {
         body,
         category: draft.category,
         coverImage: synced.coverImage,
-        images: synced.images,
         published: draft.published,
         createdAt: draft.createdAt || now,
         updatedAt: now,
@@ -511,8 +550,10 @@ export default function AdminApp() {
     if (!deleteId) return;
     try {
       const target = posts.find((post) => post.id === deleteId);
-      if (target?.images.length) {
-        await deleteImageKitImages(target.images);
+      if (target) {
+        await deleteImageKitImages(
+          collectPostImageUrls(target.coverImage, target.excerpt, target.body),
+        );
       }
       await removePost(deleteId);
       setDeleteId(null);
@@ -578,7 +619,10 @@ export default function AdminApp() {
 
   return (
     <div className="min-h-screen bg-navy-900 pt-[72px] text-white">
-      <header className="sticky top-[72px] z-40 border-b border-white/10 bg-navy-900/95 backdrop-blur-md">
+      <header
+        data-admin-header
+        className="sticky top-[72px] z-40 border-b border-white/10 bg-navy-900/95 backdrop-blur-md"
+      >
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <div>
             <div className="font-title text-[10px] uppercase tracking-[3px] text-accent-light">
@@ -659,10 +703,10 @@ export default function AdminApp() {
                   className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] sm:flex sm:items-stretch sm:gap-0 sm:p-0"
                 >
                   <div className="aspect-[16/10] w-full shrink-0 overflow-hidden bg-navy-800 sm:aspect-auto sm:h-auto sm:w-40 sm:self-stretch sm:rounded-none">
-                    {post.coverImage || post.images[0] ? (
+                    {post.coverImage ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={post.coverImage || post.images[0]}
+                        src={post.coverImage}
                         alt=""
                         className="h-full w-full object-cover object-center"
                       />
@@ -706,7 +750,7 @@ export default function AdminApp() {
                       </p>
                       {post.excerpt ? (
                         <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-white/45 sm:line-clamp-1">
-                          {post.excerpt}
+                          {htmlToPlainText(post.excerpt)}
                         </p>
                       ) : null}
                     </div>
@@ -850,160 +894,97 @@ export default function AdminApp() {
                 </span>
               </label>
 
-              <label>
-                <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/40">
-                  Short excerpt
-                </span>
-                <textarea
-                  className={`${inputClass} min-h-[80px] resize-y`}
-                  value={draft.excerpt}
-                  onChange={(e) =>
-                    setDraft((d) => ({ ...d, excerpt: e.target.value }))
-                  }
-                  required
-                  placeholder="One or two sentences for the blog cards…"
-                />
-              </label>
-
-              <label>
-                <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/40">
-                  Body
-                </span>
-                <textarea
-                  className={`${inputClass} min-h-[220px] resize-y`}
-                  value={draft.body}
-                  onChange={(e) =>
-                    setDraft((d) => ({ ...d, body: e.target.value }))
-                  }
-                  required
-                  placeholder="Write or paste the post content here… Separate paragraphs with a blank line."
-                />
-              </label>
-
               <div>
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                   <span className="font-title text-[9px] uppercase tracking-[2px] text-white/40">
-                    Images
+                    Cover photo
                   </span>
                   <span className="font-title text-[9px] uppercase tracking-[2px] text-accent-light">
-                    {imageCount} / {MAX_BLOG_IMAGES}
+                    Required
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <label
                     className={`rounded-lg border border-dashed border-accent/35 bg-accent/5 px-4 py-3 font-title text-[9px] uppercase tracking-[2px] text-accent-light hover:bg-accent/10 ${
-                      slotsLeft <= 0
+                      imagesBusy
                         ? "pointer-events-none opacity-40"
                         : "cursor-pointer"
                     }`}
                   >
-                    {slotsLeft <= 1 ? "Upload image" : "Upload image(s)"}
+                    {draft.coverImage ? "Replace cover" : "Add cover photo"}
                     <input
                       type="file"
                       accept="image/*"
-                      multiple={slotsLeft > 1}
-                      disabled={slotsLeft <= 0}
+                      disabled={imagesBusy}
                       className="hidden"
                       onChange={(e) => {
-                        onFiles(e.target.files);
-                        e.target.value = "";
-                      }}
-                    />
-                  </label>
-                  <label
-                    className={`rounded-lg border border-white/15 px-4 py-3 font-title text-[9px] uppercase tracking-[2px] text-white/55 hover:border-white/30 ${
-                      slotsLeft <= 0
-                        ? "pointer-events-none opacity-40"
-                        : "cursor-pointer"
-                    }`}
-                  >
-                    Set cover from file
-                    <input
-                      type="file"
-                      accept="image/*"
-                      disabled={slotsLeft <= 0}
-                      className="hidden"
-                      onChange={(e) => {
-                        onFiles(e.target.files, true);
+                        void queueCoverFile(e.target.files);
                         e.target.value = "";
                       }}
                     />
                   </label>
                 </div>
-                {draft.images.length ||
-                draft.coverImage ||
-                uploadingImages.length ? (
-                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    {uploadingImages.map((item) => (
-                      <div
-                        key={item.id}
-                        className="relative overflow-hidden rounded-lg border border-white/10"
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={item.preview}
-                          alt=""
-                          className="aspect-[16/10] w-full object-contain object-center bg-navy-900 opacity-40"
-                        />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-navy-900/70 px-3 text-center">
-                          {item.error ? (
-                            <>
-                              <p className="text-[11px] leading-snug text-red-300">
-                                Upload failed
+                {draft.coverImage ||
+                uploadingImages.some((item) => item.target === "cover") ? (
+                  <div className="mt-4 max-w-md">
+                    {uploadingImages
+                      .filter((item) => item.target === "cover")
+                      .map((item) => (
+                        <div
+                          key={item.id}
+                          className="relative overflow-hidden rounded-lg border border-white/10"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={item.preview}
+                            alt=""
+                            className="aspect-[16/10] w-full bg-navy-900 object-contain object-center opacity-40"
+                          />
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-navy-900/70 px-3 text-center">
+                            {item.error ? (
+                              <>
+                                <p className="text-[11px] leading-snug text-red-300">
+                                  Upload failed
+                                </p>
+                                <div className="flex gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => retryUpload(item)}
+                                    className="rounded border border-accent/35 px-2 py-1 font-title text-[7px] uppercase tracking-[1px] text-accent-light"
+                                  >
+                                    Retry
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      removeUploadingImage(item.id)
+                                    }
+                                    className="rounded border border-red-400/30 px-2 py-1 font-title text-[7px] uppercase tracking-[1px] text-red-300/80"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              </>
+                            ) : (
+                              <p className="font-title text-[9px] uppercase tracking-[2px] text-accent-light">
+                                Uploading…
                               </p>
-                              <div className="flex gap-1">
-                                <button
-                                  type="button"
-                                  onClick={() => retryUpload(item)}
-                                  className="rounded border border-accent/35 px-2 py-1 font-title text-[7px] uppercase tracking-[1px] text-accent-light"
-                                >
-                                  Retry
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => removeUploadingImage(item.id)}
-                                  className="rounded border border-red-400/30 px-2 py-1 font-title text-[7px] uppercase tracking-[1px] text-red-300/80"
-                                >
-                                  Remove
-                                </button>
-                              </div>
-                            </>
-                          ) : (
-                            <p className="font-title text-[9px] uppercase tracking-[2px] text-accent-light">
-                              Uploading…
-                            </p>
-                          )}
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                    {(draft.coverImage &&
-                    !draft.images.includes(draft.coverImage)
-                      ? [draft.coverImage, ...draft.images]
-                      : draft.images
-                    ).map((src) => (
-                      <div
-                        key={src}
-                        className="relative overflow-hidden rounded-lg border border-white/10"
-                      >
+                      ))}
+                    {draft.coverImage ? (
+                      <div className="relative overflow-hidden rounded-lg border border-white/10">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={src}
+                          src={draft.coverImage}
                           alt=""
-                          className="aspect-[16/10] w-full object-contain object-center bg-navy-900"
+                          className="aspect-[16/10] w-full bg-navy-900 object-contain object-center"
                         />
                         <div className="absolute inset-x-0 bottom-0 flex gap-1 bg-navy-900/80 p-1.5">
                           <button
                             type="button"
-                            onClick={() =>
-                              setDraft((d) => ({ ...d, coverImage: src }))
-                            }
-                            className="flex-1 rounded border border-white/15 py-1 font-title text-[7px] uppercase tracking-[1px] text-white/70 hover:text-accent-light"
-                          >
-                            {draft.coverImage === src ? "Cover" : "Make cover"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setRecropSrc(src)}
+                            onClick={() => setRecropSrc(draft.coverImage!)}
                             disabled={imagesBusy}
                             className="rounded border border-accent/35 px-2 py-1 font-title text-[7px] uppercase tracking-[1px] text-accent-light disabled:opacity-40"
                           >
@@ -1011,7 +992,7 @@ export default function AdminApp() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => removeImage(src)}
+                            onClick={removeCover}
                             disabled={imagesBusy}
                             className="rounded border border-red-400/30 px-2 py-1 font-title text-[7px] uppercase tracking-[1px] text-red-300/80 disabled:opacity-40"
                           >
@@ -1019,15 +1000,69 @@ export default function AdminApp() {
                           </button>
                         </div>
                       </div>
-                    ))}
+                    ) : null}
                   </div>
                 ) : (
                   <p className="mt-3 text-[12px] text-white/35">
-                    Up to {MAX_BLOG_IMAGES} images including the cover. Every
-                    upload is cropped to a fixed 16:10 frame (1200×750) so
-                    nothing gets cut off oddly on mobile or desktop.
+                    Cropped to 16:10 (1200×750). Shown at the top of the post.
                   </p>
                 )}
+              </div>
+
+              <div>
+                <input
+                  ref={excerptFileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    void queueEditorFile(e.target.files, "excerpt");
+                    e.target.value = "";
+                  }}
+                />
+                <RichTextEditor
+                  label="Short excerpt"
+                  value={draft.excerpt}
+                  onChange={(excerpt) => setDraft((d) => ({ ...d, excerpt }))}
+                  maxImages={MAX_EXCERPT_IMAGES}
+                  onRequestImage={() => excerptFileRef.current?.click()}
+                  uploading={uploadingImages.some(
+                    (item) => item.target === "excerpt" && !item.error,
+                  )}
+                  disabled={imagesBusy}
+                  minHeightClass="min-h-[120px]"
+                  hint="Preview for blog cards. Bold, italic, and at most one image. Drag to reorder; backspace onto an image to remove it; click an image then drag the blue handle to resize."
+                  editorRef={excerptEditorRef}
+                />
+                {editorUploadStatus("excerpt")}
+              </div>
+
+              <div>
+                <input
+                  ref={bodyFileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    void queueEditorFile(e.target.files, "body");
+                    e.target.value = "";
+                  }}
+                />
+                <RichTextEditor
+                  label="Body"
+                  value={draft.body}
+                  onChange={(body) => setDraft((d) => ({ ...d, body }))}
+                  maxImages={MAX_BODY_IMAGES}
+                  onRequestImage={() => bodyFileRef.current?.click()}
+                  uploading={uploadingImages.some(
+                    (item) => item.target === "body" && !item.error,
+                  )}
+                  disabled={imagesBusy}
+                  minHeightClass="min-h-[300px]"
+                  hint={`Bold, italic, and up to ${MAX_BODY_IMAGES} images. Images insert below your current paragraph. Drag images to move them; backspace onto one to delete; click then use the blue handle to resize.`}
+                  editorRef={bodyEditorRef}
+                />
+                {editorUploadStatus("body")}
               </div>
 
               <button
