@@ -1,6 +1,7 @@
 import {
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDocs,
   onSnapshot,
@@ -19,7 +20,13 @@ import {
   getFirebaseFirestore,
   missingFirebaseEnvironmentVariables,
 } from "./config";
-import { DEFAULT_BLOG_AUTHOR, type BlogPost } from "@/lib/blog";
+import {
+  DEFAULT_BLOG_AUTHOR,
+  MAX_BODY_IMAGES,
+  MAX_EXCERPT_IMAGES,
+  countHtmlImages,
+  type BlogPost,
+} from "@/lib/blog";
 
 export class DuplicateSlugError extends Error {
   constructor(slug: string) {
@@ -34,7 +41,9 @@ function dateString(value: unknown): string {
   return new Date().toISOString();
 }
 
-function postFromSnapshot(snapshot: QueryDocumentSnapshot<DocumentData>): BlogPost {
+function postFromSnapshot(
+  snapshot: QueryDocumentSnapshot<DocumentData>,
+): BlogPost {
   const data = snapshot.data();
   return {
     id: snapshot.id,
@@ -46,7 +55,6 @@ function postFromSnapshot(snapshot: QueryDocumentSnapshot<DocumentData>): BlogPo
     excerpt: String(data.excerpt ?? ""),
     body: String(data.body ?? ""),
     coverImage: data.coverImage ? String(data.coverImage) : undefined,
-    images: Array.isArray(data.images) ? data.images.map(String).slice(0, 3) : [],
     createdAt: dateString(data.createdAt),
     updatedAt: dateString(data.updatedAt),
   };
@@ -64,7 +72,6 @@ export function subscribeToPublishedPosts(
     );
     return () => undefined;
   }
-  // Equality-only query (no composite index). Sort newest-first in memory.
   const postsQuery = query(
     collection(getFirebaseFirestore(), "posts"),
     where("published", "==", true),
@@ -104,9 +111,9 @@ export function subscribeToAllPosts(
   );
 }
 
-export async function getPublishedPostBySlug(slug: string): Promise<BlogPost | null> {
-  // Must constrain published==true so public Firestore rules accept the query.
-  // (Slug-only queries fail for anonymous users and look like "Post not found".)
+export async function getPublishedPostBySlug(
+  slug: string,
+): Promise<BlogPost | null> {
   const result = await getDocs(
     query(
       collection(getFirebaseFirestore(), "posts"),
@@ -119,7 +126,10 @@ export async function getPublishedPostBySlug(slug: string): Promise<BlogPost | n
   return match ?? null;
 }
 
-export async function assertUniqueSlug(slug: string, currentPostId?: string): Promise<void> {
+export async function assertUniqueSlug(
+  slug: string,
+  currentPostId?: string,
+): Promise<void> {
   const matches = await getDocs(
     query(
       collection(getFirebaseFirestore(), "posts"),
@@ -135,13 +145,21 @@ export async function savePost(
   post: BlogPost,
   options: { creating: boolean },
 ): Promise<void> {
-  if (post.images.length > 3) {
-    throw new Error("A post cannot contain more than 3 images.");
+  if (!post.coverImage) {
+    throw new Error("A cover photo is required.");
+  }
+  if (countHtmlImages(post.excerpt) > MAX_EXCERPT_IMAGES) {
+    throw new Error(
+      `Excerpt can include at most ${MAX_EXCERPT_IMAGES} image.`,
+    );
+  }
+  if (countHtmlImages(post.body) > MAX_BODY_IMAGES) {
+    throw new Error(`Body can include at most ${MAX_BODY_IMAGES} images.`);
   }
   await assertUniqueSlug(post.slug, options.creating ? undefined : post.id);
 
   const postRef = doc(getFirebaseFirestore(), "posts", post.id);
-  const data = {
+  const base = {
     title: post.title,
     slug: post.slug,
     author: post.author,
@@ -150,15 +168,18 @@ export async function savePost(
     excerpt: post.excerpt,
     body: post.body,
     coverImage: post.coverImage ?? "",
-    images: post.images,
     updatedAt: serverTimestamp(),
-    ...(options.creating ? { createdAt: serverTimestamp() } : {}),
   };
-  await setDoc(
-    postRef,
-    data,
-    { merge: !options.creating },
-  );
+
+  if (options.creating) {
+    await setDoc(postRef, { ...base, createdAt: serverTimestamp() });
+  } else {
+    await setDoc(
+      postRef,
+      { ...base, images: deleteField() },
+      { merge: true },
+    );
+  }
 }
 
 export async function removePost(postId: string): Promise<void> {

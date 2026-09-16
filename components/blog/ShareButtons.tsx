@@ -9,6 +9,8 @@ type ShareButtonsProps = {
   text?: string;
   /** ISO date — changes the shared URL so WhatsApp/Facebook re-fetch the card */
   version?: string;
+  /** Match light blog surfaces or dark site sections */
+  tone?: "dark" | "light";
 };
 
 /** Always share the live site URL, with ?v= so stale previews refresh. */
@@ -40,20 +42,23 @@ function shareFacebook(url: string) {
   );
 }
 
-const btn =
-  "inline-flex items-center gap-2 rounded-lg border border-white/15 px-4 py-2.5 font-title text-[9px] uppercase tracking-[2px] text-white/70 no-underline transition-colors hover:border-accent/45 hover:text-accent-light";
-
 export default function ShareButtons({
   title,
   url,
   text,
   version,
+  tone = "dark",
 }: ShareButtonsProps) {
   const resolved = sharePageUrl(url, version);
   const [toast, setToast] = useState<{
     message: string;
     link?: string;
   } | null>(null);
+
+  const btn =
+    tone === "light"
+      ? "inline-flex items-center gap-2 rounded-lg border border-navy-800/15 bg-white px-4 py-2.5 font-title text-[9px] uppercase tracking-[2px] text-navy-800 no-underline transition-colors hover:border-accent/45 hover:text-accent"
+      : "inline-flex items-center gap-2 rounded-lg border border-white/15 px-4 py-2.5 font-title text-[9px] uppercase tracking-[2px] text-white/70 no-underline transition-colors hover:border-accent/45 hover:text-accent-light";
 
   useEffect(() => {
     if (!toast || toast.link) return;
@@ -77,13 +82,14 @@ export default function ShareButtons({
 
     try {
       await navigator.clipboard.writeText(resolved);
-      setToast({ message: "Link copied to clipboard." });
     } catch {
       setToast({
         message: "Copy this link to share:",
         link: resolved,
       });
+      return;
     }
+    setToast({ message: "Link copied to clipboard." });
   };
 
   return (

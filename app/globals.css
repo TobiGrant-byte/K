@@ -72,11 +72,12 @@ mark[data-search-hit].search-hit-fade {
 
   html {
     scroll-behavior: smooth;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
-    @apply bg-navy-800 text-white font-sans font-light antialiased overflow-x-hidden;
+    @apply bg-navy-800 text-white font-sans font-light antialiased;
+    overflow-x: clip;
   }
 
   button,

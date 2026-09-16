@@ -14,7 +14,7 @@ const pillars = [
     cta: "Read scholarship tips",
   },
   {
-    title: "Socio-Cultural Adaptation Talk",
+    title: "Presentation at Stillman College",
     desc: "Spoke to young scholars from the United States and India on mobility gaps, transport safety, and equity across developed and developing nations — arguing that roads are for people first, and that pedestrians, cyclists, and transit users deserve the same safety priority as motorists. Presented with The University of Alabama and Stillman College.",
     img: "/images/lecture-hall.jpg",
     objectPosition: "center 40%",
