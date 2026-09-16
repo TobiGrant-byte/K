@@ -1,33 +1,63 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import BlogCard from "@/components/blog/BlogCard";
+import {
+  postListsAreEqual,
+  readCachedPostList,
+  writeCachedPost,
+  writeCachedPostList,
+} from "@/lib/blog-cache";
 import { BLOG_CATEGORIES, type BlogCategory, type BlogPost } from "@/lib/blog";
 import { subscribeToPublishedPosts } from "@/lib/firebase/posts";
 
+function subscribeNoop() {
+  return () => {};
+}
+
 export default function BlogList() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const cached = useSyncExternalStore(
+    subscribeNoop,
+    readCachedPostList,
+    () => null,
+  );
+  const [posts, setPosts] = useState<BlogPost[] | null>(null);
   const [category, setCategory] = useState<BlogCategory | "All">("All");
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const displayPosts = posts ?? cached ?? [];
+  const showingCache = posts === null && Boolean(cached?.length);
+  const loading = posts === null && !cached?.length;
 
   useEffect(() => {
     return subscribeToPublishedPosts(
       (nextPosts) => {
-        setPosts(nextPosts);
-        setLoading(false);
+        setPosts((prev) => {
+          const current = prev ?? readCachedPostList();
+          if (current && postListsAreEqual(current, nextPosts)) {
+            return prev ?? current;
+          }
+          return nextPosts;
+        });
+        writeCachedPostList(nextPosts);
+        for (const post of nextPosts.slice(0, 12)) {
+          writeCachedPost(post);
+        }
         setError("");
       },
       (nextError) => {
-        setError(`Could not load blog posts: ${nextError.message}`);
-        setLoading(false);
+        if (!readCachedPostList()?.length) {
+          setError(`Could not load blog posts: ${nextError.message}`);
+        }
       },
     );
   }, []);
 
   const filtered =
-    category === "All" ? posts : posts.filter((p) => p.category === category);
+    category === "All"
+      ? displayPosts
+      : displayPosts.filter((p) => p.category === category);
 
   return (
     <section className="section-pad relative min-h-[calc(100vh-72px)] overflow-hidden bg-off-white">
@@ -88,9 +118,12 @@ export default function BlogList() {
             {filtered.map((post, i) => (
               <motion.div
                 key={post.id}
-                initial={{ opacity: 0, y: 24 }}
+                initial={showingCache ? false : { opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: i * 0.06 }}
+                transition={{
+                  duration: 0.55,
+                  delay: showingCache ? 0 : i * 0.06,
+                }}
                 className="h-full"
               >
                 <BlogCard post={post} />
