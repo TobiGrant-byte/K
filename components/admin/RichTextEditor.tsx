@@ -104,34 +104,48 @@ export default function RichTextEditor({
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const uploadingRef = useRef(uploading);
   uploadingRef.current = uploading;
+  const stickyTopRef = useRef(128);
   const fieldId = useId();
 
   const imageCount = countHtmlImages(value);
   const canAddImage = imageCount < maxImages && !uploading;
 
-  /** Pixels below the admin header — toolbar sticks under it. */
+  /** Sticky toolbar is desktop-only — mobile keyboard + sticky caused tab crashes. */
+  const [stickyEnabled, setStickyEnabled] = useState(false);
   const [stickyTop, setStickyTop] = useState(128);
-  /** True only while sticky has engaged (toolbar would have scrolled away). */
   const [isStuck, setIsStuck] = useState(false);
 
   useEffect(() => {
-    const measure = () => {
-      const header = document.querySelector<HTMLElement>("[data-admin-header]");
-      setStickyTop(
-        header ? Math.ceil(header.getBoundingClientRect().bottom) : 72,
-      );
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    window.addEventListener("scroll", measure, { passive: true });
-    return () => {
-      window.removeEventListener("resize", measure);
-      window.removeEventListener("scroll", measure);
-    };
+    const mq = window.matchMedia("(min-width: 900px) and (pointer: fine)");
+    const syncMq = () => setStickyEnabled(mq.matches);
+    syncMq();
+    mq.addEventListener("change", syncMq);
+    return () => mq.removeEventListener("change", syncMq);
   }, []);
 
   useEffect(() => {
-    if (!focused) {
+    if (!stickyEnabled) {
+      setIsStuck(false);
+      return;
+    }
+
+    const measure = () => {
+      const header = document.querySelector<HTMLElement>("[data-admin-header]");
+      const next = header
+        ? Math.ceil(header.getBoundingClientRect().bottom)
+        : 72;
+      if (next === stickyTopRef.current) return;
+      stickyTopRef.current = next;
+      setStickyTop(next);
+    };
+
+    measure();
+    window.addEventListener("resize", measure, { passive: true });
+    return () => window.removeEventListener("resize", measure);
+  }, [stickyEnabled]);
+
+  useEffect(() => {
+    if (!stickyEnabled || !focused) {
       setIsStuck(false);
       return;
     }
@@ -140,9 +154,8 @@ export default function RichTextEditor({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Sentinel sits at the toolbar’s natural place. When it scrolls
-        // out above the sticky offset, the bar is stuck.
-        setIsStuck(!entry.isIntersecting);
+        const stuck = !entry.isIntersecting;
+        setIsStuck((prev) => (prev === stuck ? prev : stuck));
       },
       {
         threshold: 0,
@@ -151,7 +164,7 @@ export default function RichTextEditor({
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [focused, stickyTop]);
+  }, [stickyEnabled, focused, stickyTop]);
 
   const leaveEditor = useCallback(() => {
     setFocused(false);
@@ -219,7 +232,11 @@ export default function RichTextEditor({
       onChange(html);
       if (sanitize) {
         const next = html || "<p><br></p>";
-        if (el.innerHTML !== next) {
+        // Rewriting innerHTML during mobile keyboard dismiss crashes WebKit/Chrome.
+        const coarse =
+          typeof window !== "undefined" &&
+          window.matchMedia("(pointer: coarse)").matches;
+        if (!coarse && el.innerHTML !== next) {
           el.innerHTML = next;
           enhanceAllImages();
         }
@@ -360,7 +377,8 @@ export default function RichTextEditor({
   };
 
   const onInput = () => {
-    enhanceAllImages();
+    const el = internalEditorRef.current;
+    if (el?.querySelector("img")) enhanceAllImages();
     syncFromEditor(false);
     updateToolbarState();
   };
@@ -582,9 +600,11 @@ export default function RichTextEditor({
         <div
           ref={toolbarRef}
           className={`flex flex-wrap items-center gap-1.5 border-b border-white/10 px-2 py-2 ${
-            focused ? "sticky z-30" : "relative"
-          } ${focused && isStuck ? "bg-navy-900" : "bg-transparent"}`}
-          style={focused ? { top: stickyTop } : undefined}
+            stickyEnabled && focused ? "sticky z-30" : "relative"
+          } ${stickyEnabled && focused && isStuck ? "bg-navy-900" : "bg-transparent"}`}
+          style={
+            stickyEnabled && focused ? { top: stickyTop } : undefined
+          }
         >
           <button
             type="button"
