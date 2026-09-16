@@ -6,9 +6,9 @@ export type BlogPost = {
   slug: string;
   title: string;
   author: string;
-  /** HTML subset: p/br/strong/em/img */
+  /** HTML subset: p/br/strong/em/ul/ol/li/img */
   excerpt: string;
-  /** HTML subset: p/br/strong/em/img */
+  /** HTML subset: p/br/strong/em/ul/ol/li/img */
   body: string;
   category: BlogCategory;
   coverImage?: string;
@@ -43,6 +43,9 @@ const ALLOWED_TAGS = new Set([
   "I",
   "IMG",
   "DIV",
+  "UL",
+  "OL",
+  "LI",
 ]);
 
 export function slugify(title: string): string {
@@ -76,7 +79,8 @@ export function htmlToPlainText(html: string): string {
   return html
     .replace(/<img\b[^>]*>/gi, " ")
     .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<\/(p|div)>/gi, " ")
+    .replace(/<\/(p|div|li)>/gi, " ")
+    .replace(/<\/?(ul|ol)\b[^>]*>/gi, " ")
     .replace(/<[^>]+>/g, "")
     .replace(/&nbsp;/gi, " ")
     .replace(/&amp;/gi, "&")
@@ -261,6 +265,16 @@ function serializeAllowed(root: ParentNode): string {
       return;
     }
 
+    if (tag === "UL" || tag === "OL") {
+      out += `<${tag.toLowerCase()}>${serializeAllowed(el)}</${tag.toLowerCase()}>`;
+      return;
+    }
+
+    if (tag === "LI") {
+      out += `<li>${serializeAllowed(el)}</li>`;
+      return;
+    }
+
     if (tag === "B") {
       out += `<strong>${serializeAllowed(el)}</strong>`;
       return;
@@ -296,7 +310,7 @@ function sanitizeBlogHtmlServer(html: string): string {
 
   // Keep only allowlisted tags; strip others but keep children text via crude pass
   out = out.replace(
-    /<\/?(?!\/?(?:p|br|strong|em|img)\b)[a-z0-9:-]+\b[^>]*>/gi,
+    /<\/?(?!\/?(?:p|br|strong|em|img|ul|ol|li)\b)[a-z0-9:-]+\b[^>]*>/gi,
     "",
   );
 

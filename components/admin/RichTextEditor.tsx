@@ -93,6 +93,8 @@ export default function RichTextEditor({
 
   const [boldOn, setBoldOn] = useState(false);
   const [italicOn, setItalicOn] = useState(false);
+  const [bulletOn, setBulletOn] = useState(false);
+  const [numberOn, setNumberOn] = useState(false);
   const [focused, setFocused] = useState(false);
   const [activeImg, setActiveImg] = useState<HTMLImageElement | null>(null);
   const [handlePos, setHandlePos] = useState<{ left: number; top: number } | null>(
@@ -288,12 +290,16 @@ export default function RichTextEditor({
     try {
       setBoldOn(document.queryCommandState("bold"));
       setItalicOn(document.queryCommandState("italic"));
+      setBulletOn(document.queryCommandState("insertUnorderedList"));
+      setNumberOn(document.queryCommandState("insertOrderedList"));
     } catch {
       /* ignore */
     }
   };
 
-  const runCommand = (command: "bold" | "italic") => {
+  const runCommand = (
+    command: "bold" | "italic" | "insertUnorderedList" | "insertOrderedList",
+  ) => {
     if (disabled) return;
     const el = internalEditorRef.current;
     el?.focus();
@@ -626,6 +632,26 @@ export default function RichTextEditor({
           </button>
           <button
             type="button"
+            className={toolBtn(bulletOn)}
+            disabled={disabled}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => runCommand("insertUnorderedList")}
+            title="Bullet list"
+          >
+            Bullets
+          </button>
+          <button
+            type="button"
+            className={toolBtn(numberOn)}
+            disabled={disabled}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => runCommand("insertOrderedList")}
+            title="Numbered list"
+          >
+            Numbers
+          </button>
+          <button
+            type="button"
             className={toolBtn(false)}
             disabled={disabled || !canAddImage}
             onMouseDown={(e) => e.preventDefault()}
@@ -649,7 +675,7 @@ export default function RichTextEditor({
             aria-label={label}
             contentEditable={!disabled}
             suppressContentEditableWarning
-            className={`${minHeightClass} px-4 py-3 text-sm leading-relaxed text-white outline-none [&_em]:italic [&_strong]:font-semibold`}
+            className={`${minHeightClass} px-4 py-3 text-sm leading-relaxed text-white outline-none [&_em]:italic [&_li]:my-1 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_strong]:font-semibold [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6`}
             onInput={onInput}
             onPaste={onPaste}
             onKeyDown={onKeyDown}
