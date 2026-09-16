@@ -70,7 +70,7 @@ const allPhotos: Photo[] = [
   },
   {
     src: "/images/graduation-mentor.webp",
-    caption: "Doctoral Hooding Ceremony",
+    caption: "Graduation Dinner with Stephen Jones",
     category: "Graduation",
     width: 1400,
     height: 1000,
@@ -115,14 +115,14 @@ const allPhotos: Photo[] = [
   },
   {
     src: "/images/lecture-hall.jpg",
-    caption: "Socio-Cultural Adaptation Talk",
+    caption: "Presentation at Stillman College",
     category: "Moments",
     width: 1400,
     height: 900,
   },
   {
     src: "/images/speaking.webp",
-    caption: "Cultural Event MC",
+    caption: "UA Africa Ball",
     category: "Moments",
     width: 1200,
     height: 900,
@@ -131,7 +131,7 @@ const allPhotos: Photo[] = [
   },
   {
     src: "/images/garver-award-2.webp",
-    caption: "Garver Recognition",
+    caption: "ITE Student Leadership Submit",
     category: "Recognition",
     width: 1200,
     height: 900,

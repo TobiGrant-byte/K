@@ -30,8 +30,7 @@ export default function BlogList() {
     category === "All" ? posts : posts.filter((p) => p.category === category);
 
   return (
-    <section className="section-pad relative overflow-hidden bg-navy-800">
-      <div className="accent-wash" />
+    <section className="section-pad relative min-h-[calc(100vh-72px)] overflow-hidden bg-off-white">
       <div className="container relative">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -41,14 +40,17 @@ export default function BlogList() {
         >
           <div className="mb-4 flex items-center gap-3.5">
             <div className="section-rule" />
-            <span className="eyebrow">Blog</span>
+            <span className="font-title text-[10px] uppercase tracking-[4px] text-black">
+              Blog
+            </span>
           </div>
-          <h1 className="font-display text-[clamp(32px,5vw,58px)] font-light leading-[1.1] text-white">
+          <h1 className="font-display text-[clamp(32px,5vw,58px)] font-light leading-[1.1] text-navy-800">
             Posts on life,{" "}
-            <em className="font-semibold text-accent-light">work &amp; society</em>
+            <em className="font-semibold text-accent">work &amp; society</em>
           </h1>
-          <p className="mt-4 font-display text-lg italic leading-[1.7] text-white/45">
-            Notes on family, career, and the world beyond the résumé — in Dr. Okafor&apos;s own words.
+          <p className="mt-4 font-display text-lg italic leading-[1.7] text-text-secondary">
+            Notes on family, career, and the world beyond the résumé — in Dr.
+            Okafor&apos;s own words.
           </p>
         </motion.div>
 
@@ -60,8 +62,8 @@ export default function BlogList() {
               onClick={() => setCategory(c)}
               className={`rounded-full border px-4 py-2 font-title text-[9px] uppercase tracking-[2px] transition-colors ${
                 category === c
-                  ? "border-accent/50 bg-accent/15 text-accent-light"
-                  : "border-white/12 bg-transparent text-white/50 hover:border-white/25 hover:text-white/80"
+                  ? "border-accent/50 bg-accent/10 text-accent"
+                  : "border-navy-800/10 bg-white text-text-muted hover:border-navy-800/25 hover:text-navy-800"
               }`}
             >
               {c}
@@ -70,11 +72,15 @@ export default function BlogList() {
         </div>
 
         {loading ? (
-          <p className="font-display text-lg italic text-white/40">Loading…</p>
+          <p className="font-display text-lg italic text-text-muted">
+            Loading…
+          </p>
         ) : error ? (
-          <p className="text-sm text-red-300" role="alert">{error}</p>
+          <p className="text-sm text-red-600" role="alert">
+            {error}
+          </p>
         ) : filtered.length === 0 ? (
-          <p className="font-display text-lg italic text-white/40">
+          <p className="font-display text-lg italic text-text-muted">
             No published posts in this category yet.
           </p>
         ) : (
