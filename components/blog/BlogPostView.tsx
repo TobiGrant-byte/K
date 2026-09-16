@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import ShareButtons from "@/components/blog/ShareButtons";
 import BlogBody from "@/components/blog/BlogBody";
 import BlogImage from "@/components/blog/BlogImage";
+import PostEngagement from "@/components/blog/PostEngagement";
 import RichHtml from "@/components/blog/RichHtml";
 import {
   postsAreEqual,
@@ -183,6 +184,11 @@ export default function BlogPostView() {
           <div className="mt-10 border-t border-navy-800/10 pt-10">
             <BlogBody body={displayPost.body} />
           </div>
+
+          <PostEngagement
+            postId={displayPost.id}
+            postTitle={displayPost.title}
+          />
 
           <div className="mt-14 border-t border-navy-800/10 pt-8">
             <div className="mb-4 font-title text-[9px] uppercase tracking-[2px] text-text-muted">

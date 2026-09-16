@@ -141,6 +141,7 @@ export default function RichTextEditor({
   const [speechError, setSpeechError] = useState("");
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const syncFromEditorRef = useRef<(sanitize?: boolean) => void>(() => {});
+  const interimSpeechRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 900px) and (pointer: fine)");
@@ -165,23 +166,94 @@ export default function RichTextEditor({
     setSpeechSupported(true);
     const recognition = new SpeechCtor();
     recognition.continuous = true;
-    recognition.interimResults = false;
+    recognition.interimResults = true;
     recognition.lang = navigator.language || "en-US";
 
+    const clearInterim = () => {
+      const node = interimSpeechRef.current;
+      if (node?.isConnected) {
+        const parent = node.parentNode;
+        node.remove();
+        if (
+          parent &&
+          parent !== internalEditorRef.current &&
+          parent.childNodes.length === 0
+        ) {
+          (parent as HTMLElement).appendChild(document.createElement("br"));
+        }
+      }
+      interimSpeechRef.current = null;
+    };
+
+    const placeInterimAtCaret = () => {
+      clearInterim();
+      const span = document.createElement("span");
+      span.setAttribute("data-speech-interim", "1");
+      span.style.opacity = "0.55";
+      span.appendChild(document.createTextNode("\u200b"));
+
+      const sel = window.getSelection();
+      const editor = internalEditorRef.current;
+      if (sel && sel.rangeCount > 0 && editor?.contains(sel.anchorNode)) {
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(span);
+      } else if (editor) {
+        editor.appendChild(span);
+      }
+
+      const next = document.createRange();
+      next.setStartAfter(span);
+      next.collapse(true);
+      sel?.removeAllRanges();
+      sel?.addRange(next);
+      interimSpeechRef.current = span;
+      return span;
+    };
+
     recognition.onresult = (event) => {
-      let chunk = "";
+      let finalChunk = "";
+      let interim = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
-        if (result.isFinal) chunk += result[0].transcript;
+        const piece = result[0]?.transcript || "";
+        if (result.isFinal) finalChunk += piece;
+        else interim += piece;
       }
-      const text = chunk.trim();
-      if (!text) return;
-      const el = internalEditorRef.current;
-      el?.focus();
-      const inserted = document.execCommand("insertText", false, `${text} `);
-      if (!inserted) {
-        el?.append(document.createTextNode(`${text} `));
+
+      const editor = internalEditorRef.current;
+      editor?.focus();
+
+      if (finalChunk) {
+        clearInterim();
+        const inserted = document.execCommand(
+          "insertText",
+          false,
+          finalChunk.endsWith(" ") ? finalChunk : `${finalChunk} `,
+        );
+        if (!inserted) {
+          editor?.append(document.createTextNode(`${finalChunk} `));
+        }
       }
+
+      if (interim) {
+        const node =
+          interimSpeechRef.current?.isConnected
+            ? interimSpeechRef.current
+            : placeInterimAtCaret();
+        node.textContent = interim;
+        const sel = window.getSelection();
+        const after = document.createRange();
+        after.setStartAfter(node);
+        after.collapse(true);
+        sel?.removeAllRanges();
+        sel?.addRange(after);
+      } else if (!finalChunk) {
+        // keep empty interim marker while still listening
+      } else {
+        clearInterim();
+      }
+
       syncFromEditorRef.current(false);
     };
 
@@ -193,10 +265,20 @@ export default function RichTextEditor({
           ? "Microphone permission blocked."
           : "Voice input stopped.",
       );
+      clearInterim();
       setListening(false);
     };
 
     recognition.onend = () => {
+      const node = interimSpeechRef.current;
+      if (node?.isConnected && (node.textContent || "").replace(/\u200b/g, "").trim()) {
+        const text = (node.textContent || "").replace(/\u200b/g, "");
+        clearInterim();
+        document.execCommand("insertText", false, `${text} `);
+        syncFromEditorRef.current(false);
+      } else {
+        clearInterim();
+      }
       setListening(false);
     };
 
@@ -212,6 +294,7 @@ export default function RichTextEditor({
         /* ignore */
       }
       recognitionRef.current = null;
+      interimSpeechRef.current = null;
     };
   }, []);
 
@@ -673,8 +756,8 @@ export default function RichTextEditor({
     window.addEventListener("mouseup", onUp);
   };
 
-  const toolBtn = (active: boolean) =>
-    `rounded-md border px-3 py-1.5 font-title text-[9px] uppercase tracking-[1.5px] transition-colors ${
+  const iconBtn = (active: boolean) =>
+    `inline-flex h-9 min-w-9 items-center justify-center rounded-md border px-2 transition-colors ${
       active
         ? "border-accent/50 bg-accent/20 text-accent-light"
         : "border-white/15 text-white/65 hover:border-white/30 hover:text-white"
@@ -727,47 +810,110 @@ export default function RichTextEditor({
             stickyEnabled && focused ? { top: stickyTop } : undefined
           }
         >
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              className={iconBtn(boldOn)}
+              disabled={disabled}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => runCommand("bold")}
+              title="Bold"
+              aria-label="Bold"
+            >
+              <span className="font-serif text-[15px] font-bold leading-none">B</span>
+            </button>
+            <button
+              type="button"
+              className={iconBtn(italicOn)}
+              disabled={disabled}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => runCommand("italic")}
+              title="Italic"
+              aria-label="Italic"
+            >
+              <span className="font-serif text-[15px] italic leading-none">I</span>
+            </button>
+            <button
+              type="button"
+              className={iconBtn(bulletOn)}
+              disabled={disabled}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => runCommand("insertUnorderedList")}
+              title="Bullet list"
+              aria-label="Bullet list"
+            >
+              <span
+                className="flex items-center gap-1 text-[11px] leading-none"
+                aria-hidden
+              >
+                <span>•</span>
+                <span>•</span>
+                <span>•</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              className={iconBtn(numberOn)}
+              disabled={disabled}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => runCommand("insertOrderedList")}
+              title="Numbered list"
+              aria-label="Numbered list"
+            >
+              <span
+                className="flex items-center gap-1 font-title text-[10px] leading-none tracking-wide"
+                aria-hidden
+              >
+                <span>1</span>
+                <span>2</span>
+                <span>3</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              className={iconBtn(false)}
+              disabled={disabled || !canAddImage}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleAddImageClick}
+              title={
+                uploading
+                  ? "Uploading…"
+                  : canAddImage
+                    ? "Insert image below current paragraph"
+                    : `Max ${maxImages} image${maxImages === 1 ? "" : "s"}`
+              }
+              aria-label={uploading ? "Uploading image" : "Add image"}
+            >
+              {uploading ? (
+                <span className="h-3.5 w-3.5 animate-pulse rounded-sm border border-current opacity-70" />
+              ) : (
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-[18px] w-[18px]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  aria-hidden
+                >
+                  <rect x="3.5" y="5" width="17" height="14" rx="2" />
+                  <circle cx="9" cy="10" r="1.6" fill="currentColor" stroke="none" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m7.5 16.5 3.2-3.6 2.3 2.2 2.4-2.8 3.1 4.2"
+                  />
+                </svg>
+              )}
+            </button>
+          </div>
+
           <button
             type="button"
-            className={toolBtn(boldOn)}
-            disabled={disabled}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => runCommand("bold")}
-          >
-            Bold
-          </button>
-          <button
-            type="button"
-            className={toolBtn(italicOn)}
-            disabled={disabled}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => runCommand("italic")}
-          >
-            Italic
-          </button>
-          <button
-            type="button"
-            className={toolBtn(bulletOn)}
-            disabled={disabled}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => runCommand("insertUnorderedList")}
-            title="Bullet list"
-          >
-            Bullets
-          </button>
-          <button
-            type="button"
-            className={toolBtn(numberOn)}
-            disabled={disabled}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => runCommand("insertOrderedList")}
-            title="Numbered list"
-          >
-            Numbers
-          </button>
-          <button
-            type="button"
-            className={toolBtn(listening)}
+            className={`ml-auto inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border transition-colors ${
+              listening
+                ? "border-rose-400/70 bg-rose-500/20 text-rose-300"
+                : "border-white/15 text-white/65 hover:border-white/30 hover:text-white"
+            } disabled:opacity-40`}
             disabled={disabled || !speechSupported}
             onMouseDown={(e) => e.preventDefault()}
             onClick={toggleVoice}
@@ -778,26 +924,22 @@ export default function RichTextEditor({
                   : "Dictate with microphone"
                 : "Voice input not supported in this browser"
             }
+            aria-label={listening ? "Stop voice input" : "Start voice input"}
+            aria-pressed={listening}
           >
-            {listening ? "Listening…" : "Voice"}
-          </button>
-          <button
-            type="button"
-            className={toolBtn(false)}
-            disabled={disabled || !canAddImage}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={handleAddImageClick}
-            title={
-              canAddImage
-                ? "Insert image below current paragraph"
-                : `Max ${maxImages} image${maxImages === 1 ? "" : "s"}`
-            }
-          >
-            {uploading ? "Uploading…" : "Add image"}
+            <svg
+              viewBox="0 0 24 24"
+              className="h-[18px] w-[18px]"
+              fill="currentColor"
+              aria-hidden
+            >
+              <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Z" />
+              <path d="M19 11a1 1 0 1 0-2 0 5 5 0 0 1-10 0 1 1 0 1 0-2 0 7 7 0 0 0 6 6.92V21H9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-3.08A7 7 0 0 0 19 11Z" />
+            </svg>
           </button>
         </div>
         {speechError ? (
-          <p className="mt-1 text-[11px] text-amber-300/90" role="status">
+          <p className="mt-1 px-2 text-[11px] text-amber-300/90" role="status">
             {speechError}
           </p>
         ) : null}

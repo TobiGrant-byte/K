@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useInView } from "framer-motion";
+import { submitWeb3Form } from "@/lib/web3forms";
 
 type Status = "idle" | "loading" | "error";
 type FormState = {
@@ -10,8 +11,6 @@ type FormState = {
   subject: string;
   message: string;
 };
-
-const WEB3FORMS_ACCESS_KEY = "491e7ee9-f5a0-4295-9665-23a72925f4ab";
 
 const inputClass =
   "w-full px-4 py-3.5 bg-white/5 border border-white/12 rounded-lg text-white font-sans text-sm outline-none transition-[border-color] duration-300 focus:border-accent/60 disabled:opacity-70";
@@ -48,30 +47,13 @@ export default function Contact() {
     try {
       const formData = new FormData(e.currentTarget as HTMLFormElement);
 
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          access_key: WEB3FORMS_ACCESS_KEY,
-          subject: form.subject || "New message to Dr. Okafor ",
-          from_name: "Dr. Sunday Okafor Website Form Submission",
-          name: form.name,
-          email: form.email,
-          message: form.message,
-          botcheck: formData.get("botcheck") ? true : false,
-        }),
+      await submitWeb3Form({
+        subject: form.subject || "New message to Dr. Okafor ",
+        name: form.name,
+        email: form.email,
+        message: form.message,
+        botcheck: formData.get("botcheck") ? true : false,
       });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(
-          result.message || "Unable to send your message right now.",
-        );
-      }
 
       formRef.current?.reset();
       setForm({ name: "", email: "", subject: "", message: "" });
