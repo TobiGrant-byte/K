@@ -13,6 +13,7 @@ type Photo = {
   /** Approximate intrinsic size for masonry layout (does not crop). */
   width: number;
   height: number;
+  media?: "image" | "video";
   objectPosition?: string;
   zoom?: number;
   transformOrigin?: string;
@@ -131,7 +132,7 @@ const allPhotos: Photo[] = [
   },
   {
     src: "/images/garver-award-2.webp",
-    caption: "ITE Student Leadership Submit",
+    caption: "ITE Student Leadership Summit",
     category: "Recognition",
     width: 1200,
     height: 900,
@@ -154,8 +155,43 @@ const allPhotos: Photo[] = [
     objectPosition: "center 40%",
     transformOrigin: "center 40%",
   },
+  {
+    src: "/images/img3.jpeg",
+    caption: "",
+    category: "Moments",
+    width: 6000,
+    height: 4000,
+    objectPosition: "center 20%",
+  },
+  {
+    src: "/images/img4.jpeg",
+    caption: "PhD Dissertation Final Defense",
+    category: "Graduation",
+    width: 6000,
+    height: 4000,
+    objectPosition: "center 35%",
+  },
+  {
+    src: "/images/img7.MP4",
+    caption: "PhD Hooding Ceremony",
+    category: "Graduation",
+    media: "video",
+    width: 1920,
+    height: 1080,
+  },
+  {
+    src: "/images/img8.jpeg",
+    caption: "ITE Research Award",
+    category: "Recognition",
+    width: 1600,
+    height: 1200,
+    objectPosition: "center 35%",
+  },
 ];
 
+function isVideo(p: Photo) {
+  return p.media === "video";
+}
 const CATEGORIES: GalleryCategory[] = [
   "All",
   "Graduation",
@@ -234,7 +270,13 @@ export default function Gallery() {
     };
   }, [lightbox, go]);
 
-  const strip = useMemo(() => [...allPhotos, ...allPhotos], []);
+  const strip = useMemo(
+    () => {
+      const stills = allPhotos.filter((p) => !isVideo(p));
+      return [...stills, ...stills];
+    },
+    [],
+  );
 
   return (
     <section
@@ -364,24 +406,47 @@ export default function Gallery() {
                 onClick={() => openAt(i)}
                 className="group mb-4 w-full break-inside-avoid cursor-zoom-in border-0 bg-transparent p-0 text-left"
               >
-                <div className="overflow-hidden bg-navy-900/40">
-                  <Image
-                    src={p.src}
-                    alt={p.caption}
-                    width={p.width}
-                    height={p.height}
-                    className="h-auto w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    priority={i < 3}
-                  />
+                <div className="overflow-hidden bg-navy-900/40 relative">
+                  {isVideo(p) ? (
+                    <>
+                      <video
+                        src={p.src}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        className="h-auto w-full object-contain"
+                        aria-label={p.caption || "Gallery video"}
+                      />
+                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-navy-900/70 text-white/90">
+                          <svg viewBox="0 0 24 24" className="ml-0.5 h-5 w-5" fill="currentColor" aria-hidden>
+                            <path d="M8 5.5v13l11-6.5L8 5.5Z" />
+                          </svg>
+                        </span>
+                      </span>
+                    </>
+                  ) : (
+                    <Image
+                      src={p.src}
+                      alt={p.caption || "Gallery photo"}
+                      width={p.width}
+                      height={p.height}
+                      className="h-auto w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      priority={i < 3}
+                    />
+                  )}
                 </div>
                 <div className="mt-2.5 px-0.5">
                   <span className="mb-1 block font-title text-[8px] uppercase tracking-[2px] text-accent-light">
                     {p.category}
+                    {isVideo(p) ? " · Video" : ""}
                   </span>
-                  <p className="font-display text-[15px] italic leading-snug text-white/75 transition-colors group-hover:text-white">
-                    {p.caption}
-                  </p>
+                  {p.caption ? (
+                    <p className="font-display text-[15px] italic leading-snug text-white/75 transition-colors group-hover:text-white">
+                      {p.caption}
+                    </p>
+                  ) : null}
                 </div>
               </motion.button>
             ))}
@@ -406,7 +471,7 @@ export default function Gallery() {
             onClick={() => setLightbox(null)}
             role="dialog"
             aria-modal="true"
-            aria-label={photos[lightbox].caption}
+            aria-label={photos[lightbox].caption || "Gallery media"}
           >
             <motion.div
               key={photos[lightbox].src}
@@ -421,10 +486,13 @@ export default function Gallery() {
                 <div className="min-w-0">
                   <span className="font-title text-[8px] uppercase tracking-[2px] text-accent-light">
                     {photos[lightbox].category}
+                    {isVideo(photos[lightbox]) ? " · Video" : ""}
                   </span>
-                  <p className="truncate font-display text-base italic text-white/70 sm:text-lg">
-                    {photos[lightbox].caption}
-                  </p>
+                  {photos[lightbox].caption ? (
+                    <p className="truncate font-display text-base italic text-white/70 sm:text-lg">
+                      {photos[lightbox].caption}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="font-title text-[9px] uppercase tracking-[2px] text-white/35">
@@ -442,15 +510,27 @@ export default function Gallery() {
               </div>
 
               <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-navy-900/50">
-                <Image
-                  src={photos[lightbox].src}
-                  alt={photos[lightbox].caption}
-                  width={photos[lightbox].width}
-                  height={photos[lightbox].height}
-                  className="max-h-[min(70vh,720px)] w-auto max-w-full object-contain"
-                  sizes="90vw"
-                  priority
-                />
+                {isVideo(photos[lightbox]) ? (
+                  <video
+                    key={photos[lightbox].src}
+                    src={photos[lightbox].src}
+                    controls
+                    autoPlay
+                    playsInline
+                    className="max-h-[min(70vh,720px)] w-auto max-w-full"
+                    aria-label={photos[lightbox].caption || "Gallery video"}
+                  />
+                ) : (
+                  <Image
+                    src={photos[lightbox].src}
+                    alt={photos[lightbox].caption || "Gallery photo"}
+                    width={photos[lightbox].width}
+                    height={photos[lightbox].height}
+                    className="max-h-[min(70vh,720px)] w-auto max-w-full object-contain"
+                    sizes="90vw"
+                    priority
+                  />
+                )}
               </div>
 
               <div className="mt-4 flex items-center justify-between gap-3">
