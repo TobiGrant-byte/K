@@ -107,8 +107,8 @@ export default function Contact() {
                 detail: "Keynotes and panel discussion",
               },
               {
-                label: "Academic Collaboration",
-                detail: "Research and social promotion",
+                label: "Collaboration",
+                detail: "Research and social programs",
               },
               {
                 label: "Mentorship",

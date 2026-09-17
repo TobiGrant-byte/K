@@ -67,13 +67,12 @@ export default function Philanthropy() {
             <em className="font-semibold text-accent-light">Society</em>
           </h2>
           <p className="mt-5 font-display text-lg italic leading-[1.7] text-white/50">
-            Beyond credentials and awards — a commitment to lift others:
-            mentoring scholars, strengthening community, and advancing safer
-            transportation for the public good.
+            A commitment to empowering people, strengthening communities, and
+            advancing public safety.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {pillars.map((p, i) => {
             const inner = (
               <>

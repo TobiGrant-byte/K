@@ -78,10 +78,10 @@ export default function BlogList() {
             Posts on life,{" "}
             <em className="font-semibold text-accent">work &amp; society</em>
           </h1>
-          <p className="mt-4 font-display text-lg italic leading-[1.7] text-text-secondary">
+          {/* <p className="mt-4 font-display text-lg italic leading-[1.7] text-text-secondary">
             Notes on family, career, and the world beyond the résumé — in Dr.
             Okafor&apos;s own words.
-          </p>
+          </p> */}
         </motion.div>
 
         <div className="mb-10 flex flex-wrap gap-2">

@@ -15,29 +15,23 @@ export function isNavGroup(item: NavItem): item is NavGroup {
 }
 
 /**
- * Top-level items with connected submenus:
- * - Work: academic / professional output
- * - Community: public & civic presence
+ * Top-level nav order:
+ * Home → About → Profession → Gallery → Philanthropy → Blog
  */
 export const navItems: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   {
-    label: "Work",
+    label: "Profession",
     children: [
       { label: "Research and Development", href: "/research" },
       { label: "Publications", href: "/publications" },
       { label: "Achievements", href: "/achievements" },
     ],
   },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Philanthropy", href: "/philanthropy" },
   { label: "Blog", href: "/blog" },
-  {
-    label: "Community",
-    children: [
-      { label: "Gallery", href: "/gallery" },
-      { label: "Philanthropy", href: "/philanthropy" },
-    ],
-  },
 ];
 
 /** Flat list for footer / search (no Admin — that is session-only in the navbar). */

@@ -14,6 +14,8 @@ type Achievement = {
   objectPosition?: string;
   zoom?: number;
   transformOrigin?: string;
+  /** Use "contain" for certificates / documents so edges are not cropped. */
+  fit?: "cover" | "contain";
   extraLinks?: { label: string; href: string }[];
 };
 
@@ -26,6 +28,16 @@ const achievements: Achievement[] = [
     img: "/images/garver-award-1.png",
     objectPosition: "center 30%",
     href: "https://www.linkedin.com/posts/sunday-okafor_i-was-recognized-with-the-transportation-activity-7388638154087510016-vvWI",
+  },
+  {
+    year: "2024",
+    title: "Project Management Professional (PMP)®",
+    org: "Project Management Institute (PMI)",
+    desc: "Certified as a Project Management Professional (PMP)® by the Project Management Institute — earning Above Target performance across People, Process, and Business Environment. The preparation strengthened day-to-day project leadership, stakeholder engagement, and a lasting commitment to continuous professional growth.",
+    img: "/images/img6.jpg",
+    objectPosition: "center center",
+    fit: "contain",
+    href: "https://www.linkedin.com/posts/sunday-okafor_pmp-projectmanagement-pmi-ugcPost-7499966985686904832-ITqh",
   },
   {
     year: "2024",
@@ -111,23 +123,40 @@ const achievements: Achievement[] = [
 ];
 
 function CardContent({ a }: { a: Achievement }) {
+  const contain = a.fit === "contain";
   return (
     <>
-      <div className="img-zoom relative h-60 overflow-hidden">
-        <Image
-          src={a.img}
-          alt={a.title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-          style={{
-            objectPosition: a.objectPosition,
-            transform: a.zoom ? `scale(${a.zoom})` : undefined,
-            transformOrigin: a.transformOrigin || "center center",
-          }}
-          sizes="33vw"
+      <div
+        className={`img-zoom relative h-60 overflow-hidden ${
+          contain ? "bg-[#f3f0f8] p-3 sm:p-4" : ""
+        }`}
+      >
+        <div className={`relative h-full w-full ${contain ? "" : "absolute inset-0"}`}>
+          <Image
+            src={a.img}
+            alt={a.title}
+            fill
+            className={`${
+              contain ? "object-contain" : "object-cover"
+            } transition-transform duration-500 ${
+              contain ? "" : "group-hover:scale-[1.03]"
+            }`}
+            style={{
+              objectPosition: a.objectPosition,
+              transform: a.zoom ? `scale(${a.zoom})` : undefined,
+              transformOrigin: a.transformOrigin || "center center",
+            }}
+            sizes="33vw"
+          />
+        </div>
+        <div
+          className={`pointer-events-none absolute inset-0 ${
+            contain
+              ? "bg-[linear-gradient(to_top,rgba(5,13,26,0.5)_0%,transparent_42%)]"
+              : "bg-[linear-gradient(to_top,rgba(5,13,26,0.65)_0%,transparent_55%)]"
+          }`}
         />
-        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.65)_0%,transparent_55%)]" />
-        <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between gap-2">
+        <div className="absolute bottom-3 left-4 right-4 z-[1] flex items-end justify-between gap-2">
           <span className="font-title text-[10px] uppercase tracking-[3px] text-white/70">{a.year}</span>
           {a.href ? (
             <span className="font-title text-[9px] uppercase tracking-[2px] text-white/55 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
