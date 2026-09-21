@@ -10,10 +10,10 @@ export type SearchEntry = {
 export const searchIndex: SearchEntry[] = [
   {
     title: "Home",
-    description: "Meet Dr. Sunday Okafor and get in touch.",
+    description: "Meet Dr. Sunday Okafor — engineer, researcher, and leader.",
     href: "/",
     category: "Page",
-    keywords: ["home", "hero", "contact", "okafor"],
+    keywords: ["home", "hero", "about", "okafor"],
   },
   {
     title: "About",
@@ -51,11 +51,11 @@ export const searchIndex: SearchEntry[] = [
     keywords: ["gallery", "photos", "images"],
   },
   {
-    title: "Philanthropy",
+    title: "Impacts",
     description: "Giving back through mentorship, community, and public safety.",
     href: "/philanthropy",
     category: "Page",
-    keywords: ["philanthropy", "mentorship", "giving back", "community", "society"],
+    keywords: ["impacts", "philanthropy", "mentorship", "giving back", "community", "society"],
   },
   {
     title: "Achievements",
@@ -76,8 +76,8 @@ export const searchIndex: SearchEntry[] = [
   {
     title: "Contact",
     description: "Reach out for collaboration, speaking, or mentorship.",
-    href: "/#contact",
-    category: "Section",
+    href: "/contact",
+    category: "Page",
     keywords: ["contact", "email", "message", "collaborate"],
   },
   {

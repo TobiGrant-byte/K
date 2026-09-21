@@ -16,7 +16,7 @@ export function isNavGroup(item: NavItem): item is NavGroup {
 
 /**
  * Top-level nav order:
- * Home → About → Profession → Gallery → Philanthropy → Blog
+ * Home → About → Profession → Gallery → Impacts → Blog → Contact
  */
 export const navItems: NavItem[] = [
   { label: "Home", href: "/" },
@@ -30,8 +30,9 @@ export const navItems: NavItem[] = [
     ],
   },
   { label: "Gallery", href: "/gallery" },
-  { label: "Philanthropy", href: "/philanthropy" },
+  { label: "Impacts", href: "/philanthropy" },
   { label: "Blog", href: "/blog" },
+  { label: "Contact", href: "/contact" },
 ];
 
 /** Flat list for footer / search (no Admin — that is session-only in the navbar). */

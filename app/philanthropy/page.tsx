@@ -3,7 +3,7 @@ import PageShell from "@/components/PageShell";
 import Philanthropy from "@/components/Philanthropy";
 
 export const metadata: Metadata = {
-  title: "Philanthropy | Dr. Sunday Okafor",
+  title: "Impacts | Dr. Sunday Okafor",
   description:
     "Mentorship, community leadership, and public talks — how Dr. Sunday Okafor gives back beyond the job.",
 };

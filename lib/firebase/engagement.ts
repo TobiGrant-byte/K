@@ -27,6 +27,27 @@ export type BlogComment = {
   createdAt: string;
 };
 
+/** Comment row for admin moderation (no email is stored on comments today). */
+export type AdminBlogComment = BlogComment & {
+  postId: string;
+  postTitle: string;
+  postSlug: string;
+  postPublished: boolean;
+};
+
+function commentFromDoc(
+  id: string,
+  data: Record<string, unknown>,
+): Omit<BlogComment, "id"> & { id: string } {
+  return {
+    id,
+    authorName: String(data.authorName ?? ""),
+    anonymous: Boolean(data.anonymous),
+    body: String(data.body ?? ""),
+    createdAt: dateString(data.createdAt),
+  };
+}
+
 function dateString(value: unknown): string {
   if (value instanceof Timestamp) return value.toDate().toISOString();
   if (typeof value === "string") return value;
@@ -111,19 +132,95 @@ export function subscribeToPostComments(
     commentsQuery,
     (snap) => {
       onChange(
-        snap.docs.map((d) => {
-          const data = d.data();
-          return {
-            id: d.id,
-            authorName: String(data.authorName ?? ""),
-            anonymous: Boolean(data.anonymous),
-            body: String(data.body ?? ""),
-            createdAt: dateString(data.createdAt),
-          };
-        }),
+        snap.docs.map((d) => commentFromDoc(d.id, d.data() as Record<string, unknown>)),
       );
     },
     (err) => onError?.(err),
+  );
+}
+
+/**
+ * Live-merge comments across posts for the admin Comments panel.
+ * Uses per-post listeners (same paths as public comments) — no collection-group index required.
+ */
+export function subscribeToAllCommentsForAdmin(
+  posts: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    published: boolean;
+  }>,
+  onChange: (comments: AdminBlogComment[]) => void,
+  onError?: (error: Error) => void,
+): Unsubscribe {
+  if (!firebaseConfigured) {
+    onChange([]);
+    return () => undefined;
+  }
+
+  if (!posts.length) {
+    onChange([]);
+    return () => undefined;
+  }
+
+  const byPost = new Map<string, AdminBlogComment[]>();
+  const unsubs: Unsubscribe[] = [];
+
+  const emit = () => {
+    const merged = [...byPost.values()].flat();
+    merged.sort(
+      (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt),
+    );
+    onChange(merged);
+  };
+
+  for (const post of posts) {
+    const commentsQuery = query(
+      collection(getFirebaseFirestore(), "posts", post.id, "comments"),
+      orderBy("createdAt", "desc"),
+    );
+    unsubs.push(
+      onSnapshot(
+        commentsQuery,
+        (snap) => {
+          byPost.set(
+            post.id,
+            snap.docs.map((d) => {
+              const base = commentFromDoc(
+                d.id,
+                d.data() as Record<string, unknown>,
+              );
+              return {
+                ...base,
+                postId: post.id,
+                postTitle: post.title,
+                postSlug: post.slug,
+                postPublished: post.published,
+              };
+            }),
+          );
+          emit();
+        },
+        (err) => onError?.(err),
+      ),
+    );
+  }
+
+  return () => {
+    for (const unsub of unsubs) unsub();
+  };
+}
+
+/** Admin-only deletion — enforced by Firestore rules (`isAdmin()`). */
+export async function deletePostComment(
+  postId: string,
+  commentId: string,
+): Promise<void> {
+  if (!firebaseConfigured || !postId || !commentId) {
+    throw new Error("Missing post or comment id.");
+  }
+  await deleteDoc(
+    doc(getFirebaseFirestore(), "posts", postId, "comments", commentId),
   );
 }
 

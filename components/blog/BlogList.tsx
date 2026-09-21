@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import BlogCard from "@/components/blog/BlogCard";
 import {
@@ -9,50 +9,47 @@ import {
   writeCachedPost,
   writeCachedPostList,
 } from "@/lib/blog-cache";
-import { BLOG_CATEGORIES, type BlogCategory, type BlogPost } from "@/lib/blog";
-import { subscribeToPublishedPosts } from "@/lib/firebase/posts";
+import { BLOG_CATEGORIES, type BlogCategory } from "@/lib/blog";
+import { usePublishedPosts } from "@/lib/domains/blog";
 
 function subscribeNoop() {
   return () => {};
 }
 
 export default function BlogList() {
+  const postsQuery = usePublishedPosts();
   const cached = useSyncExternalStore(
     subscribeNoop,
     readCachedPostList,
     () => null,
   );
-  const [posts, setPosts] = useState<BlogPost[] | null>(null);
   const [category, setCategory] = useState<BlogCategory | "All">("All");
-  const [error, setError] = useState("");
 
-  const displayPosts = posts ?? cached ?? [];
-  const showingCache = posts === null && Boolean(cached?.length);
-  const loading = posts === null && !cached?.length;
+  const remote = postsQuery.data;
 
   useEffect(() => {
-    return subscribeToPublishedPosts(
-      (nextPosts) => {
-        setPosts((prev) => {
-          const current = prev ?? readCachedPostList();
-          if (current && postListsAreEqual(current, nextPosts)) {
-            return prev ?? current;
-          }
-          return nextPosts;
-        });
-        writeCachedPostList(nextPosts);
-        for (const post of nextPosts.slice(0, 12)) {
-          writeCachedPost(post);
-        }
-        setError("");
-      },
-      (nextError) => {
-        if (!readCachedPostList()?.length) {
-          setError(`Could not load blog posts: ${nextError.message}`);
-        }
-      },
-    );
-  }, []);
+    if (!remote) return;
+    writeCachedPostList(remote);
+    for (const post of remote.slice(0, 12)) {
+      writeCachedPost(post);
+    }
+  }, [remote]);
+
+  const displayPosts = useMemo(() => {
+    if (remote) {
+      if (cached && postListsAreEqual(cached, remote)) return cached;
+      return remote;
+    }
+    return cached ?? [];
+  }, [remote, cached]);
+
+  const showingCache =
+    Boolean(cached?.length) && (!remote || remote.length === 0);
+  const loading = !cached?.length && postsQuery.isPending;
+  const error =
+    postsQuery.isError && !cached?.length
+      ? "Could not load blog posts."
+      : "";
 
   const filtered =
     category === "All"
@@ -78,10 +75,10 @@ export default function BlogList() {
             Posts on life,{" "}
             <em className="font-semibold text-accent">work &amp; society</em>
           </h1>
-          {/* <p className="mt-4 font-display text-lg italic leading-[1.7] text-text-secondary">
+          <p className="mt-4 font-display text-lg italic leading-[1.7] text-text-secondary">
             Notes on family, career, and the world beyond the résumé — in Dr.
             Okafor&apos;s own words.
-          </p> */}
+          </p>
         </motion.div>
 
         <div className="mb-10 flex flex-wrap gap-2">

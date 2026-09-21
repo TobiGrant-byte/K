@@ -60,7 +60,7 @@ export default function Philanthropy() {
         >
           <div className="mb-4 flex items-center gap-3.5">
             <div className="section-rule" />
-            <span className="eyebrow">Philanthropy</span>
+            <span className="eyebrow">Impacts</span>
           </div>
           <h2 className="font-display text-[clamp(32px,5vw,58px)] font-light leading-[1.1] text-white">
             Giving Back to{" "}

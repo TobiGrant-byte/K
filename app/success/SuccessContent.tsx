@@ -48,7 +48,7 @@ export default function SuccessContent() {
                 Back to Home
               </Link>
               <Link
-                href="/#contact"
+                href="/contact"
                 className="inline-flex px-8 py-4 border border-white/30 text-white font-title text-[11px] tracking-[3px] uppercase no-underline transition-colors hover:border-accent/40 hover:bg-white/5"
               >
                 Send Another

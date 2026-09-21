@@ -34,18 +34,38 @@ async function uploadAuthentication() {
   };
 }
 
-async function uploadImage(source: string, postId: string): Promise<string> {
-  const [authentication, fileResponse] = await Promise.all([
+async function uploadImage(
+  source: string | Blob,
+  folder: string,
+  fileNameHint?: string,
+): Promise<{ url: string; fileId: string }> {
+  const [authentication, blob] = await Promise.all([
     uploadAuthentication(),
-    fetch(source),
+    typeof source === "string"
+      ? fetch(source).then(async (fileResponse) => {
+          if (!fileResponse.ok) {
+            throw new Error("Could not prepare the image for upload.");
+          }
+          return fileResponse.blob();
+        })
+      : Promise.resolve(source),
   ]);
-  if (!fileResponse.ok) throw new Error("Could not prepare the cropped image.");
 
-  const fileName = `image-${crypto.randomUUID()}.webp`;
+  const ext =
+    blob.type === "image/png"
+      ? "png"
+      : blob.type === "image/gif"
+        ? "gif"
+        : blob.type === "image/webp"
+          ? "webp"
+          : "jpg";
+  const fileName =
+    fileNameHint ||
+    `image-${crypto.randomUUID()}.${ext === "jpg" ? "jpg" : ext}`;
   const formData = new FormData();
-  formData.append("file", await fileResponse.blob(), fileName);
+  formData.append("file", blob, fileName);
   formData.append("fileName", fileName);
-  formData.append("folder", `/blog/${postId}`);
+  formData.append("folder", folder);
   formData.append("publicKey", imageKitPublicKey);
   formData.append("token", authentication.token);
   formData.append("expire", String(authentication.expire));
@@ -64,14 +84,17 @@ async function uploadImage(source: string, postId: string): Promise<string> {
     throw new Error(message || `ImageKit upload failed (${response.status}).`);
   }
 
-  const uploaded = (await response.json()) as { url?: string };
+  const uploaded = (await response.json()) as {
+    url?: string;
+    fileId?: string;
+  };
   if (
     !uploaded.url ||
     !uploaded.url.startsWith(imageKitUrlEndpoint.replace(/\/+$/, ""))
   ) {
     throw new Error("ImageKit returned an invalid image URL.");
   }
-  return uploaded.url;
+  return { url: uploaded.url, fileId: uploaded.fileId ?? "" };
 }
 
 /** Upload a cropped data-URL immediately (after crop), before publish. */
@@ -79,7 +102,33 @@ export async function uploadCroppedBlogImage(
   source: string,
   postId: string,
 ): Promise<string> {
-  return uploadImage(source, postId);
+  const uploaded = await uploadImage(source, `/blog/${postId}`);
+  return uploaded.url;
+}
+
+/**
+ * Upload an original file into the central Media Library ImageKit folder.
+ * Does not crop — callers store the resulting URL on a gallery/{id} Firestore doc.
+ */
+export async function uploadGalleryMediaImage(
+  file: File,
+  mediaId: string,
+): Promise<{ url: string; fileId: string }> {
+  const safeBase = file.name
+    .replace(/\.[^.]+$/, "")
+    .replace(/[^a-zA-Z0-9-_]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+  const ext =
+    file.type === "image/png"
+      ? "png"
+      : file.type === "image/gif"
+        ? "gif"
+        : file.type === "image/webp"
+          ? "webp"
+          : "jpg";
+  const fileName = `${safeBase || "media"}-${mediaId.slice(0, 8)}.${ext}`;
+  return uploadImage(file, `/gallery/${mediaId}`, fileName);
 }
 
 export function isImageKitBlogUrl(url: string): boolean {
@@ -114,7 +163,9 @@ export async function syncPostImages({
         sourceToUrl.set(source, source);
         continue;
       }
-      const url = await uploadImage(source, postId);
+      const url = await uploadImage(source, `/blog/${postId}`).then(
+        (uploaded) => uploaded.url,
+      );
       sourceToUrl.set(source, url);
       newlyUploadedUrls.push(url);
     }
