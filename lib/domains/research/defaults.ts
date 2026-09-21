@@ -1,8 +1,8 @@
 import type { ResearchContent } from "@/lib/domains/research/types";
-import { siteMediaImageKitUrl } from "@/lib/domains/media/site-media-migration";
 
 /**
- * Canonical static fallbacks — existing public Research page copy.
+ * Canonical static fallbacks — copy only (no image URLs).
+ * Public frames stay empty until a Media Library image is selected.
  */
 export const RESEARCH_FALLBACK: ResearchContent = {
   development: {
@@ -47,7 +47,7 @@ export const RESEARCH_FALLBACK: ResearchContent = {
           "Representing Garver at the 2025 SDITE/MOVITE Joint Meeting in Memphis — bringing research-minded engineering into professional conversation.",
         href: "https://www.linkedin.com/posts/sunday-okafor_garvertransportation-roadsafety-activity-7316450495957467136-wm-Q",
         image: null,
-        fallbackSrc: siteMediaImageKitUrl("garver-award-1.png"),
+        fallbackSrc: "",
       },
       {
         id: "action-trb-2025",
@@ -57,7 +57,7 @@ export const RESEARCH_FALLBACK: ResearchContent = {
           "Sharing expertise at the Transportation Research Board Annual Meeting in Washington, DC — where research and practice meet on a national stage.",
         href: "https://www.linkedin.com/posts/sunday-okafor_garvertransportation-trbam-activity-7281060396864532480-mRZj",
         image: null,
-        fallbackSrc: siteMediaImageKitUrl("asa-board.jpg"),
+        fallbackSrc: "",
       },
       {
         id: "action-lifesavers-2023",
@@ -67,12 +67,12 @@ export const RESEARCH_FALLBACK: ResearchContent = {
           "Selected as a Traffic Safety Scholar at the national conference on highway safety priorities — recognizing emerging researchers shaping safer roads.",
         href: "",
         image: null,
-        fallbackSrc: siteMediaImageKitUrl("lifesavers-conf.webp"),
+        fallbackSrc: "",
       },
     ],
   },
   updatedAt: "",
 };
 
-export const RESEARCH_IMAGE_FALLBACK_SRC = siteMediaImageKitUrl("lecture-hall.jpg");
+export const RESEARCH_IMAGE_FALLBACK_SRC = "";
 export const RESEARCH_IMAGE_FALLBACK_ALT = "Dr. Okafor lecturing";

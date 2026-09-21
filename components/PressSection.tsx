@@ -1,49 +1,16 @@
 "use client";
 
 import { useRef } from "react";
-import Image from "next/image";
 import { motion, useInView } from "framer-motion";
 import ManagedImage from "@/components/media/ManagedImage";
-import type { PublicationsContent } from "@/lib/domains/publications";
+import {
+  tipDisplayNumber,
+  type PublicationsContent,
+} from "@/lib/domains/publications";
+import { isImageKitMediaUrl } from "@/lib/domains/media";
 import type { MediaAsset } from "@/lib/media";
 
 type MediaPick = Pick<MediaAsset, "imageUrl" | "altText" | "title"> | null;
-
-/** Scholarship Tips — intentionally static (separate CMS later). */
-const articles = [
-  {
-    n: "01",
-    tag: "Essay",
-    title: "My Perspective on Winning the Commonwealth Shared Scholarship",
-    blurb:
-      "How a solution-based development impact essay and a coherent story can change an application.",
-    href: "https://www.linkedin.com/pulse/my-perspective-winning-commonwealth-shared-sunday-okafor",
-  },
-  {
-    n: "02",
-    tag: "Mindset",
-    title: "Scholarship Application: Motivations, Motives and Self-esteem",
-    blurb:
-      "Why motive and confidence matter as much as grades when the essays have to sound true.",
-    href: "https://www.linkedin.com/pulse/scholarship-application-your-motivations-motives-sunday-okafor",
-  },
-  {
-    n: "03",
-    tag: "Strategy",
-    title: "Leveraging Areas of Strength in Scholarship Applications",
-    blurb:
-      "You do not have to tick every box perfectly — lead with what already sets you apart.",
-    href: "https://www.linkedin.com/pulse/leveraging-areas-your-strength-scholarship-sunday-okafor",
-  },
-  {
-    n: "04",
-    tag: "Webinar",
-    title: "A Webinar on International Scholarship and Personal Development",
-    blurb:
-      "Guidance for international applicants on purpose, preparation, and personal growth.",
-    href: "https://www.linkedin.com/pulse/webinar-discussion-international-scholarship-personal-sunday-okafor",
-  },
-];
 
 type Props = {
   publications: PublicationsContent;
@@ -56,6 +23,7 @@ export default function PressSection({
 }: Props) {
   const articlesRef = useRef(null);
   const articlesInView = useInView(articlesRef, { once: true, margin: "-80px" });
+  const { tips } = publications;
 
   return (
     <section id="press" className="section-pad relative overflow-hidden bg-navy-800">
@@ -86,7 +54,10 @@ export default function PressSection({
               (item.image?.galleryImageId &&
                 pressMediaById[item.image.galleryImageId]) ||
               null;
-            const src = media?.imageUrl || item.fallbackSrc;
+            const hasImage =
+              Boolean(media?.imageUrl) &&
+              Boolean(item.image) &&
+              isImageKitMediaUrl(media!.imageUrl);
             const alt = media?.altText || media?.title || item.title;
 
             return (
@@ -97,33 +68,15 @@ export default function PressSection({
                 rel="noopener noreferrer"
                 className="group flex w-full max-w-[360px] flex-col overflow-hidden rounded-2xl border border-white/14 bg-navy-700 no-underline transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-accent/40 sm:w-[calc(50%-14px)] sm:max-w-none lg:w-[calc(33.333%-19px)]"
               >
-                <div className="relative h-[228px] w-full shrink-0 overflow-hidden">
-                  {src ? (
-                    media?.imageUrl && item.image ? (
-                      <ManagedImage
-                        media={media}
-                        config={item.imageConfig}
-                        alt={alt}
-                        imageClassName="transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-                        sizes="360px"
-                      />
-                    ) : (
-                      <Image
-                        src={src}
-                        alt={alt}
-                        fill
-                        sizes="360px"
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-                        style={{
-                          objectPosition: `${item.imageConfig.positionX * 100}% ${item.imageConfig.positionY * 100}%`,
-                          transform:
-                            item.imageConfig.zoom !== 1
-                              ? `scale(${item.imageConfig.zoom})`
-                              : undefined,
-                          transformOrigin: `${item.imageConfig.positionX * 100}% ${item.imageConfig.positionY * 100}%`,
-                        }}
-                      />
-                    )
+                <div className="relative h-[228px] w-full shrink-0 overflow-hidden bg-navy-900/50">
+                  {hasImage && media ? (
+                    <ManagedImage
+                      media={media}
+                      config={item.imageConfig}
+                      alt={alt}
+                      imageClassName="transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                      sizes="360px"
+                    />
                   ) : null}
                   <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.85)_0%,transparent_55%)]" />
                 </div>
@@ -165,8 +118,8 @@ export default function PressSection({
           })}
         </div>
 
-        {/* LinkedIn articles — scholarship tips (static; not part of Publications CMS) */}
         <div
+          id="scholarship-tips"
           ref={articlesRef}
           className="relative mt-24 overflow-hidden rounded-2xl border border-accent/20 bg-white/[0.03] pt-12 pb-10 md:pt-16 md:pb-12"
         >
@@ -182,22 +135,27 @@ export default function PressSection({
             >
               <div className="mb-4 flex items-center gap-3.5">
                 <div className="section-rule" />
-                <span className="eyebrow">LinkedIn Articles</span>
+                <span className="eyebrow">{tips.eyebrow}</span>
               </div>
               <h3 className="font-display text-[clamp(26px,3.5vw,40px)] font-light leading-[1.15] text-white">
-                Scholarship Tips &amp;{" "}
-                <em className="font-semibold text-accent-light">Guidance</em>
+                {tips.title}{" "}
+                {tips.titleAccent ? (
+                  <em className="font-semibold text-accent-light">
+                    {tips.titleAccent}
+                  </em>
+                ) : null}
               </h3>
-              <p className="mt-3 font-display text-base italic leading-[1.7] text-white/45">
-                Practical advice for competitive international scholarships —
-                written to help others succeed.
-              </p>
+              {tips.subtitle ? (
+                <p className="mt-3 font-display text-base italic leading-[1.7] text-white/45">
+                  {tips.subtitle}
+                </p>
+              ) : null}
             </motion.div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {articles.map((article, i) => (
+              {tips.items.map((article, i) => (
                 <motion.a
-                  key={article.href}
+                  key={article.id}
                   href={article.href}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -212,18 +170,22 @@ export default function PressSection({
                     aria-hidden
                   />
                   <span className="shrink-0 font-display text-[28px] font-light leading-none text-accent/35 transition-colors duration-300 group-hover:text-accent-light/70">
-                    {article.n}
+                    {tipDisplayNumber(i)}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <span className="mb-2 inline-block font-title text-[9px] uppercase tracking-[2px] text-accent-light/70">
-                      {article.tag}
-                    </span>
+                    {article.tag ? (
+                      <span className="mb-2 inline-block font-title text-[9px] uppercase tracking-[2px] text-accent-light/70">
+                        {article.tag}
+                      </span>
+                    ) : null}
                     <span className="block font-display text-lg font-medium leading-[1.35] text-white/90 transition-colors group-hover:text-white md:text-xl">
                       {article.title}
                     </span>
-                    <span className="mt-2 block text-[13px] leading-[1.7] text-white/45">
-                      {article.blurb}
-                    </span>
+                    {article.blurb ? (
+                      <span className="mt-2 block text-[13px] leading-[1.7] text-white/45">
+                        {article.blurb}
+                      </span>
+                    ) : null}
                     <span className="mt-4 inline-flex items-center gap-2 font-title text-[9px] uppercase tracking-[2px] text-white/35 transition-all duration-300 group-hover:gap-3 group-hover:text-accent-light">
                       Read on LinkedIn
                       <span aria-hidden>→</span>

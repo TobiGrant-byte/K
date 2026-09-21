@@ -83,10 +83,8 @@ function normalizeActionItem(
     description,
     href: asString(raw.href, fallback?.href ?? "").trim(),
     image: normalizeImageRef(raw.image),
-    fallbackSrc:
-      asString(raw.fallbackSrc, fallback?.fallbackSrc ?? "").trim() ||
-      fallback?.fallbackSrc ||
-      "",
+    /** Local /public fallbacks removed — public frames stay empty without ImageKit. */
+    fallbackSrc: "",
   };
 }
 
@@ -199,6 +197,7 @@ export function toResearchWritePayload(
       items: normalized.action.items.map((item) => ({
         ...item,
         image: writeImage(item.image),
+        fallbackSrc: "",
       })),
     },
   };

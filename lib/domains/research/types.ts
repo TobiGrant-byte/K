@@ -29,7 +29,7 @@ export type ResearchActionItem = {
   /** Empty = not a link (CTA hidden). When set, public CTA is always “View on LinkedIn”. */
   href: string;
   image: MediaImageRef | null;
-  /** Static /public path when no Media Library image is selected. */
+  /** Reserved for legacy writes; public pages never use local fallbacks. */
   fallbackSrc: string;
 };
 

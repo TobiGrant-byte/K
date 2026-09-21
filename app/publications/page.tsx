@@ -11,7 +11,7 @@ import type { MediaAsset } from "@/lib/media";
 export const metadata: Metadata = {
   title: "Publications | Dr. Sunday Okafor",
   description:
-    "Press features and written pieces covering Dr. Sunday Okafor’s work in transportation, safety, and leadership.",
+    "Press features and scholarship tips from Dr. Sunday Okafor — coverage of his work in transportation, safety, and leadership.",
 };
 
 /** ISR: admin saves bust via /api/revalidate. */

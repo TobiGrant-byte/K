@@ -10,7 +10,7 @@ const pillars = [
     desc: "Through LinkedIn articles and conversations, Dr. Okafor shares practical scholarship guidance — helping first-generation and international students navigate competitive applications with clarity and confidence.",
     img: "/images/commonwealth-scholarship.png",
     objectPosition: "center 30%",
-    href: "https://www.linkedin.com/pulse/my-perspective-winning-commonwealth-shared-sunday-okafor",
+    href: "/publications#scholarship-tips",
     cta: "Read scholarship tips",
   },
   {
@@ -115,8 +115,9 @@ export default function Philanthropy() {
                 {p.href ? (
                   <a
                     href={p.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    {...(p.href.startsWith("http")
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
                     className="group flex h-full flex-col no-underline text-inherit"
                   >
                     {inner}

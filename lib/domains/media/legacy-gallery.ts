@@ -206,6 +206,11 @@ export function isLocalPublicMediaUrl(url: string): boolean {
   return false;
 }
 
+/** Public CMS frames only render Media Library assets hosted on ImageKit. */
+export function isImageKitMediaUrl(url: string): boolean {
+  return /imagekit\.io/i.test(url.trim());
+}
+
 export function legacyGalleryId(src: string): string {
   const base = src.split("/").pop() ?? src;
   const safe = base.replace(/[^a-zA-Z0-9._-]+/g, "-").toLowerCase();

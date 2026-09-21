@@ -6,7 +6,6 @@ import ImagePositionEditor from "@/components/media/ImagePositionEditor";
 import {
   RESEARCH_ACTION_IMAGE_ASPECT,
   RESEARCH_IMAGE_ASPECT,
-  RESEARCH_IMAGE_FALLBACK_ALT,
   normalizeResearchContent,
   useResearchContent,
   useSaveResearchMutation,
@@ -401,7 +400,7 @@ export default function AdminResearch() {
                 alt={
                   developmentMedia.data?.altText ||
                   developmentMedia.data?.title ||
-                  RESEARCH_IMAGE_FALLBACK_ALT
+                  "Research"
                 }
                 aspectRatio={RESEARCH_IMAGE_ASPECT}
                 emptyLabel="No focus image"

@@ -2,17 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import Image from "next/image";
 import ManagedImage from "@/components/media/ManagedImage";
 import {
-  RESEARCH_IMAGE_FALLBACK_ALT,
-  RESEARCH_IMAGE_FALLBACK_SRC,
   researchAreaNumber,
   type ResearchActionItem,
   type ResearchContent,
 } from "@/lib/domains/research";
 import type { MediaAsset } from "@/lib/media";
 import type { ImageDisplayConfig } from "@/lib/domains/media/display";
+import { isImageKitMediaUrl } from "@/lib/domains/media";
 
 const GOOGLE_SCHOLAR =
   "https://scholar.google.com/citations?user=iAfft0gAAAAJ&hl=en";
@@ -92,64 +90,30 @@ function ActionMediaFrame({
   item: ResearchActionItem;
   media: MediaPick;
 }) {
-  const src = media?.imageUrl || item.fallbackSrc;
   const alt = media?.altText || media?.title || item.title;
   const config: ImageDisplayConfig | undefined = item.image?.imageConfig;
+  const hasImage =
+    Boolean(media?.imageUrl) &&
+    Boolean(item.image) &&
+    isImageKitMediaUrl(media!.imageUrl);
 
-  if (src) {
+  if (hasImage && media) {
     return (
       <div className="relative aspect-[16/10] overflow-hidden">
-        {media?.imageUrl && item.image ? (
-          <ManagedImage
-            media={media}
-            config={config}
-            alt={alt}
-            imageClassName="transition-transform duration-[700ms] ease-out hover:scale-[1.05] group-hover:scale-[1.05]"
-            sizes="(max-width: 768px) 100vw, 33vw"
-          />
-        ) : (
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            className="object-cover transition-transform duration-[700ms] ease-out hover:scale-[1.05] group-hover:scale-[1.05]"
-            style={{ objectPosition: "center", transformOrigin: "center center" }}
-            sizes="(max-width: 768px) 100vw, 33vw"
-          />
-        )}
+        <ManagedImage
+          media={media}
+          config={config}
+          alt={alt}
+          imageClassName="transition-transform duration-[700ms] ease-out hover:scale-[1.05] group-hover:scale-[1.05]"
+          sizes="(max-width: 768px) 100vw, 33vw"
+        />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.35)_0%,transparent_45%)]" />
       </div>
     );
   }
 
   return (
-    <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden border border-dashed border-accent/30 bg-[linear-gradient(145deg,rgba(74,143,232,0.12)_0%,rgba(5,13,26,0.4)_55%,rgba(15,32,64,0.9)_100%)]">
-      <div className="pointer-events-none absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_30%_20%,rgba(122,179,240,0.35)_0%,transparent_50%)]" />
-      <div className="relative z-[1] px-6 text-center">
-        <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-accent/40 text-accent-light">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            aria-hidden
-          >
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <path
-              d="M21 15l-5-5L5 21"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <p className="font-title text-[9px] uppercase tracking-[2.5px] text-accent-light/80">
-          Image coming soon
-        </p>
-      </div>
-    </div>
+    <div className="relative aspect-[16/10] overflow-hidden bg-navy-900/50" />
   );
 }
 
@@ -167,11 +131,12 @@ export default function Research({
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const { development, action } = research;
-  const media = developmentMedia ?? {
-    imageUrl: RESEARCH_IMAGE_FALLBACK_SRC,
-    altText: RESEARCH_IMAGE_FALLBACK_ALT,
-    title: RESEARCH_IMAGE_FALLBACK_ALT,
-  };
+  const media =
+    developmentMedia?.imageUrl &&
+    development.image &&
+    isImageKitMediaUrl(developmentMedia.imageUrl)
+      ? developmentMedia
+      : null;
   const config: ImageDisplayConfig | undefined =
     development.image?.imageConfig;
 
@@ -211,13 +176,15 @@ export default function Research({
             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
             className="flex flex-col gap-3"
           >
-            <div className="img-zoom relative aspect-[4/3] overflow-hidden">
-              <ManagedImage
-                media={media}
-                config={config}
-                alt={media.altText || RESEARCH_IMAGE_FALLBACK_ALT}
-                sizes="40vw"
-              />
+            <div className="img-zoom relative aspect-[4/3] overflow-hidden bg-navy-900/50">
+              {media ? (
+                <ManagedImage
+                  media={media}
+                  config={config}
+                  alt={media.altText || media.title || "Research"}
+                  sizes="40vw"
+                />
+              ) : null}
               <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.7)_0%,transparent_55%)]" />
               <div className="absolute bottom-4 left-4">
                 <div className="eyebrow mb-1">{development.imageEyebrow}</div>

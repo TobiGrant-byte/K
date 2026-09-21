@@ -28,6 +28,7 @@ export {
   LEGACY_SITE_GALLERY,
   LIBRARY_ONLY_SITE_MEDIA,
   PUBLIC_GALLERY_STATIC_VIDEO,
+  isImageKitMediaUrl,
   isLocalPublicMediaUrl,
   isVideoMediaUrl,
   legacyGalleryId,
@@ -38,6 +39,10 @@ export {
   siteMediaDocId,
   siteMediaImageKitUrl,
 } from "@/lib/domains/media/site-media-migration";
+export {
+  PRESS_MEDIA_RECOVERY,
+  knownHostedMediaAsset,
+} from "@/lib/domains/media/press-media-recovery";
 export {
   DEFAULT_IMAGE_DISPLAY_CONFIG,
   IMAGE_DISPLAY_MAX_ZOOM,

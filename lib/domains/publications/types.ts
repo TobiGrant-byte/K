@@ -14,10 +14,8 @@ export type PublicationPressItem = {
   /** Optional supporting copy under the title. */
   excerpt: string;
   href: string;
-  /** Media Library selection (preferred). */
+  /** Media Library selection (ImageKit). Null → empty frame on the public page. */
   image: MediaImageRef | null;
-  /** Original /public or external URL when no Media Library image is selected. */
-  fallbackSrc: string;
   /**
    * Presentation for the card frame. When `image` is set, kept in sync with
    * `image.imageConfig` on write.
@@ -25,15 +23,33 @@ export type PublicationPressItem = {
   imageConfig: ImageDisplayConfig;
 };
 
+export type PublicationTipItem = {
+  id: string;
+  /** Small label above the title (e.g. Essay, Mindset). */
+  tag: string;
+  title: string;
+  blurb: string;
+  href: string;
+};
+
+export type PublicationsTipsContent = {
+  eyebrow: string;
+  title: string;
+  titleAccent: string;
+  subtitle: string;
+  items: PublicationTipItem[];
+};
+
 /**
- * Featured “In The Press” block on `/publications`.
- * Scholarship Tips & Academic Publications are out of scope for this document.
+ * Publications page document (`content/publications`).
+ * Press = Featured In The Press; tips = Scholarship Tips & Guidance.
  */
 export type PublicationsContent = {
   title: string;
   titleAccent: string;
   subtitle: string;
   items: PublicationPressItem[];
+  tips: PublicationsTipsContent;
   updatedAt: string;
 };
 
@@ -42,4 +58,5 @@ export type PublicationsContentInput = {
   titleAccent: string;
   subtitle: string;
   items: PublicationPressItem[];
+  tips: PublicationsTipsContent;
 };

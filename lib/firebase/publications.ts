@@ -97,6 +97,7 @@ export async function ensurePublicationsContentSeeded(): Promise<PublicationsCon
     titleAccent: PUBLICATIONS_FALLBACK.titleAccent,
     subtitle: PUBLICATIONS_FALLBACK.subtitle,
     items: PUBLICATIONS_FALLBACK.items,
+    tips: PUBLICATIONS_FALLBACK.tips,
   });
   await setDoc(ref, {
     ...seed,

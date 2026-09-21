@@ -6,8 +6,10 @@ import {
 import { PUBLICATIONS_FALLBACK } from "@/lib/domains/publications/defaults";
 import type {
   PublicationPressItem,
+  PublicationTipItem,
   PublicationsContent,
   PublicationsContentInput,
+  PublicationsTipsContent,
 } from "@/lib/domains/publications/types";
 
 function asString(value: unknown, fallback: string): string {
@@ -67,10 +69,6 @@ function normalizePressItem(
           imageConfig,
         }
       : null,
-    fallbackSrc:
-      asString(raw.fallbackSrc, fallback?.fallbackSrc ?? "").trim() ||
-      fallback?.fallbackSrc ||
-      "",
     imageConfig,
   };
 }
@@ -95,19 +93,79 @@ export function normalizePublicationPressItems(
       }));
 }
 
+function tipNumber(index: number): string {
+  return String(index + 1).padStart(2, "0");
+}
+
+function normalizeTipItem(
+  value: unknown,
+  index: number,
+): PublicationTipItem | null {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Record<string, unknown>;
+  const fallback = PUBLICATIONS_FALLBACK.tips.items[index];
+  const title = asString(raw.title, fallback?.title ?? "").trim();
+  const href = asString(raw.href, fallback?.href ?? "").trim();
+  if (!title || !href) return null;
+  return {
+    id:
+      asString(raw.id, "").trim() ||
+      fallback?.id ||
+      `tip-${index + 1}`,
+    tag: asString(raw.tag, fallback?.tag ?? "").trim() || fallback?.tag || "Article",
+    title,
+    blurb: asString(raw.blurb, fallback?.blurb ?? "").trim(),
+    href,
+  };
+}
+
+export function normalizePublicationTipItems(value: unknown): PublicationTipItem[] {
+  if (!Array.isArray(value)) {
+    return PUBLICATIONS_FALLBACK.tips.items.map((item) => ({ ...item }));
+  }
+  const items = value
+    .map((item, index) => normalizeTipItem(item, index))
+    .filter((item): item is PublicationTipItem => Boolean(item));
+  return items.length
+    ? items
+    : PUBLICATIONS_FALLBACK.tips.items.map((item) => ({ ...item }));
+}
+
+export function normalizePublicationsTips(
+  input?: Partial<PublicationsTipsContent> | null,
+): PublicationsTipsContent {
+  const fb = PUBLICATIONS_FALLBACK.tips;
+  return {
+    eyebrow: asString(input?.eyebrow, fb.eyebrow).trim() || fb.eyebrow,
+    title: asString(input?.title, fb.title).trim() || fb.title,
+    titleAccent: asString(input?.titleAccent, fb.titleAccent).trim(),
+    subtitle: asString(input?.subtitle, fb.subtitle).trim() || fb.subtitle,
+    items: normalizePublicationTipItems(input?.items),
+  };
+}
+
 export function normalizePublicationsContent(
   input?: Partial<PublicationsContent> | Record<string, unknown> | null,
   updatedAt = "",
 ): PublicationsContent {
   const raw = (input ?? {}) as Record<string, unknown>;
   const fb = PUBLICATIONS_FALLBACK;
+  const tipsRaw =
+    raw.tips && typeof raw.tips === "object"
+      ? (raw.tips as Partial<PublicationsTipsContent>)
+      : null;
   return {
     title: asString(raw.title, fb.title).trim() || fb.title,
     titleAccent: asString(raw.titleAccent, fb.titleAccent).trim(),
     subtitle: asString(raw.subtitle, fb.subtitle).trim() || fb.subtitle,
     items: normalizePublicationPressItems(raw.items),
+    tips: normalizePublicationsTips(tipsRaw),
     updatedAt: asString(raw.updatedAt, updatedAt),
   };
+}
+
+export function tipDisplayNumber(index: number): string {
+  return tipNumber(index);
 }
 
 export function toPublicationsWritePayload(
@@ -121,7 +179,12 @@ export function toPublicationsWritePayload(
     items: normalized.items.map((item) => {
       const imageConfig = normalizeImageDisplayConfig(item.imageConfig);
       return {
-        ...item,
+        id: item.id,
+        title: item.title,
+        source: item.source,
+        year: item.year,
+        excerpt: item.excerpt,
+        href: item.href,
         imageConfig,
         image: item.image
           ? {
@@ -131,5 +194,9 @@ export function toPublicationsWritePayload(
           : null,
       };
     }),
+    tips: {
+      ...normalized.tips,
+      items: normalized.tips.items.map((item) => ({ ...item })),
+    },
   };
 }

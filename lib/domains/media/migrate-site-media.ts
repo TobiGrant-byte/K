@@ -1,6 +1,8 @@
 import {
   SITE_MEDIA_MIGRATION,
+  siteMediaImageKitUrl,
 } from "@/lib/domains/media/site-media-migration";
+import { PRESS_MEDIA_RECOVERY } from "@/lib/domains/media/press-media-recovery";
 import {
   isLocalPublicMediaUrl,
   legacyGalleryId,
@@ -28,12 +30,54 @@ function urlForFileName(urls: Iterable<string>, fileName: string): string | null
   return null;
 }
 
+type MigrationTarget = {
+  fileName: string;
+  galleryId: string;
+  caption: string;
+  category: MediaAsset["category"];
+  showInGallery: boolean;
+  imageKitFileId?: string;
+};
+
+function migrationTargets(): MigrationTarget[] {
+  const fromCatalog: MigrationTarget[] = SITE_MEDIA_MIGRATION.map((item) => ({
+    fileName: item.fileName,
+    galleryId: legacyGalleryId(`/images/${item.fileName}`),
+    caption: item.caption,
+    category: item.category,
+    showInGallery: item.showInGallery,
+  }));
+  const fromPress: MigrationTarget[] = PRESS_MEDIA_RECOVERY.map((item) => ({
+    fileName: item.fileName,
+    galleryId: item.galleryId,
+    caption: item.caption,
+    category: item.category,
+    showInGallery: false,
+    imageKitFileId: item.imageKitFileId,
+  }));
+  return [...fromCatalog, ...fromPress];
+}
+
+async function imageKitFileExists(fileName: string): Promise<boolean> {
+  try {
+    const response = await fetch(siteMediaImageKitUrl(fileName), {
+      method: "HEAD",
+      cache: "no-store",
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Upload public site images to ImageKit and write Firebase gallery docs.
  *
  * Uses the original `legacy-{filename}` document IDs so Profile / Research /
  * Publications / Gallery selections (galleryImageId + imageConfig crops) keep
  * working after the old /images/ URL rows were removed.
+ *
+ * Also restores recovered press hotlink images under their publications CMS ids.
  */
 export async function migrateSiteMediaToImageKit(
   existing: MediaAsset[],
@@ -51,9 +95,8 @@ export async function migrateSiteMediaToImageKit(
     metadata: ReturnType<typeof normalizeMediaMetadata>;
   }> = [];
 
-  for (const item of SITE_MEDIA_MIGRATION) {
-    const publicSrc = `/images/${item.fileName}`;
-    const id = legacyGalleryId(publicSrc);
+  for (const item of migrationTargets()) {
+    const id = item.galleryId;
     const current = byId.get(id);
     const description = item.caption.trim();
     const meta = normalizeMediaMetadata({
@@ -69,7 +112,11 @@ export async function migrateSiteMediaToImageKit(
       continue;
     }
 
-    const existingHostedUrl = urlForFileName(urls, item.fileName);
+    const existingHostedUrl =
+      urlForFileName(urls, item.fileName) ??
+      ((await imageKitFileExists(item.fileName))
+        ? siteMediaImageKitUrl(item.fileName)
+        : null);
 
     // If this file is already on ImageKit under another doc, re-link the legacy id
     // (preserves CMS galleryImageId refs) without re-uploading.
@@ -87,7 +134,8 @@ export async function migrateSiteMediaToImageKit(
       pending.push({
         id,
         imageUrl,
-        imageKitFileId: hostedDoc?.imageKitFileId || "",
+        imageKitFileId:
+          hostedDoc?.imageKitFileId || item.imageKitFileId || "",
         metadata: meta,
       });
       linked += 1;
@@ -99,7 +147,7 @@ export async function migrateSiteMediaToImageKit(
         altText: meta.altText,
         category: meta.category,
         showInGallery: meta.showInGallery,
-        imageKitFileId: hostedDoc?.imageKitFileId || "",
+        imageKitFileId: hostedDoc?.imageKitFileId || item.imageKitFileId || "",
         createdAt: "",
         updatedAt: "",
       });
