@@ -131,6 +131,22 @@ export async function uploadGalleryMediaImage(
   return uploadImage(file, `/gallery/${mediaId}`, fileName);
 }
 
+/**
+ * Upload a site `/images/{fileName}` file into ImageKit `/site-media/{fileName}`.
+ * Uses a stable path so fallbacks can reference the ImageKit URL in code.
+ */
+export async function uploadSiteMediaPublicFile(
+  fileName: string,
+): Promise<{ url: string; fileId: string }> {
+  const publicPath = `/images/${fileName}`;
+  const response = await fetch(publicPath, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Could not read ${publicPath} for ImageKit upload.`);
+  }
+  const blob = await response.blob();
+  return uploadImage(blob, "/site-media", fileName);
+}
+
 export function isImageKitBlogUrl(url: string): boolean {
   const endpoint = imageKitUrlEndpoint.replace(/\/+$/, "");
   return url.startsWith(`${endpoint}/blog/`);

@@ -6,6 +6,7 @@ export {
   fetchPublicGalleryMedia,
   importLegacySiteGallery,
   importLibraryOnlySiteMedia,
+  removeLocalPublicMediaFromMediaLibrary,
   removeVideoAssetsFromMediaLibrary,
   setMediaVisibilityBatch,
   subscribeToAllMedia,
@@ -27,10 +28,16 @@ export {
   LEGACY_SITE_GALLERY,
   LIBRARY_ONLY_SITE_MEDIA,
   PUBLIC_GALLERY_STATIC_VIDEO,
+  isLocalPublicMediaUrl,
   isVideoMediaUrl,
   legacyGalleryId,
   presentationForMediaUrl,
 } from "@/lib/domains/media/legacy-gallery";
+export {
+  SITE_MEDIA_MIGRATION,
+  siteMediaDocId,
+  siteMediaImageKitUrl,
+} from "@/lib/domains/media/site-media-migration";
 export {
   DEFAULT_IMAGE_DISPLAY_CONFIG,
   IMAGE_DISPLAY_MAX_ZOOM,

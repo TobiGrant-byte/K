@@ -31,6 +31,7 @@ import {
 import {
   LEGACY_SITE_GALLERY,
   LIBRARY_ONLY_SITE_MEDIA,
+  isLocalPublicMediaUrl,
   isVideoMediaUrl,
   legacyGalleryId,
 } from "@/lib/domains/media/legacy-gallery";
@@ -388,6 +389,22 @@ export async function deleteMediaRecordsBatch(ids: string[]): Promise<void> {
     batch.delete(doc(db, "gallery", id));
   }
   await batch.commit();
+}
+
+/**
+ * Remove Media Library rows that only point at /public image paths.
+ * Real uploads live on ImageKit; those docs are kept.
+ * Does not delete files from disk or ImageKit.
+ */
+export async function removeLocalPublicMediaFromMediaLibrary(
+  existing: MediaAsset[],
+): Promise<number> {
+  const localIds = existing
+    .filter((item) => isLocalPublicMediaUrl(item.imageUrl))
+    .map((item) => item.id);
+  if (!localIds.length) return 0;
+  await deleteMediaRecordsBatch(localIds);
+  return localIds.length;
 }
 
 /**

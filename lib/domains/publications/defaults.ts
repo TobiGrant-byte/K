@@ -2,6 +2,7 @@ import {
   DEFAULT_IMAGE_DISPLAY_CONFIG,
   type ImageDisplayConfig,
 } from "@/lib/domains/media/display";
+import { siteMediaImageKitUrl } from "@/lib/domains/media/site-media-migration";
 import type { PublicationsContent } from "@/lib/domains/publications/types";
 
 function config(
@@ -31,8 +32,7 @@ export const PUBLICATIONS_FALLBACK: PublicationsContent = {
         "A first-generation student from Nigeria paving his path toward helping others — choosing The University of Alabama for the support and resources offered to international students, with a doctorate focused on safer roads for everyone.",
       href: "https://www.linkedin.com/posts/university-of-alabama_bamagrad-bamagrad-activity-7225199430163927040-RnXX",
       image: null,
-      fallbackSrc:
-        "https://news.ua.edu/wp-content/uploads/2024/07/2407025_sunday_okafor_featured.jpg",
+      fallbackSrc: siteMediaImageKitUrl("headshot.jpg"),
       imageConfig: config(0.65, 0.22, 1.15),
     },
     {
@@ -44,8 +44,7 @@ export const PUBLICATIONS_FALLBACK: PublicationsContent = {
       excerpt: "",
       href: "https://www.scholarshipregion.com/brilliant-nigerian-man-bags-first-class-bachelors-degree-masters-and-phd-at-us-uk-university-becomes-the-first-graduate-in-his-family/",
       image: null,
-      fallbackSrc:
-        "https://www.scholarshipregion.com/wp-content/uploads/2024/08/Brilliant-Nigerian-man-bags-first-class-bachelors-degree-Sunday-Okafor-also-earned-masters-and-PhD-at-US-UK-university-becomes-the-first-graduate-in-his-family.jpg",
+      fallbackSrc: siteMediaImageKitUrl("headshot.jpg"),
       imageConfig: config(0.5, 0.48),
     },
     {
@@ -56,7 +55,7 @@ export const PUBLICATIONS_FALLBACK: PublicationsContent = {
       excerpt: "",
       href: "https://www.ite.org/professional-and-career-development/young-leaders-to-follow/young-leaders-to-follow-for-2024/",
       image: null,
-      fallbackSrc: "/images/lifesavers-conf.webp",
+      fallbackSrc: siteMediaImageKitUrl("lifesavers-conf.webp"),
       imageConfig: config(0.5, 0.28),
     },
     {
@@ -68,7 +67,7 @@ export const PUBLICATIONS_FALLBACK: PublicationsContent = {
       excerpt: "",
       href: "https://www.legit.ng/people/1606304-university-alabama-praises-nigerian-student-bags-job-doctorate-civil-engineering/",
       image: null,
-      fallbackSrc: "https://cdn.legit.ng/images/1200x675/2401661588845c6b.jpeg?v=1",
+      fallbackSrc: siteMediaImageKitUrl("headshot.jpg"),
       imageConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
     },
     {
@@ -79,7 +78,7 @@ export const PUBLICATIONS_FALLBACK: PublicationsContent = {
       excerpt: "",
       href: "https://www.linkedin.com/posts/iamsamuelaboki_nigeriansareamazing-ugcPost-7231205061375217664-88xN/?utm_source=share&utm_medium=member_ios",
       image: null,
-      fallbackSrc: "/images/headshot.jpg",
+      fallbackSrc: siteMediaImageKitUrl("headshot.jpg"),
       imageConfig: config(0.5, 0.15),
     },
     {
@@ -90,8 +89,7 @@ export const PUBLICATIONS_FALLBACK: PublicationsContent = {
       excerpt: "",
       href: "https://news.ua.edu/2024/07/the-long-and-safe-road-international-graduate-helps-others/",
       image: null,
-      fallbackSrc:
-        "https://news.ua.edu/wp-content/uploads/2024/07/2407025_sunday_okafor_featured.jpg",
+      fallbackSrc: siteMediaImageKitUrl("headshot.jpg"),
       imageConfig: config(0.65, 0.22, 1.2),
     },
   ],

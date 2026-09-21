@@ -137,7 +137,7 @@ export default function Credentials() {
           >
             <div className="img-zoom relative aspect-[3/4] max-h-[420px] overflow-hidden rounded-xl">
               <Image
-                src="/images/grad-pensive.webp"
+                src={"/images/grad-pensive.webp"}
                 alt="Dr. Okafor doctoral regalia"
                 fill
                 className="object-cover object-[center_18%]"
@@ -154,7 +154,7 @@ export default function Credentials() {
             <div className="grid grid-cols-2 gap-4">
               <div className="img-zoom relative aspect-square overflow-hidden rounded-xl">
                 <Image
-                  src="/images/msc-graduation.jpg"
+                  src={"/images/msc-graduation.jpg"}
                   alt="MSc graduation UK"
                   fill
                   className="object-cover object-top"
@@ -163,7 +163,7 @@ export default function Credentials() {
               </div>
               <div className="img-zoom relative aspect-square overflow-hidden rounded-xl">
                 <Image
-                  src="/images/garver-award-1.png"
+                  src={"/images/garver-award-1.png"}
                   alt="Garver Award"
                   fill
                   className="object-cover"

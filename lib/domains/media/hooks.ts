@@ -17,6 +17,7 @@ import {
   createMediaRecordsBatch,
   importLegacySiteGallery,
   importLibraryOnlySiteMedia,
+  removeLocalPublicMediaFromMediaLibrary,
   removeVideoAssetsFromMediaLibrary,
   setMediaVisibilityBatch,
   updateMediaRecordsBatch,
@@ -25,6 +26,7 @@ import {
   normalizeMediaMetadata,
   validateMediaFiles,
 } from "@/lib/domains/media/service";
+import { migrateSiteMediaToImageKit } from "@/lib/domains/media/migrate-site-media";
 import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
 const MEDIA_STALE = 5 * 60_000;
@@ -257,6 +259,48 @@ export function useRemoveVideoMediaMutation() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
       bumpPublicMedia();
+    },
+  });
+}
+
+/**
+ * One-shot cleanup: drop Media Library rows that only point at /public paths.
+ * Keeps real ImageKit uploads stored in Firebase.
+ */
+export function useRemoveLocalPublicMediaMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const existing =
+        queryClient.getQueryData<MediaAsset[]>(mediaKeys.list()) ?? [];
+      return removeLocalPublicMediaFromMediaLibrary(existing);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
+      bumpPublicMedia();
+    },
+  });
+}
+
+/**
+ * Upload all catalogued public/images files to ImageKit and write Firebase
+ * gallery docs using the original legacy-* ids (keeps CMS crops / selections).
+ */
+export function useMigrateSiteMediaMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const existing =
+        queryClient.getQueryData<MediaAsset[]>(mediaKeys.list()) ?? [];
+      return migrateSiteMediaToImageKit(existing);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
+      bumpPublicMedia();
+      void revalidatePublicSite("gallery");
+      void revalidatePublicSite("profile");
+      void revalidatePublicSite("research");
+      void revalidatePublicSite("publications");
     },
   });
 }

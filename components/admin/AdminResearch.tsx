@@ -7,7 +7,6 @@ import {
   RESEARCH_ACTION_IMAGE_ASPECT,
   RESEARCH_IMAGE_ASPECT,
   RESEARCH_IMAGE_FALLBACK_ALT,
-  RESEARCH_IMAGE_FALLBACK_SRC,
   normalizeResearchContent,
   useResearchContent,
   useSaveResearchMutation,
@@ -30,7 +29,9 @@ type Tab = "development" | "action";
 type PickerTarget = "development" | number;
 type PendingRemove =
   | { kind: "area"; index: number }
-  | { kind: "action"; index: number };
+  | { kind: "action"; index: number }
+  | { kind: "development-image" }
+  | { kind: "action-image"; index: number };
 
 export default function AdminResearch() {
   const researchQuery = useResearchContent();
@@ -69,9 +70,9 @@ export default function AdminResearch() {
   const developmentMedia = useMediaById(developmentImageId);
 
   const developmentPreviewUrl = useMemo(() => {
-    if (developmentMedia.data?.imageUrl) return developmentMedia.data.imageUrl;
-    return RESEARCH_IMAGE_FALLBACK_SRC;
-  }, [developmentMedia.data]);
+    if (!developmentImageId) return null;
+    return developmentMedia.data?.imageUrl ?? null;
+  }, [developmentImageId, developmentMedia.data]);
 
   const dirty = useMemo(() => {
     if (!draft || !researchQuery.data) return false;
@@ -175,19 +176,27 @@ export default function AdminResearch() {
 
   const confirmPendingRemove = () => {
     if (!pendingRemove) return;
-    const { kind, index } = pendingRemove;
+    const pending = pendingRemove;
     setPendingRemove(null);
-    if (kind === "area") {
+    if (pending.kind === "area") {
       if (draft.development.areas.length <= 1) return;
       patchDevelopment({
-        areas: draft.development.areas.filter((_, i) => i !== index),
+        areas: draft.development.areas.filter((_, i) => i !== pending.index),
       });
       return;
     }
-    if (draft.action.items.length <= 1) return;
-    patchAction({
-      items: draft.action.items.filter((_, i) => i !== index),
-    });
+    if (pending.kind === "action") {
+      if (draft.action.items.length <= 1) return;
+      patchAction({
+        items: draft.action.items.filter((_, i) => i !== pending.index),
+      });
+      return;
+    }
+    if (pending.kind === "development-image") {
+      patchDevelopment({ image: null });
+      return;
+    }
+    updateActionItem(pending.index, { image: null });
   };
 
   const moveActionItem = (index: number, dir: -1 | 1) => {
@@ -376,10 +385,12 @@ export default function AdminResearch() {
                   {developmentImageId ? (
                     <button
                       type="button"
-                      onClick={() => patchDevelopment({ image: null })}
+                      onClick={() =>
+                        setPendingRemove({ kind: "development-image" })
+                      }
                       className="rounded-lg border border-white/12 px-4 py-3 font-title text-[10px] uppercase tracking-[2px] text-white/60 hover:text-white"
                     >
-                      Use site fallback
+                      Remove image
                     </button>
                   ) : null}
                 </div>
@@ -393,6 +404,7 @@ export default function AdminResearch() {
                   RESEARCH_IMAGE_FALLBACK_ALT
                 }
                 aspectRatio={RESEARCH_IMAGE_ASPECT}
+                emptyLabel="No focus image"
                 value={
                   draft.development.image?.imageConfig ??
                   DEFAULT_IMAGE_DISPLAY_CONFIG
@@ -553,6 +565,9 @@ export default function AdminResearch() {
                   onMove={(dir) => moveActionItem(index, dir)}
                   onRemove={() => removeActionItem(index)}
                   onPickImage={() => openPicker(index)}
+                  onRemoveImage={() =>
+                    setPendingRemove({ kind: "action-image", index })
+                  }
                 />
               ))}
             </div>
@@ -599,14 +614,27 @@ export default function AdminResearch() {
       <AdminConfirmDialog
         open={pendingRemove !== null}
         eyebrow={
-          pendingRemove?.kind === "action" ? "Remove card" : "Remove area"
+          pendingRemove?.kind === "action-image" ||
+          pendingRemove?.kind === "development-image"
+            ? "Remove image"
+            : pendingRemove?.kind === "action"
+              ? "Remove card"
+              : "Remove area"
         }
         title={
-          pendingRemove?.kind === "action"
-            ? "Remove this spotlight card?"
-            : "Remove this focus area?"
+          pendingRemove?.kind === "action-image" ||
+          pendingRemove?.kind === "development-image"
+            ? "Remove this image?"
+            : pendingRemove?.kind === "action"
+              ? "Remove this spotlight card?"
+              : "Remove this focus area?"
         }
-        description="It will be dropped from the list when you submit. You can cancel if this was a mistake."
+        description={
+          pendingRemove?.kind === "action-image" ||
+          pendingRemove?.kind === "development-image"
+            ? "The image will be cleared from this draft. Submit to apply the change on the public site."
+            : "It will be dropped from the list when you submit. You can cancel if this was a mistake."
+        }
         confirmLabel="Remove"
         onCancel={() => setPendingRemove(null)}
         onConfirm={confirmPendingRemove}
@@ -623,6 +651,7 @@ function ActionItemEditor({
   onMove,
   onRemove,
   onPickImage,
+  onRemoveImage,
 }: {
   item: ResearchActionItem;
   index: number;
@@ -631,9 +660,10 @@ function ActionItemEditor({
   onMove: (dir: -1 | 1) => void;
   onRemove: () => void;
   onPickImage: () => void;
+  onRemoveImage: () => void;
 }) {
   const media = useMediaById(item.image?.galleryImageId ?? null);
-  const previewUrl = media.data?.imageUrl || item.fallbackSrc || "";
+  const previewUrl = media.data?.imageUrl || null;
 
   return (
     <div className="space-y-3 rounded-lg border border-white/10 bg-navy-900/40 p-4">
@@ -715,36 +745,30 @@ function ActionItemEditor({
         {item.image ? (
           <button
             type="button"
-            onClick={() => onChange({ image: null })}
+            onClick={onRemoveImage}
             className="rounded-lg border border-white/12 px-4 py-2.5 font-title text-[10px] uppercase tracking-[2px] text-white/60 hover:text-white"
           >
-            Use fallback
+            Remove image
           </button>
         ) : null}
       </div>
 
-      {previewUrl ? (
-        <ImagePositionEditor
-          imageUrl={previewUrl}
-          alt={media.data?.altText || media.data?.title || item.title}
-          aspectRatio={RESEARCH_ACTION_IMAGE_ASPECT}
-          value={item.image?.imageConfig ?? DEFAULT_IMAGE_DISPLAY_CONFIG}
-          onChange={(imageConfig) => {
-            if (!item.image) return;
-            onChange({
-              image: {
-                galleryImageId: item.image.galleryImageId,
-                imageConfig,
-              },
-            });
-          }}
-        />
-      ) : (
-        <p className="text-sm text-white/40">
-          No image yet — select from Media Library or keep the site fallback
-          path empty until one is set.
-        </p>
-      )}
+      <ImagePositionEditor
+        imageUrl={previewUrl}
+        alt={media.data?.altText || media.data?.title || item.title}
+        aspectRatio={RESEARCH_ACTION_IMAGE_ASPECT}
+        emptyLabel="No image"
+        value={item.image?.imageConfig ?? DEFAULT_IMAGE_DISPLAY_CONFIG}
+        onChange={(imageConfig) => {
+          if (!item.image) return;
+          onChange({
+            image: {
+              galleryImageId: item.image.galleryImageId,
+              imageConfig,
+            },
+          });
+        }}
+      />
     </div>
   );
 }

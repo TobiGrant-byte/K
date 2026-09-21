@@ -43,10 +43,10 @@ export default function AdminApp() {
     }
     if (authState.status === "error") {
       adminToast.error(authState.message);
-      const t = window.setTimeout(() => {
-        setAuthState({ status: "signed-out", user: null, isAdmin: false });
-      }, 8000);
-      return () => window.clearTimeout(t);
+    const t = window.setTimeout(() => {
+      setAuthState({ status: "signed-out", user: null, isAdmin: false });
+    }, 8000);
+    return () => window.clearTimeout(t);
     }
   }, [authState]);
 
@@ -87,31 +87,31 @@ export default function AdminApp() {
           <div className="w-full max-w-md rounded-xl border border-white/10 bg-navy-800 p-8">
             <div className="mb-2 font-title text-[10px] uppercase tracking-[3px] text-white/50">
               CMS
-            </div>
-            <h1 className="mb-2 font-display text-3xl font-light text-white">
-              Sign in
-            </h1>
+          </div>
+          <h1 className="mb-2 font-display text-3xl font-light text-white">
+            Sign in
+          </h1>
             <p className="mb-8 text-sm leading-relaxed text-white/50">
               Continue with an authorized Google account to manage site content.
             </p>
 
-            <button
-              type="button"
-              onClick={handleLogin}
-              disabled={signingIn}
-              className="w-full rounded-lg bg-accent py-3.5 font-title text-[11px] uppercase tracking-[2.5px] text-white transition-colors hover:bg-accent-light disabled:opacity-60"
-            >
-              {signingIn ? "Signing in…" : "Continue with Google"}
-            </button>
+          <button
+            type="button"
+            onClick={handleLogin}
+            disabled={signingIn}
+            className="w-full rounded-lg bg-accent py-3.5 font-title text-[11px] uppercase tracking-[2.5px] text-white transition-colors hover:bg-accent-light disabled:opacity-60"
+          >
+            {signingIn ? "Signing in…" : "Continue with Google"}
+          </button>
 
-            <Link
-              href="/"
+          <Link
+            href="/"
               className="mt-6 inline-flex font-title text-[9px] uppercase tracking-[2px] text-white/40 no-underline hover:text-white/70"
-            >
-              ← Back to site
-            </Link>
-          </div>
+          >
+            ← Back to site
+          </Link>
         </div>
+      </div>
       </>
     );
   }

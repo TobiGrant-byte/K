@@ -1,0 +1,143 @@
+import {
+  SITE_MEDIA_MIGRATION,
+} from "@/lib/domains/media/site-media-migration";
+import {
+  isLocalPublicMediaUrl,
+  legacyGalleryId,
+} from "@/lib/domains/media/legacy-gallery";
+import { uploadSiteMediaPublicFile } from "@/lib/imagekit/images";
+import {
+  createMediaRecordsBatch,
+  type MediaAsset,
+} from "@/lib/domains/media/service";
+import { normalizeMediaMetadata } from "@/lib/media";
+
+function isImageKitUrl(url: string): boolean {
+  return /imagekit\.io/i.test(url) && !isLocalPublicMediaUrl(url);
+}
+
+function urlForFileName(urls: Iterable<string>, fileName: string): string | null {
+  for (const url of urls) {
+    if (
+      url.includes(`/site-media/${fileName}`) ||
+      url.includes(`/site-media/${encodeURIComponent(fileName)}`)
+    ) {
+      return url;
+    }
+  }
+  return null;
+}
+
+/**
+ * Upload public site images to ImageKit and write Firebase gallery docs.
+ *
+ * Uses the original `legacy-{filename}` document IDs so Profile / Research /
+ * Publications / Gallery selections (galleryImageId + imageConfig crops) keep
+ * working after the old /images/ URL rows were removed.
+ */
+export async function migrateSiteMediaToImageKit(
+  existing: MediaAsset[],
+): Promise<{ uploaded: number; linked: number; skipped: number; failed: string[] }> {
+  const byId = new Map(existing.map((item) => [item.id, item]));
+  const urls = new Set(existing.map((item) => item.imageUrl));
+  let uploaded = 0;
+  let linked = 0;
+  let skipped = 0;
+  const failed: string[] = [];
+  const pending: Array<{
+    id: string;
+    imageUrl: string;
+    imageKitFileId?: string;
+    metadata: ReturnType<typeof normalizeMediaMetadata>;
+  }> = [];
+
+  for (const item of SITE_MEDIA_MIGRATION) {
+    const publicSrc = `/images/${item.fileName}`;
+    const id = legacyGalleryId(publicSrc);
+    const current = byId.get(id);
+    const description = item.caption.trim();
+    const meta = normalizeMediaMetadata({
+      title: description || item.fileName,
+      altText: description || item.fileName,
+      category: item.category,
+      showInGallery: item.showInGallery,
+    });
+
+    // Already a real ImageKit row under the same CMS id — leave it alone.
+    if (current && isImageKitUrl(current.imageUrl)) {
+      skipped += 1;
+      continue;
+    }
+
+    const existingHostedUrl = urlForFileName(urls, item.fileName);
+
+    // If this file is already on ImageKit under another doc, re-link the legacy id
+    // (preserves CMS galleryImageId refs) without re-uploading.
+    const hostedDoc = existing.find(
+      (asset) =>
+        isImageKitUrl(asset.imageUrl) &&
+        (asset.imageUrl.includes(`/site-media/${item.fileName}`) ||
+          asset.imageUrl.includes(
+            `/site-media/${encodeURIComponent(item.fileName)}`,
+          )),
+    );
+
+    if (hostedDoc || (existingHostedUrl && isImageKitUrl(existingHostedUrl))) {
+      const imageUrl = hostedDoc?.imageUrl ?? existingHostedUrl!;
+      pending.push({
+        id,
+        imageUrl,
+        imageKitFileId: hostedDoc?.imageKitFileId || "",
+        metadata: meta,
+      });
+      linked += 1;
+      urls.add(imageUrl);
+      byId.set(id, {
+        id,
+        imageUrl,
+        title: meta.title,
+        altText: meta.altText,
+        category: meta.category,
+        showInGallery: meta.showInGallery,
+        imageKitFileId: hostedDoc?.imageKitFileId || "",
+        createdAt: "",
+        updatedAt: "",
+      });
+      continue;
+    }
+
+    try {
+      const { url, fileId } = await uploadSiteMediaPublicFile(item.fileName);
+      pending.push({
+        id,
+        imageUrl: url,
+        imageKitFileId: fileId,
+        metadata: meta,
+      });
+      uploaded += 1;
+      urls.add(url);
+      byId.set(id, {
+        id,
+        imageUrl: url,
+        title: meta.title,
+        altText: meta.altText,
+        category: meta.category,
+        showInGallery: meta.showInGallery,
+        imageKitFileId: fileId,
+        createdAt: "",
+        updatedAt: "",
+      });
+    } catch (error) {
+      failed.push(
+        `${item.fileName}: ${error instanceof Error ? error.message : "upload failed"}`,
+      );
+    }
+  }
+
+  const chunkSize = 40;
+  for (let i = 0; i < pending.length; i += chunkSize) {
+    await createMediaRecordsBatch(pending.slice(i, i + chunkSize));
+  }
+
+  return { uploaded, linked, skipped, failed };
+}

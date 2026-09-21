@@ -1,4 +1,5 @@
 import type { ResearchContent } from "@/lib/domains/research/types";
+import { siteMediaImageKitUrl } from "@/lib/domains/media/site-media-migration";
 
 /**
  * Canonical static fallbacks — existing public Research page copy.
@@ -46,7 +47,7 @@ export const RESEARCH_FALLBACK: ResearchContent = {
           "Representing Garver at the 2025 SDITE/MOVITE Joint Meeting in Memphis — bringing research-minded engineering into professional conversation.",
         href: "https://www.linkedin.com/posts/sunday-okafor_garvertransportation-roadsafety-activity-7316450495957467136-wm-Q",
         image: null,
-        fallbackSrc: "/images/graver.jpg",
+        fallbackSrc: siteMediaImageKitUrl("garver-award-1.png"),
       },
       {
         id: "action-trb-2025",
@@ -56,7 +57,7 @@ export const RESEARCH_FALLBACK: ResearchContent = {
           "Sharing expertise at the Transportation Research Board Annual Meeting in Washington, DC — where research and practice meet on a national stage.",
         href: "https://www.linkedin.com/posts/sunday-okafor_garvertransportation-trbam-activity-7281060396864532480-mRZj",
         image: null,
-        fallbackSrc: "/images/graver2.jpg",
+        fallbackSrc: siteMediaImageKitUrl("asa-board.jpg"),
       },
       {
         id: "action-lifesavers-2023",
@@ -66,12 +67,12 @@ export const RESEARCH_FALLBACK: ResearchContent = {
           "Selected as a Traffic Safety Scholar at the national conference on highway safety priorities — recognizing emerging researchers shaping safer roads.",
         href: "",
         image: null,
-        fallbackSrc: "/images/lifesavers-conf.webp",
+        fallbackSrc: siteMediaImageKitUrl("lifesavers-conf.webp"),
       },
     ],
   },
   updatedAt: "",
 };
 
-export const RESEARCH_IMAGE_FALLBACK_SRC = "/images/lecture-hall.jpg";
+export const RESEARCH_IMAGE_FALLBACK_SRC = siteMediaImageKitUrl("lecture-hall.jpg");
 export const RESEARCH_IMAGE_FALLBACK_ALT = "Dr. Okafor lecturing";

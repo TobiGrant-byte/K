@@ -22,13 +22,19 @@ import { createId, formatPostDate } from "@/lib/blog";
 import { adminToast } from "@/lib/admin/toast-store";
 import AdminConfirmDialog from "@/components/admin/cms/AdminConfirmDialog";
 
+type PendingRemove =
+  | { kind: "item"; index: number }
+  | { kind: "image"; index: number };
+
 export default function AdminPublications() {
   const publicationsQuery = usePublicationsContent();
   const saveMutation = useSavePublicationsMutation();
   const [draft, setDraft] = useState<PublicationsContentInput | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerIndex, setPickerIndex] = useState(0);
-  const [pendingRemove, setPendingRemove] = useState<number | null>(null);
+  const [pendingRemove, setPendingRemove] = useState<PendingRemove | null>(
+    null,
+  );
 
   const serverDraft = useMemo(() => {
     if (!publicationsQuery.data) return null;
@@ -104,15 +110,19 @@ export default function AdminPublications() {
 
   const removeItem = (index: number) => {
     if (draft.items.length <= 1) return;
-    setPendingRemove(index);
+    setPendingRemove({ kind: "item", index });
   };
 
-  const confirmRemoveItem = () => {
-    if (pendingRemove === null) return;
-    const index = pendingRemove;
+  const confirmPendingRemove = () => {
+    if (!pendingRemove) return;
+    const pending = pendingRemove;
     setPendingRemove(null);
+    if (pending.kind === "image") {
+      updateItem(pending.index, { image: null });
+      return;
+    }
     if (draft.items.length <= 1) return;
-    patch({ items: draft.items.filter((_, i) => i !== index) });
+    patch({ items: draft.items.filter((_, i) => i !== pending.index) });
   };
 
   const moveItem = (index: number, dir: -1 | 1) => {
@@ -238,6 +248,9 @@ export default function AdminPublications() {
               onMove={(dir) => moveItem(index, dir)}
               onRemove={() => removeItem(index)}
               onPickImage={() => openPicker(index)}
+              onRemoveImage={() =>
+                setPendingRemove({ kind: "image", index })
+              }
             />
           ))}
         </div>
@@ -275,13 +288,22 @@ export default function AdminPublications() {
 
       <AdminConfirmDialog
         open={pendingRemove !== null}
-        eyebrow="Remove feature"
-        title="Remove this press feature?"
+        eyebrow={
+          pendingRemove?.kind === "image" ? "Remove image" : "Remove feature"
+        }
+        title={
+          pendingRemove?.kind === "image"
+            ? "Remove this image?"
+            : "Remove this press feature?"
+        }
         description={
-          pendingRemove !== null && draft.items[pendingRemove]?.title ? (
+          pendingRemove?.kind === "image" ? (
+            "The image will be cleared from this draft. Submit to apply the change on the public site."
+          ) : pendingRemove?.kind === "item" &&
+            draft.items[pendingRemove.index]?.title ? (
             <>
-              “{draft.items[pendingRemove]!.title}” will be dropped from the
-              list when you submit.
+              “{draft.items[pendingRemove.index]!.title}” will be dropped from
+              the list when you submit.
             </>
           ) : (
             "It will be dropped from the list when you submit."
@@ -289,7 +311,7 @@ export default function AdminPublications() {
         }
         confirmLabel="Remove"
         onCancel={() => setPendingRemove(null)}
-        onConfirm={confirmRemoveItem}
+        onConfirm={confirmPendingRemove}
       />
     </div>
   );
@@ -303,6 +325,7 @@ function PressItemEditor({
   onMove,
   onRemove,
   onPickImage,
+  onRemoveImage,
 }: {
   item: PublicationPressItem;
   index: number;
@@ -311,9 +334,10 @@ function PressItemEditor({
   onMove: (dir: -1 | 1) => void;
   onRemove: () => void;
   onPickImage: () => void;
+  onRemoveImage: () => void;
 }) {
   const media = useMediaById(item.image?.galleryImageId ?? null);
-  const previewUrl = media.data?.imageUrl || item.fallbackSrc || "";
+  const previewUrl = media.data?.imageUrl || null;
 
   return (
     <div className="space-y-3 rounded-lg border border-white/10 bg-navy-900/40 p-4">
@@ -397,38 +421,32 @@ function PressItemEditor({
         {item.image ? (
           <button
             type="button"
-            onClick={() => onChange({ image: null })}
+            onClick={onRemoveImage}
             className="rounded-lg border border-white/12 px-4 py-2.5 font-title text-[10px] uppercase tracking-[2px] text-white/60 hover:text-white"
           >
-            Use site fallback
+            Remove image
           </button>
         ) : null}
       </div>
 
-      {previewUrl ? (
-        <ImagePositionEditor
-          imageUrl={previewUrl}
-          alt={media.data?.altText || media.data?.title || item.title}
-          aspectRatio={PUBLICATIONS_IMAGE_ASPECT}
-          value={item.imageConfig}
-          onChange={(imageConfig) => {
-            onChange({
-              imageConfig,
-              image: item.image
-                ? {
-                    galleryImageId: item.image.galleryImageId,
-                    imageConfig,
-                  }
-                : null,
-            });
-          }}
-        />
-      ) : (
-        <p className="text-sm text-white/40">
-          Select a Media Library image, or keep the built-in site fallback for
-          this feature.
-        </p>
-      )}
+      <ImagePositionEditor
+        imageUrl={previewUrl}
+        alt={media.data?.altText || media.data?.title || item.title}
+        aspectRatio={PUBLICATIONS_IMAGE_ASPECT}
+        emptyLabel="No image"
+        value={item.imageConfig}
+        onChange={(imageConfig) => {
+          onChange({
+            imageConfig,
+            image: item.image
+              ? {
+                  galleryImageId: item.image.galleryImageId,
+                  imageConfig,
+                }
+              : null,
+          });
+        }}
+      />
     </div>
   );
 }
