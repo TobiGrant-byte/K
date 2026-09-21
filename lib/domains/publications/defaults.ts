@@ -1,8 +1,8 @@
 import {
   DEFAULT_IMAGE_DISPLAY_CONFIG,
+  createMediaImageRef,
   type ImageDisplayConfig,
 } from "@/lib/domains/media/display";
-import { siteMediaImageKitUrl } from "@/lib/domains/media/site-media-migration";
 import type { PublicationsContent } from "@/lib/domains/publications/types";
 
 function config(
@@ -13,9 +13,18 @@ function config(
   return { positionX, positionY, zoom };
 }
 
+function pressImage(
+  galleryImageId: string,
+  positionX: number,
+  positionY: number,
+  zoom = 1,
+) {
+  return createMediaImageRef(galleryImageId, config(positionX, positionY, zoom));
+}
+
 /**
- * Canonical static fallback — existing PressSection “Featured In The Press” copy.
- * Scholarship Tips block stays hard-coded on the public page (separate CMS later).
+ * Canonical static fallbacks — press cards point at recovered Media Library ids
+ * (ImageKit /site-media). Frames stay empty only if those assets are missing.
  */
 export const PUBLICATIONS_FALLBACK: PublicationsContent = {
   title: "Featured",
@@ -31,8 +40,7 @@ export const PUBLICATIONS_FALLBACK: PublicationsContent = {
       excerpt:
         "A first-generation student from Nigeria paving his path toward helping others — choosing The University of Alabama for the support and resources offered to international students, with a doctorate focused on safer roads for everyone.",
       href: "https://www.linkedin.com/posts/university-of-alabama_bamagrad-bamagrad-activity-7225199430163927040-RnXX",
-      image: null,
-      fallbackSrc: siteMediaImageKitUrl("headshot.jpg"),
+      image: pressImage("legacy-press-ua-long-safe-road.jpg", 0.65, 0.22, 1.15),
       imageConfig: config(0.65, 0.22, 1.15),
     },
     {
@@ -43,8 +51,7 @@ export const PUBLICATIONS_FALLBACK: PublicationsContent = {
       year: "2025",
       excerpt: "",
       href: "https://www.scholarshipregion.com/brilliant-nigerian-man-bags-first-class-bachelors-degree-masters-and-phd-at-us-uk-university-becomes-the-first-graduate-in-his-family/",
-      image: null,
-      fallbackSrc: siteMediaImageKitUrl("headshot.jpg"),
+      image: pressImage("legacy-press-scholarship-region.jpg", 0.5, 0.48),
       imageConfig: config(0.5, 0.48),
     },
     {
@@ -54,8 +61,7 @@ export const PUBLICATIONS_FALLBACK: PublicationsContent = {
       year: "2024",
       excerpt: "",
       href: "https://www.ite.org/professional-and-career-development/young-leaders-to-follow/young-leaders-to-follow-for-2024/",
-      image: null,
-      fallbackSrc: siteMediaImageKitUrl("lifesavers-conf.webp"),
+      image: pressImage("legacy-lifesavers-conf.webp", 0.5, 0.28),
       imageConfig: config(0.5, 0.28),
     },
     {
@@ -66,8 +72,7 @@ export const PUBLICATIONS_FALLBACK: PublicationsContent = {
       year: "2024",
       excerpt: "",
       href: "https://www.legit.ng/people/1606304-university-alabama-praises-nigerian-student-bags-job-doctorate-civil-engineering/",
-      image: null,
-      fallbackSrc: siteMediaImageKitUrl("headshot.jpg"),
+      image: pressImage("legacy-press-legit-alabama-job.jpeg", 0.5, 0.5),
       imageConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
     },
     {
@@ -77,8 +82,7 @@ export const PUBLICATIONS_FALLBACK: PublicationsContent = {
       year: "2024",
       excerpt: "",
       href: "https://www.linkedin.com/posts/iamsamuelaboki_nigeriansareamazing-ugcPost-7231205061375217664-88xN/?utm_source=share&utm_medium=member_ios",
-      image: null,
-      fallbackSrc: siteMediaImageKitUrl("headshot.jpg"),
+      image: pressImage("legacy-headshot.jpg", 0.5, 0.15),
       imageConfig: config(0.5, 0.15),
     },
     {
@@ -88,10 +92,50 @@ export const PUBLICATIONS_FALLBACK: PublicationsContent = {
       year: "2024",
       excerpt: "",
       href: "https://news.ua.edu/2024/07/the-long-and-safe-road-international-graduate-helps-others/",
-      image: null,
-      fallbackSrc: siteMediaImageKitUrl("headshot.jpg"),
+      image: pressImage("legacy-press-ua-long-safe-road.jpg", 0.65, 0.22, 1.2),
       imageConfig: config(0.65, 0.22, 1.2),
     },
   ],
+  tips: {
+    eyebrow: "LinkedIn Articles",
+    title: "Scholarship Tips &",
+    titleAccent: "Guidance",
+    subtitle:
+      "Practical advice for competitive international scholarships — written to help others succeed.",
+    items: [
+      {
+        id: "tip-commonwealth",
+        tag: "Essay",
+        title: "My Perspective on Winning the Commonwealth Shared Scholarship",
+        blurb:
+          "How a solution-based development impact essay and a coherent story can change an application.",
+        href: "https://www.linkedin.com/pulse/my-perspective-winning-commonwealth-shared-sunday-okafor",
+      },
+      {
+        id: "tip-motivations",
+        tag: "Mindset",
+        title: "Scholarship Application: Motivations, Motives and Self-esteem",
+        blurb:
+          "Why motive and confidence matter as much as grades when the essays have to sound true.",
+        href: "https://www.linkedin.com/pulse/scholarship-application-your-motivations-motives-sunday-okafor",
+      },
+      {
+        id: "tip-strength",
+        tag: "Strategy",
+        title: "Leveraging Areas of Strength in Scholarship Applications",
+        blurb:
+          "You do not have to tick every box perfectly — lead with what already sets you apart.",
+        href: "https://www.linkedin.com/pulse/leveraging-areas-your-strength-scholarship-sunday-okafor",
+      },
+      {
+        id: "tip-webinar",
+        tag: "Webinar",
+        title: "A Webinar on International Scholarship and Personal Development",
+        blurb:
+          "Guidance for international applicants on purpose, preparation, and personal growth.",
+        href: "https://www.linkedin.com/pulse/webinar-discussion-international-scholarship-personal-sunday-okafor",
+      },
+    ],
+  },
   updatedAt: "",
 };

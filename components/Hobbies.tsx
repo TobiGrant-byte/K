@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import ManagedImage from "@/components/media/ManagedImage";
 import type { MediaAsset } from "@/lib/domains/media";
+import { isImageKitMediaUrl } from "@/lib/domains/media";
 import type {
   ProfileHobbiesContent,
   ProfileHobbyItem,
@@ -24,8 +25,12 @@ function HobbyMediaFrame({
   media: MediaPick;
 }) {
   const alt = media?.altText || media?.title || item.title;
+  const hasImage =
+    Boolean(media?.imageUrl) &&
+    Boolean(item.image) &&
+    isImageKitMediaUrl(media!.imageUrl);
 
-  if (media?.imageUrl && item.image) {
+  if (hasImage && media) {
     return (
       <ManagedImage
         media={media}
@@ -36,11 +41,7 @@ function HobbyMediaFrame({
     );
   }
 
-  return (
-    <div className="flex h-full items-center justify-center bg-white/[0.04] text-sm text-white/35">
-      Image coming soon
-    </div>
-  );
+  return <div className="h-full w-full bg-white/[0.04]" />;
 }
 
 export default function Hobbies({ hobbies, mediaById = {} }: Props) {

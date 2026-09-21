@@ -27,6 +27,7 @@ import {
   validateMediaFiles,
 } from "@/lib/domains/media/service";
 import { migrateSiteMediaToImageKit } from "@/lib/domains/media/migrate-site-media";
+import { knownHostedMediaAsset } from "@/lib/domains/media/press-media-recovery";
 import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
 const MEDIA_STALE = 5 * 60_000;
@@ -76,14 +77,17 @@ export function usePublicGalleryMedia(initialData: MediaAsset[] = []) {
 
 export function useMediaById(id: string | null | undefined) {
   const library = useMediaLibrary();
-  const asset = id
+  const fromLibrary = id
     ? (library.data?.find((item) => item.id === id) ?? null)
     : null;
+  const asset =
+    fromLibrary ??
+    (id ? knownHostedMediaAsset(id) : null);
 
   return {
     ...library,
     data: asset,
-    isPending: Boolean(id) && library.isPending,
+    isPending: Boolean(id) && library.isPending && !asset,
   };
 }
 

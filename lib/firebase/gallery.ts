@@ -146,13 +146,17 @@ export async function fetchMediaAssetById(
   id: string,
 ): Promise<MediaAsset | null> {
   if (!firebaseConfigured || !id.trim()) return null;
+  const trimmed = id.trim();
   try {
-    const snap = await getDoc(doc(getFirebaseFirestore(), "gallery", id.trim()));
-    if (!snap.exists()) return null;
-    return mediaFromData(snap.id, snap.data());
+    const snap = await getDoc(doc(getFirebaseFirestore(), "gallery", trimmed));
+    if (snap.exists()) return mediaFromData(snap.id, snap.data());
   } catch {
-    return null;
+    // Fall through to known hosted catalog (recovered press / site-media).
   }
+  const { knownHostedMediaAsset } = await import(
+    "@/lib/domains/media/press-media-recovery"
+  );
+  return knownHostedMediaAsset(trimmed);
 }
 
 export async function createMediaRecord(args: {
