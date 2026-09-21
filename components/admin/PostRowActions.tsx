@@ -42,7 +42,7 @@ export default function PostRowActions({
   return (
     <div
       ref={rootRef}
-      className={`relative shrink-0 self-start ${open ? "z-50" : "z-10"}`}
+      className={`relative -mr-1 -mt-0.5 shrink-0 ${open ? "z-50" : "z-20"}`}
     >
       <button
         type="button"
@@ -51,7 +51,7 @@ export default function PostRowActions({
         aria-controls={menuId}
         aria-label="Post actions"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-6 w-6 items-center justify-center text-white/50 transition-colors hover:text-white"
+        className="inline-flex h-8 w-8 items-center justify-center text-white/50 transition-colors hover:text-white"
       >
         <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden>
           <circle cx="12" cy="5" r="1.75" />
@@ -64,7 +64,7 @@ export default function PostRowActions({
         <div
           id={menuId}
           role="menu"
-          className="absolute right-0 top-full z-50 mt-1 min-w-40 overflow-hidden rounded-lg border border-white/10 bg-navy-800 py-1 shadow-lg"
+          className="absolute right-0 top-full z-50 mt-1 min-w-40 overflow-hidden rounded-lg border border-white/10 bg-navy-800 py-1 shadow-[0_12px_40px_rgba(0,0,0,0.55)]"
         >
           <Link
             href={`/blog/${slug}`}

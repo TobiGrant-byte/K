@@ -525,7 +525,7 @@ export default function AdminPosts() {
               {sorted.map((post) => (
                 <article
                   key={post.id}
-                  className="rounded-xl border border-white/10 bg-navy-800 sm:flex sm:items-stretch sm:gap-0 sm:p-0"
+                  className="relative overflow-visible rounded-xl border border-white/10 bg-navy-800 sm:flex sm:items-stretch sm:gap-0 sm:p-0"
                 >
                   <div className="aspect-[16/10] w-full shrink-0 overflow-hidden rounded-t-xl bg-white/5 sm:aspect-auto sm:h-auto sm:w-40 sm:self-stretch sm:rounded-none sm:rounded-l-xl">
                     {post.coverImage ? (
@@ -544,30 +544,38 @@ export default function AdminPosts() {
                     )}
                   </div>
 
-                  <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 sm:flex-row sm:items-start sm:gap-4 sm:p-5">
+                  <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-visible p-4 sm:flex-row sm:items-start sm:gap-4 sm:p-5">
                     <div className="min-w-0 flex-1">
-                      <div className="mb-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-title text-[10px] uppercase tracking-[1.5px]">
-                        <span className="font-semibold text-accent">
-                          {post.category}
-                        </span>
-                        <span className="text-white/25" aria-hidden>
-                          ·
-                        </span>
-                        <span
-                          className={`font-semibold ${
-                            post.published
-                              ? "text-emerald-400"
-                              : "text-amber-400"
-                          }`}
-                        >
-                          {post.published ? "Published" : "Draft"}
-                        </span>
-                        <span className="text-white/25" aria-hidden>
-                          ·
-                        </span>
-                        <span className="font-medium text-white/60">
-                          {formatPostDate(post.updatedAt)}
-                        </span>
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 font-title text-[10px] uppercase tracking-[1.5px]">
+                          <span className="font-semibold text-accent">
+                            {post.category}
+                          </span>
+                          <span className="text-white/25" aria-hidden>
+                            ·
+                          </span>
+                          <span
+                            className={`font-semibold ${
+                              post.published
+                                ? "text-emerald-400"
+                                : "text-amber-400"
+                            }`}
+                          >
+                            {post.published ? "Published" : "Draft"}
+                          </span>
+                          <span className="text-white/25" aria-hidden>
+                            ·
+                          </span>
+                          <span className="font-medium text-white/60">
+                            {formatPostDate(post.updatedAt)}
+                          </span>
+                        </div>
+                        <PostRowActions
+                          slug={post.slug}
+                          onEdit={() => openEdit(post.id)}
+                          onComments={() => openPostComments(post.id)}
+                          onDelete={() => remove(post.id)}
+                        />
                       </div>
                       <h2 className="font-display text-[22px] leading-snug text-white sm:truncate sm:text-xl">
                         {post.title}
@@ -581,13 +589,6 @@ export default function AdminPosts() {
                         </p>
                       ) : null}
                     </div>
-
-                    <PostRowActions
-                      slug={post.slug}
-                      onEdit={() => openEdit(post.id)}
-                      onComments={() => openPostComments(post.id)}
-                      onDelete={() => remove(post.id)}
-                    />
                   </div>
                 </article>
               ))}
