@@ -9,8 +9,8 @@ export const metadata: Metadata = {
     "Moments from work, campus, and community — a visual story of Dr. Sunday Okafor’s journey.",
 };
 
-/** Refresh SSR gallery data periodically; client listener keeps it live. */
-export const revalidate = 60;
+/** ISR: serve cached HTML; admin saves bust the cache via /api/revalidate. */
+export const revalidate = 300;
 
 export default async function GalleryPage() {
   let initialMedia: Awaited<ReturnType<typeof fetchPublicGalleryMedia>> = [];

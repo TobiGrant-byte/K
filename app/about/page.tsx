@@ -14,7 +14,8 @@ export const metadata: Metadata = {
     "Meet Dr. Sunday Okafor — Transportation Engineer, Researcher, and Leader dedicated to safer roads and stronger communities.",
 };
 
-export const revalidate = 60;
+/** ISR: serve cached HTML; admin saves bust the cache via /api/revalidate. */
+export const revalidate = 300;
 
 export default async function AboutPage() {
   let profile = PROFILE_FALLBACK;

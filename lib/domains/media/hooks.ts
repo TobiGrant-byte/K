@@ -25,8 +25,13 @@ import {
   normalizeMediaMetadata,
   validateMediaFiles,
 } from "@/lib/domains/media/service";
+import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
 const MEDIA_STALE = 5 * 60_000;
+
+function bumpPublicMedia() {
+  void revalidatePublicSite("gallery");
+}
 
 /** Admin Media Library + Media Picker: shared list + one Firestore listener. */
 export function useMediaLibrary() {
@@ -127,6 +132,7 @@ export function useCreateMediaBatchMutation() {
     ) => createMediaRecordsBatch(items),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
+      bumpPublicMedia();
     },
   });
 }
@@ -142,6 +148,7 @@ export function useImportLegacyGalleryMutation() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
+      bumpPublicMedia();
     },
   });
 }
@@ -157,6 +164,7 @@ export function useImportLibraryOnlyMediaMutation() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
+      bumpPublicMedia();
     },
   });
 }
@@ -194,6 +202,7 @@ export function useUpdateMediaBatchMutation() {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
+      bumpPublicMedia();
     },
   });
 }
@@ -228,6 +237,7 @@ export function useSetMediaVisibilityBatchMutation() {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
+      bumpPublicMedia();
     },
   });
 }
@@ -246,6 +256,7 @@ export function useRemoveVideoMediaMutation() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
+      bumpPublicMedia();
     },
   });
 }

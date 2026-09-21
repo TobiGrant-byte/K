@@ -24,8 +24,8 @@ export const ADMIN_NAV: AdminNavItem[] = [
   {
     id: "publications",
     label: "Publications",
-    enabled: false,
-    group: "Professional",
+    enabled: true,
+    group: "Site",
   },
   {
     id: "scholarship",
@@ -117,6 +117,7 @@ export const ADMIN_PUBLIC_QUICK_LINKS: Array<{
   { href: "/gallery", label: "Gallery", hint: "Public media" },
   { href: "/about", label: "About", hint: "Profile page" },
   { href: "/research", label: "Research", hint: "R&D and Research in Action" },
+  { href: "/publications", label: "Publications", hint: "Press features" },
   { href: "/achievements", label: "Achievements", hint: "Credentials" },
   { href: "/philanthropy", label: "Impacts", hint: "Community work" },
   { href: "/contact", label: "Contact", hint: "Get in touch" },

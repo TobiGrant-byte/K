@@ -3,107 +3,57 @@
 import { useRef } from "react";
 import Image from "next/image";
 import { motion, useInView } from "framer-motion";
+import ManagedImage from "@/components/media/ManagedImage";
+import type { PublicationsContent } from "@/lib/domains/publications";
+import type { MediaAsset } from "@/lib/media";
 
-interface PressItem {
-  title: string;
-  source: string;
-  date: string;
-  image: string;
-  href: string;
-  objectPosition?: string;
-  zoom?: number;
-  excerpt?: string;
-}
+type MediaPick = Pick<MediaAsset, "imageUrl" | "altText" | "title"> | null;
 
-const pressItems: PressItem[] = [
-  {
-    title: "Meet #BamaGrad Sunday Okafor",
-    source: "The University of Alabama",
-    date: "2024",
-    image: "https://news.ua.edu/wp-content/uploads/2024/07/2407025_sunday_okafor_featured.jpg",
-    href: "https://www.linkedin.com/posts/university-of-alabama_bamagrad-bamagrad-activity-7225199430163927040-RnXX",
-    objectPosition: "65% 22%",
-    zoom: 1.15,
-    excerpt:
-      "A first-generation student from Nigeria paving his path toward helping others — choosing The University of Alabama for the support and resources offered to international students, with a doctorate focused on safer roads for everyone.",
-  },
-  {
-    title:
-      "Brilliant Nigerian Man Bags First-Class Bachelor's, Master's and PhD at US & UK Universities",
-    source: "Scholarship Region",
-    date: "2025",
-    image:
-      "https://www.scholarshipregion.com/wp-content/uploads/2024/08/Brilliant-Nigerian-man-bags-first-class-bachelors-degree-Sunday-Okafor-also-earned-masters-and-PhD-at-US-UK-university-becomes-the-first-graduate-in-his-family.jpg",
-    href: "https://www.scholarshipregion.com/brilliant-nigerian-man-bags-first-class-bachelors-degree-masters-and-phd-at-us-uk-university-becomes-the-first-graduate-in-his-family/",
-    objectPosition: "center 48%",
-  },
-  {
-    title: "ITE Young Leader to Follow 2024",
-    source: "Institute of Transportation Engineers",
-    date: "2024",
-    image: "/images/lifesavers-conf.webp",
-    href: "https://www.ite.org/professional-and-career-development/young-leaders-to-follow/young-leaders-to-follow-for-2024/",
-    objectPosition: "center 28%",
-  },
-  {
-    title:
-      "The University of Alabama Praises Nigerian Student as He Bags Job after Doctorate in Civil Engineering",
-    source: "Legit.ng",
-    date: "2024",
-    image: "https://cdn.legit.ng/images/1200x675/2401661588845c6b.jpeg?v=1",
-    href: "https://www.legit.ng/people/1606304-university-alabama-praises-nigerian-student-bags-job-doctorate-civil-engineering/",
-  },
-  {
-    title: "#NigeriansAreAmazing — Featured by Samuel Aboki",
-    source: "LinkedIn",
-    date: "2024",
-    image: "/images/headshot.jpg",
-    href: "https://www.linkedin.com/posts/iamsamuelaboki_nigeriansareamazing-ugcPost-7231205061375217664-88xN/?utm_source=share&utm_medium=member_ios",
-    objectPosition: "center 15%",
-  },
-  {
-    title: "The Long and Safe Road: International Graduate Helps Others",
-    source: "The University of Alabama News",
-    date: "2024",
-    image: "https://news.ua.edu/wp-content/uploads/2024/07/2407025_sunday_okafor_featured.jpg",
-    href: "https://news.ua.edu/2024/07/the-long-and-safe-road-international-graduate-helps-others/",
-    objectPosition: "65% 22%",
-    zoom: 1.2,
-  },
-];
-
+/** Scholarship Tips — intentionally static (separate CMS later). */
 const articles = [
   {
     n: "01",
     tag: "Essay",
     title: "My Perspective on Winning the Commonwealth Shared Scholarship",
-    blurb: "How a solution-based development impact essay and a coherent story can change an application.",
+    blurb:
+      "How a solution-based development impact essay and a coherent story can change an application.",
     href: "https://www.linkedin.com/pulse/my-perspective-winning-commonwealth-shared-sunday-okafor",
   },
   {
     n: "02",
     tag: "Mindset",
     title: "Scholarship Application: Motivations, Motives and Self-esteem",
-    blurb: "Why motive and confidence matter as much as grades when the essays have to sound true.",
+    blurb:
+      "Why motive and confidence matter as much as grades when the essays have to sound true.",
     href: "https://www.linkedin.com/pulse/scholarship-application-your-motivations-motives-sunday-okafor",
   },
   {
     n: "03",
     tag: "Strategy",
     title: "Leveraging Areas of Strength in Scholarship Applications",
-    blurb: "You do not have to tick every box perfectly — lead with what already sets you apart.",
+    blurb:
+      "You do not have to tick every box perfectly — lead with what already sets you apart.",
     href: "https://www.linkedin.com/pulse/leveraging-areas-your-strength-scholarship-sunday-okafor",
   },
   {
     n: "04",
     tag: "Webinar",
     title: "A Webinar on International Scholarship and Personal Development",
-    blurb: "Guidance for international applicants on purpose, preparation, and personal growth.",
+    blurb:
+      "Guidance for international applicants on purpose, preparation, and personal growth.",
     href: "https://www.linkedin.com/pulse/webinar-discussion-international-scholarship-personal-sunday-okafor",
   },
 ];
 
-export default function PressSection() {
+type Props = {
+  publications: PublicationsContent;
+  pressMediaById?: Record<string, MediaPick>;
+};
+
+export default function PressSection({
+  publications,
+  pressMediaById = {},
+}: Props) {
   const articlesRef = useRef(null);
   const articlesInView = useInView(articlesRef, { once: true, margin: "-80px" });
 
@@ -118,61 +68,108 @@ export default function PressSection() {
             <div className="section-rule-light" />
           </div>
           <h2 className="m-0 font-display text-[clamp(32px,5vw,58px)] font-light leading-[1.1] text-white">
-            Featured <em className="font-semibold text-accent-light">In The Press</em>
+            {publications.title}{" "}
+            {publications.titleAccent ? (
+              <em className="font-semibold text-accent-light">
+                {publications.titleAccent}
+              </em>
+            ) : null}
           </h2>
           <p className="mt-4 font-display text-lg italic leading-[1.6] text-white/45">
-            A journey covered by leading platforms — celebrating excellence, scholarship, and impact.
+            {publications.subtitle}
           </p>
         </div>
 
         <div className="flex flex-wrap justify-center gap-7">
-          {pressItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex w-full max-w-[360px] flex-col overflow-hidden rounded-2xl border border-white/14 bg-navy-700 no-underline transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-accent/40 sm:w-[calc(50%-14px)] sm:max-w-none lg:w-[calc(33.333%-19px)]"
-            >
-              <div className="relative h-[228px] w-full shrink-0 overflow-hidden">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  sizes="360px"
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-                  style={{
-                    objectPosition: item.objectPosition || "center",
-                    transform: item.zoom ? `scale(${item.zoom})` : undefined,
-                    transformOrigin: item.objectPosition || "center center",
-                  }}
-                />
-                <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.85)_0%,transparent_55%)]" />
-              </div>
+          {publications.items.map((item) => {
+            const media =
+              (item.image?.galleryImageId &&
+                pressMediaById[item.image.galleryImageId]) ||
+              null;
+            const src = media?.imageUrl || item.fallbackSrc;
+            const alt = media?.altText || media?.title || item.title;
 
-              <div className="flex flex-1 flex-col gap-3.5 px-7 pb-8 pt-7">
-                <span className="font-title text-[10px] uppercase tracking-[2px] text-white/40">
-                  {item.source} · {item.date}
-                </span>
-                <h3 className="m-0 font-display text-xl font-medium leading-[1.35] text-white">
-                  {item.title}
-                </h3>
-                {item.excerpt ? (
-                  <p className="m-0 text-[13px] leading-[1.7] text-white/45">{item.excerpt}</p>
-                ) : null}
-                <span className="mt-auto inline-flex items-center gap-1.5 pt-2 text-[13px] text-accent-light/70 transition-colors group-hover:text-accent-light">
-                  Read Feature
-                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </span>
-              </div>
-            </a>
-          ))}
+            return (
+              <a
+                key={item.id}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex w-full max-w-[360px] flex-col overflow-hidden rounded-2xl border border-white/14 bg-navy-700 no-underline transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-accent/40 sm:w-[calc(50%-14px)] sm:max-w-none lg:w-[calc(33.333%-19px)]"
+              >
+                <div className="relative h-[228px] w-full shrink-0 overflow-hidden">
+                  {src ? (
+                    media?.imageUrl && item.image ? (
+                      <ManagedImage
+                        media={media}
+                        config={item.imageConfig}
+                        alt={alt}
+                        imageClassName="transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                        sizes="360px"
+                      />
+                    ) : (
+                      <Image
+                        src={src}
+                        alt={alt}
+                        fill
+                        sizes="360px"
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                        style={{
+                          objectPosition: `${item.imageConfig.positionX * 100}% ${item.imageConfig.positionY * 100}%`,
+                          transform:
+                            item.imageConfig.zoom !== 1
+                              ? `scale(${item.imageConfig.zoom})`
+                              : undefined,
+                          transformOrigin: `${item.imageConfig.positionX * 100}% ${item.imageConfig.positionY * 100}%`,
+                        }}
+                      />
+                    )
+                  ) : null}
+                  <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.85)_0%,transparent_55%)]" />
+                </div>
+
+                <div className="flex flex-1 flex-col gap-3.5 px-7 pb-8 pt-7">
+                  <span className="font-title text-[10px] uppercase tracking-[2px] text-white/40">
+                    {item.source}
+                    {item.source && item.year ? " · " : null}
+                    {item.year}
+                  </span>
+                  <h3 className="m-0 font-display text-xl font-medium leading-[1.35] text-white">
+                    {item.title}
+                  </h3>
+                  {item.excerpt ? (
+                    <p className="m-0 text-[13px] leading-[1.7] text-white/45">
+                      {item.excerpt}
+                    </p>
+                  ) : null}
+                  <span className="mt-auto inline-flex items-center gap-1.5 pt-2 text-[13px] text-accent-light/70 transition-colors group-hover:text-accent-light">
+                    Read Feature
+                    <svg
+                      width="14"
+                      height="14"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                      />
+                    </svg>
+                  </span>
+                </div>
+              </a>
+            );
+          })}
         </div>
 
-        {/* LinkedIn articles — scholarship tips */}
-        <div ref={articlesRef} className="relative mt-24 overflow-hidden rounded-2xl border border-accent/20 bg-white/[0.03] pt-12 pb-10 md:pt-16 md:pb-12">
+        {/* LinkedIn articles — scholarship tips (static; not part of Publications CMS) */}
+        <div
+          ref={articlesRef}
+          className="relative mt-24 overflow-hidden rounded-2xl border border-accent/20 bg-white/[0.03] pt-12 pb-10 md:pt-16 md:pb-12"
+        >
           <div className="pointer-events-none absolute -right-20 top-0 h-56 w-56 rounded-full bg-accent/15 blur-3xl" />
           <div className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-accent-light/10 blur-3xl" />
 
@@ -192,7 +189,8 @@ export default function PressSection() {
                 <em className="font-semibold text-accent-light">Guidance</em>
               </h3>
               <p className="mt-3 font-display text-base italic leading-[1.7] text-white/45">
-                Practical advice for competitive international scholarships — written to help others succeed.
+                Practical advice for competitive international scholarships —
+                written to help others succeed.
               </p>
             </motion.div>
 

@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import ImageCropModal from "@/components/admin/ImageCropModal";
 import AdminComments from "@/components/admin/AdminComments";
+import AdminConfirmDialog from "@/components/admin/cms/AdminConfirmDialog";
 import PostRowActions from "@/components/admin/PostRowActions";
 import RichTextEditor, {
   insertImageIntoEditor,
@@ -82,6 +83,7 @@ export default function AdminPosts() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [pendingRemoveCover, setPendingRemoveCover] = useState(false);
   const [cropQueue, setCropQueue] = useState<CropJob[]>([]);
   const [recropSrc, setRecropSrc] = useState<string | null>(null);
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
@@ -326,7 +328,12 @@ export default function AdminPosts() {
       ));
 
   const removeCover = () => {
+    setPendingRemoveCover(true);
+  };
+
+  const confirmRemoveCover = () => {
     const src = draft.coverImage;
+    setPendingRemoveCover(false);
     setDraft((d) => ({ ...d, coverImage: undefined }));
     if (!editingId && src && isImageKitBlogUrl(src)) {
       void deleteImageKitImages([src]).catch(console.error);
@@ -907,56 +914,35 @@ export default function AdminPosts() {
       ) : null}
 
       {deleteId ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-navy-900/80 px-4 backdrop-blur-sm"
-          onClick={() => setDeleteId(null)}
-          role="presentation"
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-post-title"
-            className="w-full max-w-md rounded-2xl border border-white/10 bg-navy-800 p-8 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-2 font-title text-[9px] uppercase tracking-[2px] text-red-400">
-              Delete post
-            </div>
-            <h2
-              id="delete-post-title"
-              className="font-display text-2xl font-light text-white"
-            >
-              Remove this post?
-            </h2>
-            <p className="mt-3 text-[14px] leading-relaxed text-white/50">
-              {deleteTarget ? (
-                <>
-                  “{deleteTarget.title}” will be permanently deleted. This
-                  cannot be undone.
-                </>
-              ) : (
-                <>This post will be permanently deleted.</>
-              )}
-            </p>
-            <div className="mt-8 flex flex-wrap justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setDeleteId(null)}
-                className="rounded-lg border border-white/12 px-5 py-3 font-title text-[10px] uppercase tracking-[2px] text-white/70 hover:border-white/20 hover:text-white"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmDelete}
-                className="rounded-lg border border-red-500/40 bg-red-500/15 px-5 py-3 font-title text-[10px] uppercase tracking-[2px] text-red-300 hover:bg-red-500/25"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <AdminConfirmDialog
+          open
+          eyebrow="Delete post"
+          title="Remove this post?"
+          description={
+            deleteTarget ? (
+              <>
+                “{deleteTarget.title}” will be permanently deleted. This cannot
+                be undone.
+              </>
+            ) : (
+              <>This post will be permanently deleted.</>
+            )
+          }
+          confirmLabel="Delete"
+          onCancel={() => setDeleteId(null)}
+          onConfirm={() => void confirmDelete()}
+        />
       ) : null}
+
+      <AdminConfirmDialog
+        open={pendingRemoveCover}
+        eyebrow="Remove cover"
+        title="Remove the cover image?"
+        description="The cover will be cleared from this draft. Save the post to apply the change."
+        confirmLabel="Remove"
+        onCancel={() => setPendingRemoveCover(false)}
+        onConfirm={confirmRemoveCover}
+      />
     </div>
   );
 }

@@ -21,6 +21,7 @@ import {
 } from "@/lib/domains/media";
 import { formatPostDate } from "@/lib/blog";
 import { adminToast } from "@/lib/admin/toast-store";
+import AdminConfirmDialog from "@/components/admin/cms/AdminConfirmDialog";
 
 type Tab = "home" | "about";
 
@@ -30,6 +31,9 @@ export default function AdminProfile() {
   const [tab, setTab] = useState<Tab>("home");
   const [draft, setDraft] = useState<ProfileContentInput | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [pendingRemoveRole, setPendingRemoveRole] = useState<number | null>(
+    null,
+  );
 
   const serverDraft = useMemo(() => {
     if (!profileQuery.data) return null;
@@ -98,6 +102,14 @@ export default function AdminProfile() {
   };
 
   const removeRole = (index: number) => {
+    if (draft.home.roles.length <= 1) return;
+    setPendingRemoveRole(index);
+  };
+
+  const confirmRemoveRole = () => {
+    if (pendingRemoveRole === null) return;
+    const index = pendingRemoveRole;
+    setPendingRemoveRole(null);
     if (draft.home.roles.length <= 1) return;
     patchHome({ roles: draft.home.roles.filter((_, i) => i !== index) });
   };
@@ -409,6 +421,16 @@ export default function AdminProfile() {
         onSelect={onSelectMedia}
         selectedId={selectedImageId}
         title="Select About image"
+      />
+
+      <AdminConfirmDialog
+        open={pendingRemoveRole !== null}
+        eyebrow="Remove role"
+        title="Remove this role?"
+        description="It will be dropped from the list when you submit. You can cancel if this was a mistake."
+        confirmLabel="Remove"
+        onCancel={() => setPendingRemoveRole(null)}
+        onConfirm={confirmRemoveRole}
       />
     </div>
   );

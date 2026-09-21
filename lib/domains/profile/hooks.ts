@@ -7,6 +7,7 @@ import {
   saveProfileContent,
 } from "@/lib/firebase/profile";
 import type { ProfileContentInput } from "@/lib/domains/profile/types";
+import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
 const PROFILE_STALE = 5 * 60_000;
 
@@ -28,6 +29,7 @@ export function useSaveProfileMutation() {
     mutationFn: (input: ProfileContentInput) => saveProfileContent(input),
     onSuccess: (data) => {
       queryClient.setQueryData(profileKeys.content(), data);
+      void revalidatePublicSite("profile");
     },
   });
 }

@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import AdminOverview from "@/components/admin/cms/AdminOverview";
 import AdminPosts from "@/components/admin/AdminPosts";
 import AdminMediaLibrary from "@/components/admin/AdminMediaLibrary";
 import AdminProfile from "@/components/admin/AdminProfile";
 import AdminResearch from "@/components/admin/AdminResearch";
+import AdminPublications from "@/components/admin/AdminPublications";
 import AdminShell from "@/components/admin/cms/AdminShell";
 import AdminToasts from "@/components/admin/cms/AdminToasts";
+import AdminUrlSync from "@/components/admin/cms/AdminUrlSync";
 import {
   signInAdminWithGoogle,
   signOutAdmin,
@@ -116,12 +118,16 @@ export default function AdminApp() {
 
   return (
     <AdminShell user={authState.user} onLogout={handleLogout}>
+      <Suspense fallback={null}>
+        <AdminUrlSync />
+      </Suspense>
       <AdminToasts />
       {section === "overview" ? <AdminOverview /> : null}
       {section === "blog-posts" ? <AdminPosts /> : null}
       {section === "gallery" ? <AdminMediaLibrary /> : null}
       {section === "about" ? <AdminProfile /> : null}
       {section === "research-dev" ? <AdminResearch /> : null}
+      {section === "publications" ? <AdminPublications /> : null}
     </AdminShell>
   );
 }

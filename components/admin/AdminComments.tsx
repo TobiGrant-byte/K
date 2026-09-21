@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import AdminConfirmDialog from "@/components/admin/cms/AdminConfirmDialog";
 import { formatPostDate } from "@/lib/blog";
 import { adminToast } from "@/lib/admin/toast-store";
 import {
@@ -164,56 +165,26 @@ export default function AdminComments({
       </div>
 
       {pendingDelete ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-navy-900/80 px-4 backdrop-blur-sm"
-          onClick={() =>
-            deleteMutation.isPending ? undefined : setPendingDelete(null)
+        <AdminConfirmDialog
+          open
+          eyebrow="Delete comment"
+          title="Delete this comment?"
+          description={
+            <>
+              <p>
+                This removes the comment from the public blog. This cannot be
+                undone.
+              </p>
+              <p className="mt-3 line-clamp-4 whitespace-pre-wrap rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] leading-relaxed text-white/80">
+                {pendingDelete.body}
+              </p>
+            </>
           }
-          role="presentation"
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-comment-title"
-            className="w-full max-w-md rounded-xl border border-white/10 bg-navy-800 p-8 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-2 font-title text-[9px] uppercase tracking-[2px] text-red-400">
-              Delete comment
-            </div>
-            <h2
-              id="delete-comment-title"
-              className="font-display text-2xl font-light text-white"
-            >
-              Delete this comment?
-            </h2>
-            <p className="mt-3 text-[14px] leading-relaxed text-white/50">
-              This removes the comment from the public blog. This cannot be
-              undone.
-            </p>
-            <p className="mt-3 line-clamp-4 whitespace-pre-wrap rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] leading-relaxed text-white/80">
-              {pendingDelete.body}
-            </p>
-            <div className="mt-8 flex flex-wrap justify-end gap-3">
-              <button
-                type="button"
-                disabled={deleteMutation.isPending}
-                onClick={() => setPendingDelete(null)}
-                className="rounded-lg border border-white/12 px-5 py-3 font-title text-[10px] uppercase tracking-[2px] text-white/70 hover:border-white/20 hover:text-white disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={deleteMutation.isPending}
-                onClick={confirmDelete}
-                className="rounded-lg border border-red-500/40 bg-red-500/15 px-5 py-3 font-title text-[10px] uppercase tracking-[2px] text-red-300 hover:bg-red-500/25 disabled:opacity-50"
-              >
-                {deleteMutation.isPending ? "Deleting…" : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
+          confirmLabel={deleteMutation.isPending ? "Deleting…" : "Delete"}
+          busy={deleteMutation.isPending}
+          onCancel={() => setPendingDelete(null)}
+          onConfirm={() => void confirmDelete()}
+        />
       ) : null}
     </>
   );

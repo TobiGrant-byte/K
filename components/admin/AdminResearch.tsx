@@ -24,9 +24,13 @@ import {
 } from "@/lib/domains/media";
 import { createId, formatPostDate } from "@/lib/blog";
 import { adminToast } from "@/lib/admin/toast-store";
+import AdminConfirmDialog from "@/components/admin/cms/AdminConfirmDialog";
 
 type Tab = "development" | "action";
 type PickerTarget = "development" | number;
+type PendingRemove =
+  | { kind: "area"; index: number }
+  | { kind: "action"; index: number };
 
 export default function AdminResearch() {
   const researchQuery = useResearchContent();
@@ -35,6 +39,9 @@ export default function AdminResearch() {
   const [draft, setDraft] = useState<ResearchContentInput | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>("development");
+  const [pendingRemove, setPendingRemove] = useState<PendingRemove | null>(
+    null,
+  );
 
   const serverDraft = useMemo(() => {
     if (!researchQuery.data) return null;
@@ -122,9 +129,7 @@ export default function AdminResearch() {
 
   const removeArea = (index: number) => {
     if (draft.development.areas.length <= 1) return;
-    patchDevelopment({
-      areas: draft.development.areas.filter((_, i) => i !== index),
-    });
+    setPendingRemove({ kind: "area", index });
   };
 
   const moveArea = (index: number, dir: -1 | 1) => {
@@ -164,6 +169,21 @@ export default function AdminResearch() {
   };
 
   const removeActionItem = (index: number) => {
+    if (draft.action.items.length <= 1) return;
+    setPendingRemove({ kind: "action", index });
+  };
+
+  const confirmPendingRemove = () => {
+    if (!pendingRemove) return;
+    const { kind, index } = pendingRemove;
+    setPendingRemove(null);
+    if (kind === "area") {
+      if (draft.development.areas.length <= 1) return;
+      patchDevelopment({
+        areas: draft.development.areas.filter((_, i) => i !== index),
+      });
+      return;
+    }
     if (draft.action.items.length <= 1) return;
     patchAction({
       items: draft.action.items.filter((_, i) => i !== index),
@@ -574,6 +594,22 @@ export default function AdminResearch() {
             ? "Select research focus image"
             : "Select spotlight image"
         }
+      />
+
+      <AdminConfirmDialog
+        open={pendingRemove !== null}
+        eyebrow={
+          pendingRemove?.kind === "action" ? "Remove card" : "Remove area"
+        }
+        title={
+          pendingRemove?.kind === "action"
+            ? "Remove this spotlight card?"
+            : "Remove this focus area?"
+        }
+        description="It will be dropped from the list when you submit. You can cancel if this was a mistake."
+        confirmLabel="Remove"
+        onCancel={() => setPendingRemove(null)}
+        onConfirm={confirmPendingRemove}
       />
     </div>
   );
