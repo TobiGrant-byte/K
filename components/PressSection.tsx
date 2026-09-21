@@ -118,6 +118,7 @@ export default function PressSection({
           })}
         </div>
 
+        {tips.items.length > 0 ? (
         <div
           id="scholarship-tips"
           ref={articlesRef}
@@ -196,6 +197,7 @@ export default function PressSection({
             </div>
           </div>
         </div>
+        ) : null}
       </div>
     </section>
   );

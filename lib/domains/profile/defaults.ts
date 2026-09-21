@@ -13,8 +13,8 @@ function config(
 }
 
 /**
- * Canonical static fallbacks — existing public site copy.
- * Used when Firestore is empty/unavailable and as migration seed.
+ * Admin seed copy only — written once via ensure*Seeded into Firebase.
+ * Public pages never display this object directly (except About text/image).
  */
 export const PROFILE_FALLBACK: ProfileContent = {
   home: {

@@ -14,22 +14,22 @@ import type {
   ProfileHomeContent,
 } from "@/lib/domains/profile/types";
 
-function asString(value: unknown, fallback: string): string {
+function asString(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;
 }
 
+/** Public/home: Firebase only — never reinject seed roles. */
 function normalizeRoles(value: unknown): string[] {
-  if (!Array.isArray(value)) return [...PROFILE_FALLBACK.home.roles];
-  const roles = value
+  if (!Array.isArray(value)) return [];
+  return value
     .map((role) => (typeof role === "string" ? role.trimEnd() : ""))
     .filter((role) => role.trim().length > 0);
-  return roles.length ? roles : [...PROFILE_FALLBACK.home.roles];
 }
 
 function normalizeImageRef(value: unknown): MediaImageRef | null {
   if (!value || typeof value !== "object") return null;
   const raw = value as Record<string, unknown>;
-  const galleryImageId = asString(raw.galleryImageId, "").trim();
+  const galleryImageId = asString(raw.galleryImageId).trim();
   if (!galleryImageId) return null;
   const configRaw =
     raw.imageConfig && typeof raw.imageConfig === "object"
@@ -64,27 +64,22 @@ export function normalizeProfileHome(
 ): ProfileHomeContent {
   return {
     roles: normalizeRoles(input?.roles),
-    quote: asString(input?.quote, PROFILE_FALLBACK.home.quote).trim() ||
-      PROFILE_FALLBACK.home.quote,
+    quote: asString(input?.quote).trim(),
   };
 }
 
+/**
+ * About is the only section that may fall back to seed copy / local portrait
+ * when Firebase fields are empty.
+ */
 export function normalizeProfileAbout(
   input?: Partial<ProfileAboutContent> | null,
 ): ProfileAboutContent {
-  const title =
-    asString(input?.title, PROFILE_FALLBACK.about.title).trim() ||
-    PROFILE_FALLBACK.about.title;
-  const titleAccent = asString(
-    input?.titleAccent,
-    PROFILE_FALLBACK.about.titleAccent,
-  ).trim();
-  const excerpt =
-    asString(input?.excerpt, PROFILE_FALLBACK.about.excerpt).trim() ||
-    PROFILE_FALLBACK.about.excerpt;
-  const body =
-    asString(input?.body, PROFILE_FALLBACK.about.body).trim() ||
-    PROFILE_FALLBACK.about.body;
+  const fb = PROFILE_FALLBACK.about;
+  const title = asString(input?.title, fb.title).trim() || fb.title;
+  const titleAccent = asString(input?.titleAccent, fb.titleAccent).trim();
+  const excerpt = asString(input?.excerpt, fb.excerpt).trim() || fb.excerpt;
+  const body = asString(input?.body, fb.body).trim() || fb.body;
 
   return {
     title,
@@ -101,31 +96,20 @@ function normalizeHobbyItem(
 ): ProfileHobbyItem | null {
   if (!value || typeof value !== "object") return null;
   const raw = value as Record<string, unknown>;
-  const fallback = PROFILE_FALLBACK.hobbies.items[index];
-  const title = asString(raw.title, fallback?.title ?? "").trim();
-  const description = asString(
-    raw.description,
-    fallback?.description ?? "",
-  ).trim();
+  const title = asString(raw.title).trim();
+  const description = asString(raw.description).trim();
   if (!title || !description) return null;
 
   const image = normalizeImageRef(raw.image);
   const imageConfig = normalizeImageConfig(
     raw.imageConfig ?? image?.imageConfig,
-    fallback?.imageConfig,
   );
 
   return {
-    id:
-      asString(raw.id, "").trim() ||
-      fallback?.id ||
-      `hobby-${index + 1}`,
+    id: asString(raw.id).trim() || `hobby-${index + 1}`,
     title,
     description,
-    icon:
-      asString(raw.icon, fallback?.icon ?? "").trim() ||
-      fallback?.icon ||
-      "◎",
+    icon: asString(raw.icon).trim() || "◎",
     image: image
       ? {
           galleryImageId: image.galleryImageId,
@@ -137,32 +121,26 @@ function normalizeHobbyItem(
 }
 
 export function normalizeProfileHobbyItems(value: unknown): ProfileHobbyItem[] {
-  if (!Array.isArray(value)) {
-    return PROFILE_FALLBACK.hobbies.items.map((item) => ({ ...item }));
-  }
-  const items = value
+  if (!Array.isArray(value)) return [];
+  return value
     .map((item, index) => normalizeHobbyItem(item, index))
     .filter((item): item is ProfileHobbyItem => Boolean(item));
-  return items.length
-    ? items
-    : PROFILE_FALLBACK.hobbies.items.map((item) => ({ ...item }));
 }
 
 export function normalizeProfileHobbies(
   input?: Partial<ProfileHobbiesContent> | null,
 ): ProfileHobbiesContent {
-  const fb = PROFILE_FALLBACK.hobbies;
   return {
-    eyebrow: asString(input?.eyebrow, fb.eyebrow).trim() || fb.eyebrow,
-    title: asString(input?.title, fb.title).trim() || fb.title,
-    titleAccent: asString(input?.titleAccent, fb.titleAccent).trim(),
-    subtitle: asString(input?.subtitle, fb.subtitle).trim() || fb.subtitle,
-    quote: asString(input?.quote, fb.quote).trim() || fb.quote,
+    eyebrow: asString(input?.eyebrow).trim(),
+    title: asString(input?.title).trim(),
+    titleAccent: asString(input?.titleAccent).trim(),
+    subtitle: asString(input?.subtitle).trim(),
+    quote: asString(input?.quote).trim(),
     items: normalizeProfileHobbyItems(input?.items),
   };
 }
 
-/** Merge unknown Firestore data with static fallbacks. */
+/** Normalize Firestore profile data — About may use seed text; home/hobbies do not. */
 export function normalizeProfileContent(
   input?: Partial<ProfileContent> | Record<string, unknown> | null,
   updatedAt = "",

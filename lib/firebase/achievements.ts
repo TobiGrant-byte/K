@@ -12,19 +12,19 @@ import {
   missingFirebaseEnvironmentVariables,
 } from "@/lib/firebase/config";
 import {
-  normalizeResearchContent,
-  researchSeedPayload,
-  RESEARCH_PUBLIC_EMPTY,
-  toResearchWritePayload,
-} from "@/lib/domains/research/normalize";
+  achievementsSeedPayload,
+  ACHIEVEMENTS_PUBLIC_EMPTY,
+  normalizeAchievementsContent,
+  toAchievementsWritePayload,
+} from "@/lib/domains/achievements/normalize";
 import type {
-  ResearchContent,
-  ResearchContentInput,
-} from "@/lib/domains/research/types";
+  AchievementsContent,
+  AchievementsContentInput,
+} from "@/lib/domains/achievements/types";
 
-export const RESEARCH_DOC_PATH = {
+export const ACHIEVEMENTS_DOC_PATH = {
   collection: "content",
-  id: "research",
+  id: "achievements",
 } as const;
 
 function dateString(value: unknown): string {
@@ -41,38 +41,38 @@ function requireFirebase() {
   }
 }
 
-function fromFirestoreData(data: DocumentData | undefined): ResearchContent {
-  if (!data) return { ...RESEARCH_PUBLIC_EMPTY };
-  return normalizeResearchContent(data, dateString(data.updatedAt));
+function fromFirestoreData(data: DocumentData | undefined): AchievementsContent {
+  if (!data) return { ...ACHIEVEMENTS_PUBLIC_EMPTY };
+  return normalizeAchievementsContent(data, dateString(data.updatedAt));
 }
 
 /** Public / SSR: Firebase only — never reinject seed copy. */
-export async function fetchResearchContent(): Promise<ResearchContent> {
-  if (!firebaseConfigured) return { ...RESEARCH_PUBLIC_EMPTY };
+export async function fetchAchievementsContent(): Promise<AchievementsContent> {
+  if (!firebaseConfigured) return { ...ACHIEVEMENTS_PUBLIC_EMPTY };
   try {
     const snap = await getDoc(
       doc(
         getFirebaseFirestore(),
-        RESEARCH_DOC_PATH.collection,
-        RESEARCH_DOC_PATH.id,
+        ACHIEVEMENTS_DOC_PATH.collection,
+        ACHIEVEMENTS_DOC_PATH.id,
       ),
     );
-    if (!snap.exists()) return { ...RESEARCH_PUBLIC_EMPTY };
+    if (!snap.exists()) return { ...ACHIEVEMENTS_PUBLIC_EMPTY };
     return fromFirestoreData(snap.data());
   } catch {
-    return { ...RESEARCH_PUBLIC_EMPTY };
+    return { ...ACHIEVEMENTS_PUBLIC_EMPTY };
   }
 }
 
-export async function saveResearchContent(
-  input: ResearchContentInput,
-): Promise<ResearchContent> {
+export async function saveAchievementsContent(
+  input: AchievementsContentInput,
+): Promise<AchievementsContent> {
   requireFirebase();
-  const payload = toResearchWritePayload(input);
+  const payload = toAchievementsWritePayload(input);
   const ref = doc(
     getFirebaseFirestore(),
-    RESEARCH_DOC_PATH.collection,
-    RESEARCH_DOC_PATH.id,
+    ACHIEVEMENTS_DOC_PATH.collection,
+    ACHIEVEMENTS_DOC_PATH.id,
   );
   await setDoc(ref, {
     ...payload,
@@ -84,17 +84,17 @@ export async function saveResearchContent(
   };
 }
 
-export async function ensureResearchContentSeeded(): Promise<ResearchContent> {
+export async function ensureAchievementsContentSeeded(): Promise<AchievementsContent> {
   requireFirebase();
   const ref = doc(
     getFirebaseFirestore(),
-    RESEARCH_DOC_PATH.collection,
-    RESEARCH_DOC_PATH.id,
+    ACHIEVEMENTS_DOC_PATH.collection,
+    ACHIEVEMENTS_DOC_PATH.id,
   );
   const snap = await getDoc(ref);
   if (snap.exists()) return fromFirestoreData(snap.data());
 
-  const seed = researchSeedPayload();
+  const seed = achievementsSeedPayload();
   await setDoc(ref, {
     ...seed,
     updatedAt: serverTimestamp(),

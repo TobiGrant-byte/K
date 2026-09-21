@@ -12,6 +12,7 @@ import {
   missingFirebaseEnvironmentVariables,
 } from "@/lib/firebase/config";
 import { PROFILE_FALLBACK } from "@/lib/domains/profile/defaults";
+import { PROFILE_PUBLIC_EMPTY } from "@/lib/domains/profile/empty";
 import {
   normalizeProfileContent,
   toProfileWritePayload,
@@ -41,16 +42,15 @@ function requireFirebase() {
 }
 
 function fromFirestoreData(data: DocumentData | undefined): ProfileContent {
-  if (!data) return { ...PROFILE_FALLBACK };
+  if (!data) return { ...PROFILE_PUBLIC_EMPTY };
   return normalizeProfileContent(data, dateString(data.updatedAt));
 }
 
 /**
- * Public / SSR: load shared Profile content.
- * Missing doc → static fallback (existing site copy).
+ * Public / SSR: Firebase only. Missing doc → empty home/hobbies; About keeps seed text.
  */
 export async function fetchProfileContent(): Promise<ProfileContent> {
-  if (!firebaseConfigured) return { ...PROFILE_FALLBACK };
+  if (!firebaseConfigured) return { ...PROFILE_PUBLIC_EMPTY };
   try {
     const snap = await getDoc(
       doc(
@@ -59,14 +59,13 @@ export async function fetchProfileContent(): Promise<ProfileContent> {
         PROFILE_DOC_PATH.id,
       ),
     );
-    if (!snap.exists()) return { ...PROFILE_FALLBACK };
+    if (!snap.exists()) return { ...PROFILE_PUBLIC_EMPTY };
     return fromFirestoreData(snap.data());
   } catch {
-    return { ...PROFILE_FALLBACK };
+    return { ...PROFILE_PUBLIC_EMPTY };
   }
 }
 
-/** Admin write — full document replace of editable fields. */
 export async function saveProfileContent(
   input: ProfileContentInput,
 ): Promise<ProfileContent> {
@@ -93,10 +92,7 @@ export async function saveProfileContent(
   };
 }
 
-/**
- * First-time seed: write static fallbacks if the doc does not exist yet.
- * Safe to call from Admin; does not overwrite existing CMS data.
- */
+/** Admin: seed PROFILE_FALLBACK once if the doc does not exist. */
 export async function ensureProfileContentSeeded(): Promise<ProfileContent> {
   requireFirebase();
   const ref = doc(

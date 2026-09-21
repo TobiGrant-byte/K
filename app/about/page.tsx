@@ -2,10 +2,7 @@ import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import About from "@/components/About";
 import Hobbies from "@/components/Hobbies";
-import {
-  fetchProfileContent,
-  PROFILE_FALLBACK,
-} from "@/lib/domains/profile";
+import { fetchProfileContent } from "@/lib/domains/profile";
 import { fetchMediaAssetById } from "@/lib/domains/media";
 
 export const metadata: Metadata = {
@@ -18,12 +15,7 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function AboutPage() {
-  let profile = PROFILE_FALLBACK;
-  try {
-    profile = await fetchProfileContent();
-  } catch {
-    profile = PROFILE_FALLBACK;
-  }
+  const profile = await fetchProfileContent();
 
   let aboutMedia = null;
   const aboutImageId = profile.about.image?.galleryImageId;
@@ -52,7 +44,7 @@ export default async function AboutPage() {
         const asset = await fetchMediaAssetById(id);
         if (asset) hobbyMediaById[id] = asset;
       } catch {
-        // Keep fallback image for this card.
+        // Empty frame when Media Library asset is missing.
       }
     }),
   );
@@ -61,7 +53,11 @@ export default async function AboutPage() {
     <PageShell>
       <main>
         <About about={profile.about} aboutMedia={aboutMedia} />
-        <Hobbies hobbies={profile.hobbies} mediaById={hobbyMediaById} />
+        {profile.hobbies.items.length > 0 ||
+        profile.hobbies.title ||
+        profile.hobbies.eyebrow ? (
+          <Hobbies hobbies={profile.hobbies} mediaById={hobbyMediaById} />
+        ) : null}
       </main>
     </PageShell>
   );

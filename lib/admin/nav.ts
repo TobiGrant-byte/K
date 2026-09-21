@@ -9,6 +9,10 @@ export type AdminNavItem = {
 
 /**
  * CMS navigation. Comments live under Posts (View comments), not as a separate item.
+ *
+ * Rollout: only Overview, Blog, Media, and Profile are unlocked for now.
+ * Later sections stay wired and work via deep link (`?section=…`); flip
+ * `enabled` to true when ready to expose them in the sidebar.
  */
 export const ADMIN_NAV: AdminNavItem[] = [
   { id: "overview", label: "Overview", enabled: true },
@@ -18,13 +22,13 @@ export const ADMIN_NAV: AdminNavItem[] = [
   {
     id: "research-dev",
     label: "Research",
-    enabled: true,
+    enabled: false,
     group: "Site",
   },
   {
     id: "publications",
     label: "Publications",
-    enabled: true,
+    enabled: false,
     group: "Site",
   },
   {
@@ -47,6 +51,9 @@ export const ADMIN_NAV: AdminNavItem[] = [
   },
 ];
 
+export function isAdminNavEnabled(section: AdminSection): boolean {
+  return ADMIN_NAV.find((n) => n.id === section)?.enabled ?? false;
+}
 export function sectionTitle(section: AdminSection): string {
   return ADMIN_NAV.find((n) => n.id === section)?.label ?? "Admin";
 }

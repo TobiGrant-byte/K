@@ -22,6 +22,8 @@ export {
   normalizeResearchContent,
   normalizeResearchDevelopment,
   researchAreaNumber,
+  RESEARCH_PUBLIC_EMPTY,
+  researchSeedPayload,
   toResearchWritePayload,
 } from "@/lib/domains/research/normalize";
 export { researchKeys } from "@/lib/domains/research/keys";

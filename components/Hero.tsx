@@ -23,9 +23,7 @@ export default function Hero({ home }: Props) {
   const opacity = useTransform(scrollYProgress, [0, 0.65], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
 
-  const roles = home.roles.length
-    ? home.roles.map(roleLines).filter((lines) => lines.length > 0)
-    : [["Transportation", "Engineer."], ["Researcher."], ["Leader."]];
+  const roles = home.roles.map(roleLines).filter((lines) => lines.length > 0);
 
   return (
     <section
@@ -89,7 +87,7 @@ export default function Hero({ home }: Props) {
                     duration: 3,
                     delay: i * 3 + 1.2,
                     repeat: Infinity,
-                    repeatDelay: (roles.length - 1) * 3,
+                    repeatDelay: Math.max(roles.length - 1, 0) * 3,
                   }}
                   className={`flex h-11 flex-col justify-center whitespace-nowrap font-title text-[clamp(14px,1.5vw,17px)] uppercase leading-[1.25] tracking-[3px] text-accent-light ${
                     i === 0 ? "relative" : "absolute left-0 top-0"

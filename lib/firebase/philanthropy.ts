@@ -12,19 +12,19 @@ import {
   missingFirebaseEnvironmentVariables,
 } from "@/lib/firebase/config";
 import {
-  normalizeResearchContent,
-  researchSeedPayload,
-  RESEARCH_PUBLIC_EMPTY,
-  toResearchWritePayload,
-} from "@/lib/domains/research/normalize";
+  normalizePhilanthropyContent,
+  philanthropySeedPayload,
+  PHILANTHROPY_PUBLIC_EMPTY,
+  toPhilanthropyWritePayload,
+} from "@/lib/domains/philanthropy/normalize";
 import type {
-  ResearchContent,
-  ResearchContentInput,
-} from "@/lib/domains/research/types";
+  PhilanthropyContent,
+  PhilanthropyContentInput,
+} from "@/lib/domains/philanthropy/types";
 
-export const RESEARCH_DOC_PATH = {
+export const PHILANTHROPY_DOC_PATH = {
   collection: "content",
-  id: "research",
+  id: "philanthropy",
 } as const;
 
 function dateString(value: unknown): string {
@@ -41,38 +41,38 @@ function requireFirebase() {
   }
 }
 
-function fromFirestoreData(data: DocumentData | undefined): ResearchContent {
-  if (!data) return { ...RESEARCH_PUBLIC_EMPTY };
-  return normalizeResearchContent(data, dateString(data.updatedAt));
+function fromFirestoreData(data: DocumentData | undefined): PhilanthropyContent {
+  if (!data) return { ...PHILANTHROPY_PUBLIC_EMPTY };
+  return normalizePhilanthropyContent(data, dateString(data.updatedAt));
 }
 
 /** Public / SSR: Firebase only — never reinject seed copy. */
-export async function fetchResearchContent(): Promise<ResearchContent> {
-  if (!firebaseConfigured) return { ...RESEARCH_PUBLIC_EMPTY };
+export async function fetchPhilanthropyContent(): Promise<PhilanthropyContent> {
+  if (!firebaseConfigured) return { ...PHILANTHROPY_PUBLIC_EMPTY };
   try {
     const snap = await getDoc(
       doc(
         getFirebaseFirestore(),
-        RESEARCH_DOC_PATH.collection,
-        RESEARCH_DOC_PATH.id,
+        PHILANTHROPY_DOC_PATH.collection,
+        PHILANTHROPY_DOC_PATH.id,
       ),
     );
-    if (!snap.exists()) return { ...RESEARCH_PUBLIC_EMPTY };
+    if (!snap.exists()) return { ...PHILANTHROPY_PUBLIC_EMPTY };
     return fromFirestoreData(snap.data());
   } catch {
-    return { ...RESEARCH_PUBLIC_EMPTY };
+    return { ...PHILANTHROPY_PUBLIC_EMPTY };
   }
 }
 
-export async function saveResearchContent(
-  input: ResearchContentInput,
-): Promise<ResearchContent> {
+export async function savePhilanthropyContent(
+  input: PhilanthropyContentInput,
+): Promise<PhilanthropyContent> {
   requireFirebase();
-  const payload = toResearchWritePayload(input);
+  const payload = toPhilanthropyWritePayload(input);
   const ref = doc(
     getFirebaseFirestore(),
-    RESEARCH_DOC_PATH.collection,
-    RESEARCH_DOC_PATH.id,
+    PHILANTHROPY_DOC_PATH.collection,
+    PHILANTHROPY_DOC_PATH.id,
   );
   await setDoc(ref, {
     ...payload,
@@ -84,17 +84,17 @@ export async function saveResearchContent(
   };
 }
 
-export async function ensureResearchContentSeeded(): Promise<ResearchContent> {
+export async function ensurePhilanthropyContentSeeded(): Promise<PhilanthropyContent> {
   requireFirebase();
   const ref = doc(
     getFirebaseFirestore(),
-    RESEARCH_DOC_PATH.collection,
-    RESEARCH_DOC_PATH.id,
+    PHILANTHROPY_DOC_PATH.collection,
+    PHILANTHROPY_DOC_PATH.id,
   );
   const snap = await getDoc(ref);
   if (snap.exists()) return fromFirestoreData(snap.data());
 
-  const seed = researchSeedPayload();
+  const seed = philanthropySeedPayload();
   await setDoc(ref, {
     ...seed,
     updatedAt: serverTimestamp(),

@@ -16,6 +16,7 @@ export {
   HOME_HERO_IMAGE_SRC,
   PROFILE_FALLBACK,
 } from "@/lib/domains/profile/defaults";
+export { PROFILE_PUBLIC_EMPTY } from "@/lib/domains/profile/empty";
 export {
   normalizeProfileAbout,
   normalizeProfileContent,

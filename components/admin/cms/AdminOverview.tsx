@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import {
+  ADMIN_NAV,
   ADMIN_PUBLIC_QUICK_LINKS,
+  isAdminNavEnabled,
 } from "@/lib/admin/nav";
 import { useAdminUiStore } from "@/lib/admin/ui-store";
 import { useAdminComments, useAdminPosts } from "@/lib/domains/blog";
@@ -54,12 +56,25 @@ export default function AdminOverview() {
     },
   ];
 
+  const editSections = ADMIN_NAV.filter(
+    (item) =>
+      item.id !== "overview" &&
+      item.id !== "scholarship" &&
+      (item.id === "blog-posts" ||
+        item.id === "gallery" ||
+        item.id === "about" ||
+        item.id === "research-dev" ||
+        item.id === "publications" ||
+        item.id === "achievements" ||
+        item.id === "philanthropy"),
+  );
+
   return (
     <div className="space-y-8">
       <p className="max-w-2xl text-sm leading-relaxed text-white/50">
-        Welcome to the content management system. Blog, Media Library, Profile,
-        and Research are live; additional site sections will open here as they
-        are connected.
+        Welcome to the content management system. Blog, Media Library, and
+        Profile are available now. Additional site sections will open here as
+        they roll out.
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -96,57 +111,63 @@ export default function AdminOverview() {
           Open a section to edit shared page content in the CMS.
         </p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {(
-            [
-              {
-                id: "about" as const,
-                label: "Profile",
-                hint: "Home roles, quote, and About",
-              },
-              {
-                id: "research-dev" as const,
-                label: "Research",
-                hint: "R&D and Research in Action",
-              },
-              {
-                id: "publications" as const,
-                label: "Publications",
-                hint: "Featured In The Press",
-              },
-              {
-                id: "gallery" as const,
-                label: "Media Library",
-                hint: "Upload and manage images",
-              },
-              {
-                id: "blog-posts" as const,
-                label: "Posts",
-                hint: "Blog articles and comments",
-              },
-            ] as const
-          ).map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setSection(item.id)}
-              className="group flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-navy-900/50 px-4 py-4 text-left transition-colors hover:border-accent/40 hover:bg-accent/5"
-            >
-              <div>
-                <div className="font-display text-lg text-white group-hover:text-accent-light">
-                  {item.label}
-                </div>
-                <div className="mt-0.5 font-title text-[8px] uppercase tracking-[1.5px] text-white/40">
-                  {item.hint}
-                </div>
-              </div>
-              <span
-                aria-hidden
-                className="font-title text-[10px] text-white/30 transition-colors group-hover:text-accent-light"
+          {editSections.map((item) => {
+            const enabled = isAdminNavEnabled(item.id);
+            const hint =
+              item.id === "about"
+                ? "Home roles, quote, About, and hobbies"
+                : item.id === "research-dev"
+                  ? "R&D and Research in Action"
+                  : item.id === "publications"
+                    ? "Featured In The Press"
+                    : item.id === "gallery"
+                      ? "Upload and manage images"
+                      : item.id === "blog-posts"
+                        ? "Blog articles and comments"
+                        : item.id === "achievements"
+                          ? "Milestones and Career Journey"
+                          : item.id === "philanthropy"
+                            ? "Community impacts"
+                            : item.label;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                disabled={!enabled}
+                onClick={() => enabled && setSection(item.id)}
+                className={`group flex items-center justify-between gap-3 rounded-lg border px-4 py-4 text-left transition-colors ${
+                  enabled
+                    ? "border-white/10 bg-navy-900/50 hover:border-accent/40 hover:bg-accent/5"
+                    : "cursor-not-allowed border-white/8 bg-navy-900/30 opacity-60"
+                }`}
               >
-                →
-              </span>
-            </button>
-          ))}
+                <div>
+                  <div
+                    className={`font-display text-lg ${
+                      enabled
+                        ? "text-white group-hover:text-accent-light"
+                        : "text-white/45"
+                    }`}
+                  >
+                    {item.label}
+                  </div>
+                  <div className="mt-0.5 font-title text-[8px] uppercase tracking-[1.5px] text-white/40">
+                    {enabled ? hint : "Coming soon"}
+                  </div>
+                </div>
+                <span
+                  aria-hidden
+                  className={`font-title text-[10px] transition-colors ${
+                    enabled
+                      ? "text-white/30 group-hover:text-accent-light"
+                      : "text-white/25"
+                  }`}
+                >
+                  {enabled ? "→" : "Soon"}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
