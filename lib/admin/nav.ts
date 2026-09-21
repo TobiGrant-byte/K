@@ -121,4 +121,3 @@ export const ADMIN_PUBLIC_QUICK_LINKS: Array<{
   { href: "/philanthropy", label: "Impacts", hint: "Community work" },
   { href: "/contact", label: "Contact", hint: "Get in touch" },
 ];
-
