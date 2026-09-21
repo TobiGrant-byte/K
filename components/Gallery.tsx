@@ -3,14 +3,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import {
+  GALLERY_CATEGORIES,
+  PUBLIC_GALLERY_STATIC_VIDEO,
+  isVideoMediaUrl,
+  presentationForMediaUrl,
+  usePublicGalleryMedia,
+  type GalleryCategory as MediaCategory,
+  type MediaAsset,
+} from "@/lib/domains/media";
 
-type GalleryCategory = "All" | "Graduation" | "Recognition" | "Moments";
+type GalleryFilter = "All" | MediaCategory;
 
 type Photo = {
+  id: string;
   src: string;
   caption: string;
-  category: Exclude<GalleryCategory, "All">;
-  /** Approximate intrinsic size for masonry layout (does not crop). */
+  category: MediaCategory;
   width: number;
   height: number;
   media?: "image" | "video";
@@ -19,185 +28,45 @@ type Photo = {
   transformOrigin?: string;
 };
 
-const allPhotos: Photo[] = [
-  {
-    src: "/images/grad-pensive.webp",
-    caption: "Graduation · The University of Alabama",
-    category: "Graduation",
-    width: 1200,
-    height: 1500,
-    objectPosition: "center 28%",
-    transformOrigin: "center 28%",
-  },
-  {
-    src: "/images/credentials.png",
-    caption: "Engineering Credentials",
-    category: "Recognition",
-    width: 1200,
-    height: 900,
-  },
-  {
-    src: "/images/graduation-denny.webp",
-    caption: "Denny Chimes · Tuscaloosa, Alabama",
-    category: "Graduation",
-    width: 1000,
-    height: 1400,
-    objectPosition: "center 38%",
-    zoom: 1.25,
-    transformOrigin: "center 38%",
-  },
-  {
-    src: "/images/garver-award-1.png",
-    caption: "Garver Award Ceremony",
-    category: "Recognition",
-    width: 1400,
-    height: 900,
-    objectPosition: "center 30%",
-  },
-  {
-    src: "/images/lifesavers-conf.webp",
-    caption: "LIFESAVERS 2023 · Seattle, WA",
-    category: "Recognition",
-    width: 1400,
-    height: 900,
-    objectPosition: "center 28%",
-  },
-  {
-    src: "/images/traffic-safety-scholars.jpg",
-    caption: "Traffic Safety Scholars · LIFESAVERS 2023",
-    category: "Recognition",
-    width: 1400,
-    height: 1000,
-  },
-  {
-    src: "/images/graduation-mentor.webp",
-    caption: "Graduation Dinner with Stephen Jones",
-    category: "Graduation",
-    width: 1400,
-    height: 1000,
-  },
-  {
-    src: "/images/msc-graduation.jpg",
-    caption: "MSc Graduation · Nottingham Trent, UK",
-    category: "Graduation",
-    width: 1100,
-    height: 1400,
-    objectPosition: "top center",
-    zoom: 1.18,
-    transformOrigin: "top center",
-  },
-  {
-    src: "/images/africa-ball.jpg",
-    caption: "Africa Ball · The University of Alabama",
-    category: "Moments",
-    width: 1000,
-    height: 1400,
-    objectPosition: "center 35%",
-    zoom: 1.15,
-    transformOrigin: "center 35%",
-  },
-  {
-    src: "/images/headshot.jpg",
-    caption: "Professional Portrait",
-    category: "Moments",
-    width: 1000,
-    height: 1250,
-    objectPosition: "center 20%",
-    transformOrigin: "center 20%",
-  },
-  {
-    src: "/images/grad-lean.webp",
-    caption: "Graduation — The University of Alabama",
-    category: "Graduation",
-    width: 1100,
-    height: 1400,
-    objectPosition: "center 20%",
-    transformOrigin: "center 20%",
-  },
-  {
-    src: "/images/lecture-hall.jpg",
-    caption: "Presentation at Stillman College",
-    category: "Moments",
-    width: 1400,
-    height: 900,
-  },
-  {
-    src: "/images/speaking.webp",
-    caption: "UA Africa Ball",
-    category: "Moments",
-    width: 1200,
-    height: 900,
-    zoom: 1.32,
-    transformOrigin: "center center",
-  },
-  {
-    src: "/images/garver-award-2.webp",
-    caption: "ITE Student Leadership Summit",
-    category: "Recognition",
-    width: 1200,
-    height: 900,
-  },
-  {
-    src: "/images/grad-close.webp",
-    caption: "Graduation Portrait",
-    category: "Graduation",
-    width: 1000,
-    height: 1300,
-    objectPosition: "center 15%",
-    transformOrigin: "center 15%",
-  },
-  {
-    src: "/images/seated.webp",
-    caption: "The University of Alabama Campus",
-    category: "Moments",
-    width: 1100,
-    height: 1400,
-    objectPosition: "center 40%",
-    transformOrigin: "center 40%",
-  },
-  {
-    src: "/images/img3.jpeg",
-    caption: "",
-    category: "Moments",
-    width: 6000,
-    height: 4000,
-    objectPosition: "center 20%",
-  },
-  {
-    src: "/images/img4.jpeg",
-    caption: "PhD Dissertation Final Defense",
-    category: "Graduation",
-    width: 6000,
-    height: 4000,
-    objectPosition: "center 35%",
-  },
-  {
-    src: "/images/img7.MP4",
-    caption: "PhD Hooding Ceremony",
-    category: "Graduation",
+const CATEGORIES: GalleryFilter[] = ["All", ...GALLERY_CATEGORIES];
+
+function mediaToPhoto(asset: MediaAsset): Photo {
+  const presentation = presentationForMediaUrl(asset.imageUrl);
+  const description = (asset.title || asset.altText || "").trim();
+  return {
+    id: asset.id,
+    src: asset.imageUrl,
+    caption: description,
+    category: asset.category,
+    width: presentation.width,
+    height: presentation.height,
+    media: presentation.media,
+    objectPosition: presentation.objectPosition,
+    zoom: presentation.zoom,
+    transformOrigin: presentation.transformOrigin,
+  };
+}
+
+function staticPublicVideoPhoto(): Photo {
+  return {
+    id: "public-static-img7",
+    src: PUBLIC_GALLERY_STATIC_VIDEO.src,
+    caption: PUBLIC_GALLERY_STATIC_VIDEO.caption,
+    category: PUBLIC_GALLERY_STATIC_VIDEO.category,
+    width: PUBLIC_GALLERY_STATIC_VIDEO.width,
+    height: PUBLIC_GALLERY_STATIC_VIDEO.height,
     media: "video",
-    width: 1920,
-    height: 1080,
-  },
-  {
-    src: "/images/img8.jpeg",
-    caption: "ITE Research Award",
-    category: "Recognition",
-    width: 1600,
-    height: 1200,
-    objectPosition: "center 35%",
-  },
-];
+  };
+}
 
 function isVideo(p: Photo) {
-  return p.media === "video";
+  return p.media === "video" || isVideoMediaUrl(p.src);
 }
-const CATEGORIES: GalleryCategory[] = [
-  "All",
-  "Graduation",
-  "Recognition",
-  "Moments",
-];
+
+function imageAlt(caption: string): string {
+  // Empty description → pass nothing (decorative / no invented alt).
+  return caption;
+}
 
 function StripThumb({
   src,
@@ -215,7 +84,7 @@ function StripThumb({
   return (
     <Image
       src={src}
-      alt={caption}
+      alt={imageAlt(caption)}
       fill
       className="object-cover"
       style={{
@@ -228,18 +97,35 @@ function StripThumb({
   );
 }
 
-export default function Gallery() {
+type Props = {
+  initialMedia?: MediaAsset[];
+};
+
+export default function Gallery({ initialMedia = [] }: Props) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
-  const [filter, setFilter] = useState<GalleryCategory>("All");
+  const [filter, setFilter] = useState<GalleryFilter>("All");
   const [lightbox, setLightbox] = useState<number | null>(null);
+
+  const mediaQuery = usePublicGalleryMedia(initialMedia);
+  const mediaItems = useMemo(
+    () => mediaQuery.data ?? [],
+    [mediaQuery.data],
+  );
+  const allPhotos = useMemo(() => {
+    // CMS images only — video stays a public static file, not a Media Library asset.
+    const fromCms = mediaItems
+      .filter((asset) => !isVideoMediaUrl(asset.imageUrl))
+      .map(mediaToPhoto);
+    return [...fromCms, staticPublicVideoPhoto()];
+  }, [mediaItems]);
 
   const photos = useMemo(
     () =>
       filter === "All"
         ? allPhotos
         : allPhotos.filter((p) => p.category === filter),
-    [filter],
+    [allPhotos, filter],
   );
 
   const openAt = (index: number) => setLightbox(index);
@@ -270,13 +156,14 @@ export default function Gallery() {
     };
   }, [lightbox, go]);
 
-  const strip = useMemo(
-    () => {
-      const stills = allPhotos.filter((p) => !isVideo(p));
-      return [...stills, ...stills];
-    },
-    [],
-  );
+  const strip = useMemo(() => {
+    const stills = allPhotos.filter((p) => !isVideo(p));
+    if (!stills.length) return [];
+    return [...stills, ...stills];
+  }, [allPhotos]);
+
+  const loading = mediaQuery.isPending && mediaItems.length === 0;
+  const failed = mediaQuery.isError;
 
   return (
     <section
@@ -311,156 +198,190 @@ export default function Gallery() {
         </motion.div>
       </div>
 
-      {/* Moving strip — same as before, just placed above the grid */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={inView ? { opacity: 1 } : {}}
-        transition={{ duration: 0.8, delay: 0.15 }}
-        className="mb-12 md:mb-16"
-      >
-        <div className="container mb-4 flex items-end justify-between gap-4">
-          <p className="font-title text-[9px] uppercase tracking-[2px] text-white/35">
-            Featured moments
-          </p>
-          <p className="hidden font-display text-sm italic text-white/30 sm:block">
-            Hover to pause · click any frame to open
-          </p>
-        </div>
-        <div className="scroll-strip">
-          <div className="scroll-track gap-3 [animation-duration:55s]">
-            {strip.map((p, i) => (
-              <button
-                key={`strip-${i}`}
-                type="button"
-                onClick={() => {
-                  const idx = allPhotos.findIndex((x) => x.src === p.src);
-                  if (idx < 0) return;
-                  setFilter("All");
-                  setLightbox(idx);
-                }}
-                className="img-zoom relative h-[140px] w-[200px] shrink-0 cursor-zoom-in overflow-hidden border-0 bg-navy-900 p-0 sm:h-[160px] sm:w-[240px]"
-              >
-                <StripThumb
-                  src={p.src}
-                  caption={p.caption}
-                  objectPosition={p.objectPosition}
-                  zoom={p.zoom}
-                  transformOrigin={p.transformOrigin}
-                />
-              </button>
+      {loading ? (
+        <div className="container mb-16">
+          <div className="mb-8 h-4 w-40 animate-pulse rounded bg-white/10" />
+          <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="mb-4 break-inside-avoid animate-pulse bg-white/5"
+                style={{ height: 180 + (i % 3) * 60 }}
+              />
             ))}
           </div>
         </div>
-      </motion.div>
+      ) : null}
 
-      {/* Filters + masonry gallery — bottom */}
-      <div className="container relative">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.55, delay: 0.2 }}
-          className="mb-8 flex flex-wrap gap-2"
-          role="tablist"
-          aria-label="Gallery categories"
-        >
-          {CATEGORIES.map((c) => {
-            const selected = filter === c;
-            return (
-              <button
-                key={c}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                onClick={() => {
-                  setFilter(c);
-                  setLightbox(null);
-                }}
-                className={`rounded-full border px-4 py-2 font-title text-[9px] uppercase tracking-[2px] transition-colors ${
-                  selected
-                    ? "border-accent/50 bg-accent/15 text-accent-light"
-                    : "border-white/12 bg-transparent text-white/50 hover:border-white/25 hover:text-white/80"
-                }`}
-              >
-                {c}
-              </button>
-            );
-          })}
-        </motion.div>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={filter}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.35 }}
-            className="columns-1 gap-4 sm:columns-2 lg:columns-3"
-          >
-            {photos.map((p, i) => (
-              <motion.button
-                key={`${p.src}-${filter}`}
-                type="button"
-                initial={{ opacity: 0, y: 16 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.45, delay: Math.min(i * 0.04, 0.35) }}
-                onClick={() => openAt(i)}
-                className="group mb-4 w-full break-inside-avoid cursor-zoom-in border-0 bg-transparent p-0 text-left"
-              >
-                <div className="overflow-hidden bg-navy-900/40 relative">
-                  {isVideo(p) ? (
-                    <>
-                      <video
-                        src={p.src}
-                        muted
-                        playsInline
-                        preload="metadata"
-                        className="h-auto w-full object-contain"
-                        aria-label={p.caption || "Gallery video"}
-                      />
-                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                        <span className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-navy-900/70 text-white/90">
-                          <svg viewBox="0 0 24 24" className="ml-0.5 h-5 w-5" fill="currentColor" aria-hidden>
-                            <path d="M8 5.5v13l11-6.5L8 5.5Z" />
-                          </svg>
-                        </span>
-                      </span>
-                    </>
-                  ) : (
-                    <Image
-                      src={p.src}
-                      alt={p.caption || "Gallery photo"}
-                      width={p.width}
-                      height={p.height}
-                      className="h-auto w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      priority={i < 3}
-                    />
-                  )}
-                </div>
-                <div className="mt-2.5 px-0.5">
-                  <span className="mb-1 block font-title text-[8px] uppercase tracking-[2px] text-accent-light">
-                    {p.category}
-                    {isVideo(p) ? " · Video" : ""}
-                  </span>
-                  {p.caption ? (
-                    <p className="font-display text-[15px] italic leading-snug text-white/75 transition-colors group-hover:text-white">
-                      {p.caption}
-                    </p>
-                  ) : null}
-                </div>
-              </motion.button>
-            ))}
-          </motion.div>
-        </AnimatePresence>
-
-        {photos.length === 0 ? (
-          <p className="font-display text-lg italic text-white/40">
-            No photos in this category yet.
+      {failed ? (
+        <div className="container mb-16">
+          <p className="font-display text-lg italic text-white/45">
+            The gallery could not be loaded right now. Please try again shortly.
           </p>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
-      {/* Lightbox */}
+      {!loading && !failed && strip.length > 0 ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.8, delay: 0.15 }}
+          className="mb-12 md:mb-16"
+        >
+          <div className="container mb-4 flex items-end justify-between gap-4">
+            <p className="font-title text-[9px] uppercase tracking-[2px] text-white/35">
+              Featured moments
+            </p>
+            <p className="hidden font-display text-sm italic text-white/30 sm:block">
+              Hover to pause · click any frame to open
+            </p>
+          </div>
+          <div className="scroll-strip">
+            <div className="scroll-track gap-3 [animation-duration:55s]">
+              {strip.map((p, i) => (
+                <button
+                  key={`strip-${p.id}-${i}`}
+                  type="button"
+                  onClick={() => {
+                    const idx = allPhotos.findIndex((x) => x.id === p.id);
+                    if (idx < 0) return;
+                    setFilter("All");
+                    setLightbox(idx);
+                  }}
+                  className="img-zoom relative h-[140px] w-[200px] shrink-0 cursor-zoom-in overflow-hidden border-0 bg-navy-900 p-0 sm:h-[160px] sm:w-[240px]"
+                >
+                  <StripThumb
+                    src={p.src}
+                    caption={p.caption}
+                    objectPosition={p.objectPosition}
+                    zoom={p.zoom}
+                    transformOrigin={p.transformOrigin}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      ) : null}
+
+      {!loading && !failed ? (
+        <div className="container relative">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.55, delay: 0.2 }}
+            className="mb-8 flex flex-wrap gap-2"
+            role="tablist"
+            aria-label="Gallery categories"
+          >
+            {CATEGORIES.map((c) => {
+              const selected = filter === c;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => {
+                    setFilter(c);
+                    setLightbox(null);
+                  }}
+                  className={`rounded-full border px-4 py-2 font-title text-[9px] uppercase tracking-[2px] transition-colors ${
+                    selected
+                      ? "border-accent/50 bg-accent/15 text-accent-light"
+                      : "border-white/12 bg-transparent text-white/50 hover:border-white/25 hover:text-white/80"
+                  }`}
+                >
+                  {c}
+                </button>
+              );
+            })}
+          </motion.div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={filter}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35 }}
+              className="columns-1 gap-4 sm:columns-2 lg:columns-3"
+            >
+              {photos.map((p, i) => (
+                <motion.button
+                  key={`${p.id}-${filter}`}
+                  type="button"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={inView ? { opacity: 1, y: 0 } : {}}
+                  transition={{
+                    duration: 0.45,
+                    delay: Math.min(i * 0.04, 0.35),
+                  }}
+                  onClick={() => openAt(i)}
+                  className="group mb-4 w-full break-inside-avoid cursor-zoom-in border-0 bg-transparent p-0 text-left"
+                >
+                  <div className="relative overflow-hidden bg-navy-900/40">
+                    {isVideo(p) ? (
+                      <>
+                        <video
+                          src={p.src}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          className="h-auto w-full object-contain"
+                          aria-label={p.caption || undefined}
+                        />
+                        <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                          <span className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-navy-900/70 text-white/90">
+                            <svg
+                              viewBox="0 0 24 24"
+                              className="ml-0.5 h-5 w-5"
+                              fill="currentColor"
+                              aria-hidden
+                            >
+                              <path d="M8 5.5v13l11-6.5L8 5.5Z" />
+                            </svg>
+                          </span>
+                        </span>
+                      </>
+                    ) : (
+                      <Image
+                        src={p.src}
+                        alt={imageAlt(p.caption)}
+                        width={p.width}
+                        height={p.height}
+                        className="h-auto w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        priority={i < 3}
+                      />
+                    )}
+                  </div>
+                  <div className="mt-2.5 px-0.5">
+                    <span className="mb-1 block font-title text-[8px] uppercase tracking-[2px] text-accent-light">
+                      {p.category}
+                      {isVideo(p) ? " · Video" : ""}
+                    </span>
+                    {p.caption ? (
+                      <p className="font-display text-[15px] italic leading-snug text-white/75 transition-colors group-hover:text-white">
+                        {p.caption}
+                      </p>
+                    ) : null}
+                  </div>
+                </motion.button>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+
+          {photos.length === 0 ? (
+            <p className="font-display text-lg italic text-white/40">
+              {allPhotos.length === 0
+                ? "No gallery images yet."
+                : "No photos in this category yet."}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       <AnimatePresence>
         {lightbox !== null && photos[lightbox] ? (
           <motion.div
@@ -474,7 +395,7 @@ export default function Gallery() {
             aria-label={photos[lightbox].caption || "Gallery media"}
           >
             <motion.div
-              key={photos[lightbox].src}
+              key={photos[lightbox].id}
               initial={{ scale: 0.94, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
@@ -518,12 +439,12 @@ export default function Gallery() {
                     autoPlay
                     playsInline
                     className="max-h-[min(70vh,720px)] w-auto max-w-full"
-                    aria-label={photos[lightbox].caption || "Gallery video"}
+                    aria-label={photos[lightbox].caption || undefined}
                   />
                 ) : (
                   <Image
                     src={photos[lightbox].src}
-                    alt={photos[lightbox].caption || "Gallery photo"}
+                    alt={imageAlt(photos[lightbox].caption)}
                     width={photos[lightbox].width}
                     height={photos[lightbox].height}
                     className="max-h-[min(70vh,720px)] w-auto max-w-full object-contain"

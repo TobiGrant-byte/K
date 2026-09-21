@@ -61,7 +61,8 @@ function enhanceImage(img: HTMLImageElement) {
   img.style.maxWidth = "100%";
   img.style.display = "block";
   img.style.objectFit = "contain";
-  img.style.background = "rgba(5,13,26,0.65)";
+  img.style.background = "rgba(5, 13, 26, 0.65)";
+  img.style.border = "1px solid rgba(255, 255, 255, 0.12)";
   img.style.borderRadius = "8px";
   img.style.margin = "12px 0";
   img.style.cursor = "grab";
@@ -759,8 +760,8 @@ export default function RichTextEditor({
   const iconBtn = (active: boolean) =>
     `inline-flex h-9 min-w-9 items-center justify-center rounded-md border px-2 transition-colors ${
       active
-        ? "border-accent/50 bg-accent/20 text-accent-light"
-        : "border-white/15 text-white/65 hover:border-white/30 hover:text-white"
+        ? "border-accent/50 bg-accent/10 text-accent"
+        : "border-white/12 text-white/60 hover:border-white/20 hover:text-white"
     } disabled:opacity-40`;
 
   return (
@@ -768,11 +769,11 @@ export default function RichTextEditor({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <label
           htmlFor={fieldId}
-          className="font-title text-[9px] uppercase tracking-[2px] text-white/40"
+          className="font-title text-[9px] uppercase tracking-[2px] text-white/50"
         >
           {label}
         </label>
-        <span className="font-title text-[9px] uppercase tracking-[2px] text-accent-light">
+        <span className="font-title text-[9px] uppercase tracking-[2px] text-accent">
           Images {imageCount} / {maxImages}
         </span>
       </div>
@@ -784,13 +785,15 @@ export default function RichTextEditor({
         }`}
         onFocusCapture={() => setFocused(true)}
         onBlurCapture={(e) => {
+          const shell = e.currentTarget;
           const next = e.relatedTarget as Node | null;
-          if (e.currentTarget.contains(next)) return;
+          if (shell.contains(next)) return;
           window.setTimeout(() => {
             if (uploadingRef.current) return;
             const active = document.activeElement;
+            const root = shellRef.current ?? shell;
             if (
-              e.currentTarget.contains(active) ||
+              (active && root.contains(active)) ||
               (active as HTMLElement | null)?.closest?.("[data-rte-resize]")
             ) {
               return;
@@ -803,9 +806,13 @@ export default function RichTextEditor({
         <div ref={sentinelRef} className="pointer-events-none h-0 w-full" aria-hidden />
         <div
           ref={toolbarRef}
-          className={`flex flex-wrap items-center gap-1.5 border-b border-white/10 px-2 py-2 ${
+          className={`flex flex-wrap items-center gap-1.5 border-b border-white/12 px-2 py-2 ${
             stickyEnabled && focused ? "sticky z-30" : "relative"
-          } ${stickyEnabled && focused && isStuck ? "bg-navy-900" : "bg-transparent"}`}
+          } ${
+            stickyEnabled && focused && isStuck
+              ? "bg-navy-900 shadow-sm"
+              : "bg-white/5"
+          }`}
           style={
             stickyEnabled && focused ? { top: stickyTop } : undefined
           }
@@ -911,8 +918,8 @@ export default function RichTextEditor({
             type="button"
             className={`ml-auto inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border transition-colors ${
               listening
-                ? "border-rose-400/70 bg-rose-500/20 text-rose-300"
-                : "border-white/15 text-white/65 hover:border-white/30 hover:text-white"
+                ? "border-rose-400/50 bg-rose-500/15 text-rose-400"
+                : "border-white/12 text-white/50 hover:border-white/20 hover:text-white"
             } disabled:opacity-40`}
             disabled={disabled || !speechSupported}
             onMouseDown={(e) => e.preventDefault()}
@@ -939,7 +946,7 @@ export default function RichTextEditor({
           </button>
         </div>
         {speechError ? (
-          <p className="mt-1 px-2 text-[11px] text-amber-300/90" role="status">
+          <p className="mt-1 px-2 text-[11px] text-amber-400" role="status">
             {speechError}
           </p>
         ) : null}
@@ -953,7 +960,7 @@ export default function RichTextEditor({
             aria-label={label}
             contentEditable={!disabled}
             suppressContentEditableWarning
-            className={`${minHeightClass} px-4 py-3 text-sm leading-relaxed text-white outline-none [&_em]:italic [&_li]:my-1 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_strong]:font-semibold [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6`}
+            className={`${minHeightClass} px-4 py-3 text-sm leading-relaxed text-white outline-none [&_a]:text-accent [&_em]:italic [&_li]:my-1 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_strong]:font-semibold [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6`}
             onInput={onInput}
             onPaste={onPaste}
             onKeyDown={onKeyDown}

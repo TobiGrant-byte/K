@@ -1,10 +1,23 @@
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import Image from "next/image";
+import ManagedImage from "@/components/media/ManagedImage";
+import {
+  RESEARCH_IMAGE_FALLBACK_ALT,
+  RESEARCH_IMAGE_FALLBACK_SRC,
+  researchAreaNumber,
+  type ResearchActionItem,
+  type ResearchContent,
+} from "@/lib/domains/research";
+import type { MediaAsset } from "@/lib/media";
+import type { ImageDisplayConfig } from "@/lib/domains/media/display";
 
 const GOOGLE_SCHOLAR =
   "https://scholar.google.com/citations?user=iAfft0gAAAAJ&hl=en";
+
+type MediaPick = Pick<MediaAsset, "imageUrl" | "altText" | "title"> | null;
 
 function CountUp({
   to,
@@ -20,14 +33,10 @@ function CountUp({
   const [value, setValue] = useState(0);
 
   useEffect(() => {
-    if (!active) {
-      setValue(0);
-      return;
-    }
+    if (!active) return;
 
     let frame = 0;
     const start = performance.now();
-    setValue(0);
 
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
@@ -40,9 +49,11 @@ function CountUp({
     return () => cancelAnimationFrame(frame);
   }, [active, to, duration]);
 
+  const display = active ? value : 0;
+
   return (
     <>
-      {value}
+      {display}
       {suffix}
     </>
   );
@@ -74,100 +85,39 @@ function ScholarStats() {
   );
 }
 
-const areas = [
-  {
-    n: "01",
-    title: "Advanced Crash Analytics & Predictive Safety",
-    desc: "Investigating the complex interplay of human behavior, roadway geometry, and environmental factors that lead to crashes. Expertise lies in developing predictive safety models, identifying systemic improvements, and implementing state and federal data-driven countermeasures designed to drastically reduce traffic fatalities.",
-  },
-  {
-    n: "02",
-    title: "Connected Infrastructure & Intelligent Transportation Systems",
-    desc: "Harnessing the power of real-world connected vehicle (CV) data, cloud-based telematics, and AI-driven spatial simulations to optimize corridor performance, assess autonomous vehicle readiness, and build future-proof, resilient municipal highway networks.",
-  },
-  {
-    n: "03",
-    title: "Inclusive Infrastructure Design",
-    desc: "Championing human-centric transit solutions that serve all populations. Expertise includes adapting spatial data workflows to identify and rectify infrastructure disparities in underserved communities, enhance pedestrian networks, and improve mobility in both domestic and international contexts.",
-  },
-];
-
-type Spotlight = {
-  label: string;
-  title: string;
-  desc: string;
-  href?: string;
-  cta?: string;
-  image?: string;
-  imagePosition?: string;
-  placeholderLabel?: string;
-  /** < 1 zooms out; "contain" shows the full graphic */
-  fit?: "cover" | "contain";
-  zoom?: number;
-};
-
-const spotlights: Spotlight[] = [
-  {
-    label: "Practice · Garver · SDITE/MOVITE",
-    title: "Connecting at the joint meeting",
-    desc: "Representing Garver at the 2025 SDITE/MOVITE Joint Meeting in Memphis — bringing research-minded engineering into professional conversation.",
-    href: "https://www.linkedin.com/posts/sunday-okafor_garvertransportation-roadsafety-activity-7316450495957467136-wm-Q",
-    cta: "View on LinkedIn",
-    image: "/images/graver.jpg",
-    imagePosition: "center",
-    fit: "contain",
-  },
-  {
-    label: "Industry · TRB Annual Meeting",
-    title: "Speaking at TRB 2025",
-    desc: "Sharing expertise at the Transportation Research Board Annual Meeting in Washington, DC — where research and practice meet on a national stage.",
-    href: "https://www.linkedin.com/posts/sunday-okafor_garvertransportation-trbam-activity-7281060396864532480-mRZj",
-    cta: "View on LinkedIn",
-    image: "/images/graver2.jpg",
-    imagePosition: "center",
-    fit: "contain",
-  },
-  {
-    label: "Conference · Seattle, WA",
-    title: "LIFESAVERS 2023",
-    desc: "Selected as a Traffic Safety Scholar at the national conference on highway safety priorities — recognizing emerging researchers shaping safer roads.",
-    image: "/images/lifesavers-conf.webp",
-    imagePosition: "center 22%",
-  },
-];
-
-function MediaFrame({
-  image,
-  imagePosition,
-  placeholderLabel,
-  alt,
-  fit = "cover",
-  zoom,
+function ActionMediaFrame({
+  item,
+  media,
 }: {
-  image?: string;
-  imagePosition?: string;
-  placeholderLabel?: string;
-  alt: string;
-  fit?: "cover" | "contain";
-  zoom?: number;
+  item: ResearchActionItem;
+  media: MediaPick;
 }) {
-  if (image) {
+  const src = media?.imageUrl || item.fallbackSrc;
+  const alt = media?.altText || media?.title || item.title;
+  const config: ImageDisplayConfig | undefined = item.image?.imageConfig;
+
+  if (src) {
     return (
-      <div className={`relative aspect-[16/10] overflow-hidden ${fit === "contain" ? "bg-white" : ""}`}>
-        <Image
-          src={image}
-          alt={alt}
-          fill
-          className={`${fit === "contain" ? "object-contain" : "object-cover"} transition-transform duration-[700ms] ease-out hover:scale-[1.05] group-hover:scale-[1.05]`}
-          style={{
-            objectPosition: imagePosition || "center",
-            ...(zoom ? { transform: `scale(${zoom})`, transformOrigin: "center center" } : { transformOrigin: "center center" }),
-          }}
-          sizes="(max-width: 768px) 100vw, 33vw"
-        />
-        {fit === "cover" ? (
-          <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.35)_0%,transparent_45%)] pointer-events-none" />
-        ) : null}
+      <div className="relative aspect-[16/10] overflow-hidden">
+        {media?.imageUrl && item.image ? (
+          <ManagedImage
+            media={media}
+            config={config}
+            alt={alt}
+            imageClassName="transition-transform duration-[700ms] ease-out hover:scale-[1.05] group-hover:scale-[1.05]"
+            sizes="(max-width: 768px) 100vw, 33vw"
+          />
+        ) : (
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            className="object-cover transition-transform duration-[700ms] ease-out hover:scale-[1.05] group-hover:scale-[1.05]"
+            style={{ objectPosition: "center", transformOrigin: "center center" }}
+            sizes="(max-width: 768px) 100vw, 33vw"
+          />
+        )}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.35)_0%,transparent_45%)]" />
       </div>
     );
   }
@@ -177,30 +127,63 @@ function MediaFrame({
       <div className="pointer-events-none absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_30%_20%,rgba(122,179,240,0.35)_0%,transparent_50%)]" />
       <div className="relative z-[1] px-6 text-center">
         <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-accent/40 text-accent-light">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            aria-hidden
+          >
             <rect x="3" y="3" width="18" height="18" rx="2" />
             <circle cx="8.5" cy="8.5" r="1.5" />
-            <path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M21 15l-5-5L5 21"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
         <p className="font-title text-[9px] uppercase tracking-[2.5px] text-accent-light/80">
-          {placeholderLabel || "Image coming soon"}
+          Image coming soon
         </p>
       </div>
     </div>
   );
 }
 
-export default function Research() {
+type Props = {
+  research: ResearchContent;
+  developmentMedia?: MediaPick;
+  actionMediaById?: Record<string, MediaPick>;
+};
+
+export default function Research({
+  research,
+  developmentMedia = null,
+  actionMediaById = {},
+}: Props) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+  const { development, action } = research;
+  const media = developmentMedia ?? {
+    imageUrl: RESEARCH_IMAGE_FALLBACK_SRC,
+    altText: RESEARCH_IMAGE_FALLBACK_ALT,
+    title: RESEARCH_IMAGE_FALLBACK_ALT,
+  };
+  const config: ImageDisplayConfig | undefined =
+    development.image?.imageConfig;
 
   return (
-    <section id="research" ref={ref} className="section-pad relative overflow-hidden bg-navy-800">
+    <section
+      id="research"
+      ref={ref}
+      className="section-pad relative overflow-hidden bg-navy-800"
+    >
       <div className="accent-wash" />
 
       <div className="container">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -212,12 +195,15 @@ export default function Research() {
             <span className="eyebrow">Research & Development</span>
           </div>
           <h2 className="font-display text-[clamp(32px,5vw,62px)] font-light leading-[1.1] text-white">
-            Ideas That Shape How <em className="font-semibold italic text-accent-light">We Move</em>
+            {development.title}{" "}
+            {development.titleAccent ? (
+              <em className="font-semibold italic text-accent-light">
+                {development.titleAccent}
+              </em>
+            ) : null}
           </h2>
-      
         </motion.div>
 
-        {/* Focus areas */}
         <div className="grid grid-cols-1 items-start gap-16 md:grid-cols-[2fr_3fr]">
           <motion.div
             initial={{ opacity: 0, x: -36 }}
@@ -226,43 +212,47 @@ export default function Research() {
             className="flex flex-col gap-3"
           >
             <div className="img-zoom relative aspect-[4/3] overflow-hidden">
-              <Image
-                src="/images/lecture-hall.jpg"
-                alt="Dr. Okafor lecturing"
-                fill
-                className="object-cover"
+              <ManagedImage
+                media={media}
+                config={config}
+                alt={media.altText || RESEARCH_IMAGE_FALLBACK_ALT}
                 sizes="40vw"
               />
               <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.7)_0%,transparent_55%)]" />
               <div className="absolute bottom-4 left-4">
-                <div className="eyebrow mb-1">Guiding Minds</div>
-                <div className="font-display text-[15px] italic text-white">Where ideas find a voice</div>
+                <div className="eyebrow mb-1">{development.imageEyebrow}</div>
+                <div className="font-display text-[15px] italic text-white">
+                  {development.imageCaption}
+                </div>
               </div>
             </div>
           </motion.div>
 
           <div>
-            {areas.map((a, i) => (
+            {development.areas.map((a, i) => (
               <motion.div
-                key={a.n}
+                key={a.id}
                 initial={{ opacity: 0, x: 32 }}
                 animate={inView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.65, delay: i * 0.14 + 0.2 }}
                 className="relative flex cursor-default gap-5 border-b border-white/[0.07] py-7 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-accent/50 after:transition-[width] after:duration-[400ms] hover:after:w-full"
               >
                 <span className="shrink-0 font-display text-[36px] font-light leading-none text-white/[0.12]">
-                  {a.n}
+                  {researchAreaNumber(i)}
                 </span>
                 <div>
-                  <h3 className="mb-2.5 font-display text-2xl font-medium text-white">{a.title}</h3>
-                  <p className="text-sm leading-[1.85] text-white/55">{a.desc}</p>
+                  <h3 className="mb-2.5 font-display text-2xl font-medium text-white">
+                    {a.title}
+                  </h3>
+                  <p className="text-sm leading-[1.85] text-white/55">
+                    {a.description}
+                  </p>
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
 
-        {/* Google Scholar — contextual panel */}
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -278,14 +268,19 @@ export default function Research() {
               </div>
               <h3 className="mb-4 font-display text-[clamp(28px,3.5vw,42px)] font-light leading-[1.15] text-white">
                 Published research on{" "}
-                <em className="font-semibold text-accent-light">Google Scholar</em>
+                <em className="font-semibold text-accent-light">
+                  Google Scholar
+                </em>
               </h3>
               <p className="max-w-[520px] text-[15px] leading-[1.85] text-white/55">
-                Google Scholar hosts Dr. Okafor&apos;s verified academic profile — peer-reviewed
-                articles, conference papers, and his doctoral dissertation. His listed research
-                areas are road traffic safety, connected vehicles, and sustainable transportation,
-                with work spanning crash-severity modeling, pedestrian injury pathways, large-truck
-                safety, and connected-vehicle hard-braking data for proactive safety improvement.
+                Google Scholar hosts Dr. Okafor&apos;s verified academic
+                profile — peer-reviewed articles, conference papers, and his
+                doctoral dissertation. His listed research areas are road
+                traffic safety, connected vehicles, and sustainable
+                transportation, with work spanning crash-severity modeling,
+                pedestrian injury pathways, large-truck safety, and
+                connected-vehicle hard-braking data for proactive safety
+                improvement.
               </p>
             </div>
 
@@ -298,8 +293,14 @@ export default function Research() {
                   "Dissertation on connected-vehicle data for proactive road safety",
                   "Collaborations with Alabama Transportation Institute researchers",
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-[13px] leading-[1.6] text-white/65">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 text-[13px] leading-[1.6] text-white/65"
+                  >
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"
+                      aria-hidden
+                    />
                     {item}
                   </li>
                 ))}
@@ -318,7 +319,6 @@ export default function Research() {
           </div>
         </motion.div>
 
-        {/* Spotlights — LinkedIn + LIFESAVERS in one system */}
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -331,57 +331,57 @@ export default function Research() {
               <span className="eyebrow">Research in Action</span>
             </div>
             <h3 className="font-display text-[clamp(26px,3.5vw,40px)] font-light leading-[1.15] text-white">
-              Moments that carry the <em className="font-semibold text-accent-light">work forward</em>
+              {action.title}{" "}
+              {action.titleAccent ? (
+                <em className="font-semibold text-accent-light">
+                  {action.titleAccent}
+                </em>
+              ) : null}
             </h3>
             <p className="mt-3 font-display text-base italic leading-[1.7] text-white/45">
-              Moments where research shows up in practice, professional forums, and the national safety community.
+              {action.subtitle}
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {spotlights.map((s, i) => {
+            {action.items.map((item, i) => {
+              const itemMedia =
+                (item.image?.galleryImageId &&
+                  actionMediaById[item.image.galleryImageId]) ||
+                null;
               const body = (
                 <>
-                  <MediaFrame
-                    image={s.image}
-                    imagePosition={s.imagePosition}
-                    placeholderLabel={s.placeholderLabel}
-                    alt={s.title}
-                    fit={s.fit}
-                    zoom={s.zoom}
-                  />
+                  <ActionMediaFrame item={item} media={itemMedia} />
                   <div className="flex flex-1 flex-col px-5 pb-6 pt-5">
                     <div className="mb-2 font-title text-[9px] uppercase tracking-[2px] text-accent-light/70">
-                      {s.label}
+                      {item.label}
                     </div>
                     <h4 className="mb-2.5 font-display text-[22px] font-medium leading-[1.25] text-white">
-                      {s.title}
+                      {item.title}
                     </h4>
-                    <p className="mb-5 flex-1 text-[13px] leading-[1.75] text-white/50">{s.desc}</p>
-                    {s.href && s.cta ? (
+                    <p className="mb-5 flex-1 text-[13px] leading-[1.75] text-white/50">
+                      {item.description}
+                    </p>
+                    {item.href ? (
                       <span className="inline-flex items-center gap-1.5 font-title text-[9px] uppercase tracking-[2px] text-white/40 transition-colors group-hover:text-accent-light">
-                        {s.cta}
+                        View on LinkedIn
                         <span aria-hidden>→</span>
                       </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 font-title text-[9px] uppercase tracking-[2px] text-white/30">
-                        Conference highlight
-                      </span>
-                    )}
+                    ) : null}
                   </div>
                 </>
               );
 
               return (
                 <motion.div
-                  key={s.title}
+                  key={item.id}
                   initial={{ opacity: 0, y: 24 }}
                   animate={inView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.6, delay: 0.5 + i * 0.1 }}
                 >
-                  {s.href ? (
+                  {item.href ? (
                     <a
-                      href={s.href}
+                      href={item.href}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="group flex h-full flex-col overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] no-underline text-inherit transition-colors duration-300 hover:border-accent/40"

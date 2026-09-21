@@ -7,6 +7,7 @@ import {
   BLOG_IMAGE_HEIGHT,
   BLOG_IMAGE_WIDTH,
 } from "@/lib/blog";
+import { adminToast } from "@/lib/admin/toast-store";
 
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 3;
@@ -79,7 +80,6 @@ export default function ImageCropModal({
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
 
   const onCropComplete = useCallback((_area: Area, pixels: Area) => {
     setCroppedAreaPixels(pixels);
@@ -88,12 +88,11 @@ export default function ImageCropModal({
   const apply = async () => {
     if (!croppedAreaPixels) return;
     setBusy(true);
-    setError("");
     try {
       const dataUrl = await getCroppedDataUrl(imageSrc, croppedAreaPixels);
       onComplete(dataUrl);
     } catch {
-      setError("Could not crop this image. Try another file.");
+      adminToast.error("Could not crop this image. Try another file.");
     } finally {
       setBusy(false);
     }
@@ -188,14 +187,6 @@ export default function ImageCropModal({
           </div>
 
           <div className="flex flex-wrap justify-end gap-3">
-            {error ? (
-              <p
-                className="mr-auto self-center text-sm text-red-300"
-                role="alert"
-              >
-                {error}
-              </p>
-            ) : null}
             <button
               type="button"
               onClick={onCancel}

@@ -1,26 +1,40 @@
 "use client";
+
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
+import {
+  HOME_HERO_IMAGE_SRC,
+  roleLines,
+  type ProfileHomeContent,
+} from "@/lib/domains/profile";
 
-const words = [
-  ["Transportation", "Engineer."],
-  ["Researcher."],
-  ["Leader."],
-];
+type Props = {
+  home: ProfileHomeContent;
+};
 
-export default function Hero() {
+export default function Hero({ home }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
   const textY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.65], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
 
+  const roles = home.roles.length
+    ? home.roles.map(roleLines).filter((lines) => lines.length > 0)
+    : [["Transportation", "Engineer."], ["Researcher."], ["Leader."]];
+
   return (
-    <section ref={ref} className="relative flex h-screen min-h-[700px] items-end overflow-hidden">
+    <section
+      ref={ref}
+      className="relative flex h-screen min-h-[700px] items-end overflow-hidden"
+    >
       <motion.div className="absolute inset-0 z-0" style={{ scale }}>
         <Image
-          src="/images/hero-picture.jpeg"
+          src={HOME_HERO_IMAGE_SRC}
           alt="Dr. Sunday Okafor"
           fill
           priority
@@ -52,7 +66,7 @@ export default function Hero() {
               <span className="text-accent-light" aria-hidden>
                 &ldquo;
               </span>
-              Do not let the difficult days deter you from moving forward, keep going everyday
+              {home.quote}
               <span className="text-accent-light" aria-hidden>
                 &rdquo;
               </span>
@@ -66,16 +80,16 @@ export default function Hero() {
             className="mb-8 flex items-center gap-3.5"
           >
             <div className="relative h-11 min-w-[220px] overflow-hidden">
-              {words.map((lines, i) => (
+              {roles.map((lines, i) => (
                 <motion.span
-                  key={lines.join(" ")}
+                  key={`${lines.join("-")}-${i}`}
                   initial={{ y: 44, opacity: 0 }}
                   animate={{ y: [44, 0, 0, -44], opacity: [0, 1, 1, 0] }}
                   transition={{
                     duration: 3,
                     delay: i * 3 + 1.2,
                     repeat: Infinity,
-                    repeatDelay: (words.length - 1) * 3,
+                    repeatDelay: (roles.length - 1) * 3,
                   }}
                   className={`flex h-11 flex-col justify-center whitespace-nowrap font-title text-[clamp(14px,1.5vw,17px)] uppercase leading-[1.25] tracking-[3px] text-accent-light ${
                     i === 0 ? "relative" : "absolute left-0 top-0"
