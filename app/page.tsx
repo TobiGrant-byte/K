@@ -13,8 +13,8 @@ export const metadata: Metadata = {
     "Dr. Sunday Okafor, PhD — Transportation Engineer, Researcher, and Leader. Designing safer roads, mentoring emerging professionals, and leading with purpose.",
 };
 
-/** Refresh shared profile copy periodically; static hero never waits on CMS. */
-export const revalidate = 60;
+/** ISR: serve cached HTML; admin saves bust the cache via /api/revalidate. */
+export const revalidate = 300;
 
 export default async function Home() {
   let profile = PROFILE_FALLBACK;

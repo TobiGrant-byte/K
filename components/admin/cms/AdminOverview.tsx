@@ -109,6 +109,11 @@ export default function AdminOverview() {
                 hint: "R&D and Research in Action",
               },
               {
+                id: "publications" as const,
+                label: "Publications",
+                hint: "Featured In The Press",
+              },
+              {
                 id: "gallery" as const,
                 label: "Media Library",
                 hint: "Upload and manage images",

@@ -1,4 +1,16 @@
+import {
+  DEFAULT_IMAGE_DISPLAY_CONFIG,
+  type ImageDisplayConfig,
+} from "@/lib/domains/media/display";
 import type { ProfileContent } from "@/lib/domains/profile/types";
+
+function config(
+  positionX: number,
+  positionY: number,
+  zoom = 1,
+): ImageDisplayConfig {
+  return { positionX, positionY, zoom };
+}
 
 /**
  * Canonical static fallbacks — existing public site copy.
@@ -22,6 +34,44 @@ export const PROFILE_FALLBACK: ProfileContent = {
     ].join("\n\n"),
     image: null,
   },
+  hobbies: {
+    eyebrow: "Away From Work",
+    title: "The Man Behind the",
+    titleAccent: "PhD",
+    subtitle:
+      "Excellence in engineering begins with a life well-lived outside of it.",
+    quote:
+      "A great mind is nothing without a great heart — and a great partner to share life with.",
+    items: [
+      {
+        id: "hobby-wife",
+        title: "Talking with His Wife",
+        description:
+          "His favourite thing to do is engaging in daily gists with his Achalaugo, Maryjane — the conversations that ground every day.",
+        icon: "♡",
+        image: null,
+        imageConfig: config(0.5, 0.22),
+      },
+      {
+        id: "hobby-chess",
+        title: "Playing Chess",
+        description:
+          "He also enjoys playing chess — a quiet contest of patience, foresight, and calm under pressure.",
+        icon: "♟",
+        image: null,
+        imageConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
+      },
+      {
+        id: "hobby-football",
+        title: "Watching Football",
+        description:
+          "And when the whistle blows, you’ll find him watching football — the beautiful game, shared with the same easy joy.",
+        icon: "◎",
+        image: null,
+        imageConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
+      },
+    ],
+  },
   updatedAt: "",
 };
 
@@ -29,5 +79,5 @@ export const PROFILE_FALLBACK: ProfileContent = {
 export const ABOUT_IMAGE_FALLBACK_SRC = "/images/headshot.jpg";
 export const ABOUT_IMAGE_FALLBACK_ALT = "Dr. Sunday Okafor";
 
-/** Static Home hero — never CMS-managed. */
+/** Static Home hero — never CMS-managed; stays on /public. */
 export const HOME_HERO_IMAGE_SRC = "/images/hero-picture.jpeg";

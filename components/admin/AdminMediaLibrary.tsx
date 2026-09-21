@@ -7,8 +7,9 @@ import {
   MEDIA_MAX_UPLOAD_COUNT,
   isVideoMediaUrl,
   useCreateMediaBatchMutation,
-  useImportLibraryOnlyMediaMutation,
   useMediaLibrary,
+  useMigrateSiteMediaMutation,
+  useRemoveLocalPublicMediaMutation,
   useRemoveVideoMediaMutation,
   useSetMediaVisibilityBatchMutation,
   useUpdateMediaBatchMutation,
@@ -71,10 +72,12 @@ export default function AdminMediaLibrary() {
   const updateBatch = useUpdateMediaBatchMutation();
   const visibilityBatch = useSetMediaVisibilityBatchMutation();
   const removeVideos = useRemoveVideoMediaMutation();
-  const importLibraryOnly = useImportLibraryOnlyMediaMutation();
+  const migrateSiteMedia = useMigrateSiteMediaMutation();
+  const removeLocalPublic = useRemoveLocalPublicMediaMutation();
   const fileRef = useRef<HTMLInputElement | null>(null);
   const cleanedVideosRef = useRef(false);
-  const seededLibraryOnlyRef = useRef(false);
+  const migratedSiteMediaRef = useRef(false);
+  const cleanedLocalPublicRef = useRef(false);
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<
@@ -107,19 +110,39 @@ export default function AdminMediaLibrary() {
     });
   }, [mediaQuery.data, removeVideos]);
 
-  // One-time seed: wife / chess / football for “The Man Behind the PhD” (Others, unpublished).
+  // One-time: upload public site images to ImageKit + restore Firebase docs
+  // under the original legacy-* ids (keeps CMS positions / selections).
   useEffect(() => {
-    if (seededLibraryOnlyRef.current || mediaQuery.isPending) return;
+    if (migratedSiteMediaRef.current || mediaQuery.isPending) return;
     if (!mediaQuery.data) return;
-    seededLibraryOnlyRef.current = true;
-    void importLibraryOnly.mutateAsync().then((result) => {
-      if (result.created > 0) {
+    migratedSiteMediaRef.current = true;
+    void migrateSiteMedia.mutateAsync().then((result) => {
+      if (result.uploaded > 0 || result.linked > 0) {
         adminToast.success(
-          `Added ${result.created} image${result.created === 1 ? "" : "s"} to Others (library only).`,
+          `ImageKit sync: uploaded ${result.uploaded}, relinked ${result.linked}, skipped ${result.skipped}.`,
         );
       }
+      if (result.failed.length) {
+        adminToast.error(
+          `Could not sync ${result.failed.length} image${result.failed.length === 1 ? "" : "s"}.`,
+        );
+      }
+      // After ImageKit docs exist, drop any leftover /images/ URL rows.
+      void removeLocalPublic.mutateAsync().then((count) => {
+        cleanedLocalPublicRef.current = true;
+        if (count > 0) {
+          adminToast.info(
+            `Removed ${count} leftover local path row${count === 1 ? "" : "s"} from Media Library.`,
+          );
+        }
+      });
     });
-  }, [mediaQuery.data, mediaQuery.isPending, importLibraryOnly]);
+  }, [
+    mediaQuery.data,
+    mediaQuery.isPending,
+    migrateSiteMedia,
+    removeLocalPublic,
+  ]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();

@@ -7,10 +7,12 @@ import {
   ABOUT_IMAGE_ASPECT,
   ABOUT_IMAGE_FALLBACK_ALT,
   ABOUT_IMAGE_FALLBACK_SRC,
+  HOBBIES_IMAGE_ASPECT,
   normalizeProfileContent,
   useProfileContent,
   useSaveProfileMutation,
   type ProfileContentInput,
+  type ProfileHobbyItem,
 } from "@/lib/domains/profile";
 import {
   DEFAULT_IMAGE_DISPLAY_CONFIG,
@@ -19,10 +21,16 @@ import {
   useMediaById,
   type MediaAsset,
 } from "@/lib/domains/media";
-import { formatPostDate } from "@/lib/blog";
+import { createId, formatPostDate } from "@/lib/blog";
 import { adminToast } from "@/lib/admin/toast-store";
+import AdminConfirmDialog from "@/components/admin/cms/AdminConfirmDialog";
 
-type Tab = "home" | "about";
+type Tab = "home" | "about" | "hobbies";
+type PickerTarget = "about" | number;
+type PendingRemove =
+  | { kind: "role"; index: number }
+  | { kind: "hobby"; index: number }
+  | { kind: "hobby-image"; index: number };
 
 export default function AdminProfile() {
   const profileQuery = useProfileContent();
@@ -30,6 +38,10 @@ export default function AdminProfile() {
   const [tab, setTab] = useState<Tab>("home");
   const [draft, setDraft] = useState<ProfileContentInput | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerTarget, setPickerTarget] = useState<PickerTarget>("about");
+  const [pendingRemove, setPendingRemove] = useState<PendingRemove | null>(
+    null,
+  );
 
   const serverDraft = useMemo(() => {
     if (!profileQuery.data) return null;
@@ -37,6 +49,7 @@ export default function AdminProfile() {
     return {
       home: normalized.home,
       about: normalized.about,
+      hobbies: normalized.hobbies,
     } satisfies ProfileContentInput;
   }, [profileQuery.data]);
 
@@ -45,13 +58,24 @@ export default function AdminProfile() {
     setDraft(serverDraft);
   }
 
-  const selectedImageId = draft?.about.image?.galleryImageId ?? null;
-  const selectedMedia = useMediaById(selectedImageId);
+  const aboutImageId = draft?.about.image?.galleryImageId ?? null;
+  const hobbyImageIndex =
+    typeof pickerTarget === "number" ? pickerTarget : null;
+  const hobbyImageId =
+    hobbyImageIndex !== null
+      ? (draft?.hobbies.items[hobbyImageIndex]?.image?.galleryImageId ?? null)
+      : null;
+  const selectedImageId =
+    pickerTarget === "about" ? aboutImageId : hobbyImageId;
 
-  const previewUrl = useMemo(() => {
-    if (selectedMedia.data?.imageUrl) return selectedMedia.data.imageUrl;
+  const selectedAboutMedia = useMediaById(aboutImageId);
+
+  const aboutPreviewUrl = useMemo(() => {
+    if (selectedAboutMedia.data?.imageUrl) {
+      return selectedAboutMedia.data.imageUrl;
+    }
     return ABOUT_IMAGE_FALLBACK_SRC;
-  }, [selectedMedia.data]);
+  }, [selectedAboutMedia.data]);
 
   const dirty = useMemo(() => {
     if (!draft || !profileQuery.data) return false;
@@ -61,6 +85,7 @@ export default function AdminProfile() {
       JSON.stringify({
         home: current.home,
         about: current.about,
+        hobbies: current.hobbies,
       })
     );
   }, [draft, profileQuery.data]);
@@ -87,6 +112,12 @@ export default function AdminProfile() {
     );
   };
 
+  const patchHobbies = (patch: Partial<ProfileContentInput["hobbies"]>) => {
+    setDraft((prev) =>
+      prev ? { ...prev, hobbies: { ...prev.hobbies, ...patch } } : prev,
+    );
+  };
+
   const updateRole = (index: number, value: string) => {
     const roles = [...draft.home.roles];
     roles[index] = value;
@@ -99,7 +130,7 @@ export default function AdminProfile() {
 
   const removeRole = (index: number) => {
     if (draft.home.roles.length <= 1) return;
-    patchHome({ roles: draft.home.roles.filter((_, i) => i !== index) });
+    setPendingRemove({ kind: "role", index });
   };
 
   const moveRole = (index: number, dir: -1 | 1) => {
@@ -111,19 +142,94 @@ export default function AdminProfile() {
     patchHome({ roles });
   };
 
+  const updateHobbyItem = (
+    index: number,
+    patchItem: Partial<ProfileHobbyItem>,
+  ) => {
+    const items = draft.hobbies.items.map((item, i) =>
+      i === index ? { ...item, ...patchItem } : item,
+    );
+    patchHobbies({ items });
+  };
+
+  const addHobbyItem = () => {
+    patchHobbies({
+      items: [
+        ...draft.hobbies.items,
+        {
+          id: createId(),
+          title: "",
+          description: "",
+          icon: "◎",
+          image: null,
+          imageConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
+        },
+      ],
+    });
+  };
+
+  const removeHobbyItem = (index: number) => {
+    if (draft.hobbies.items.length <= 1) return;
+    setPendingRemove({ kind: "hobby", index });
+  };
+
+  const moveHobbyItem = (index: number, dir: -1 | 1) => {
+    const next = index + dir;
+    if (next < 0 || next >= draft.hobbies.items.length) return;
+    const items = [...draft.hobbies.items];
+    const [item] = items.splice(index, 1);
+    items.splice(next, 0, item!);
+    patchHobbies({ items });
+  };
+
+  const confirmPendingRemove = () => {
+    if (!pendingRemove) return;
+    const pending = pendingRemove;
+    setPendingRemove(null);
+    if (pending.kind === "role") {
+      if (draft.home.roles.length <= 1) return;
+      patchHome({
+        roles: draft.home.roles.filter((_, i) => i !== pending.index),
+      });
+      return;
+    }
+    if (pending.kind === "hobby-image") {
+      updateHobbyItem(pending.index, { image: null });
+      return;
+    }
+    if (draft.hobbies.items.length <= 1) return;
+    patchHobbies({
+      items: draft.hobbies.items.filter((_, i) => i !== pending.index),
+    });
+  };
+
+  const openPicker = (target: PickerTarget) => {
+    setPickerTarget(target);
+    setPickerOpen(true);
+  };
+
   const onSelectMedia = (asset: MediaAsset) => {
     if (isVideoMediaUrl(asset.imageUrl)) {
       adminToast.error("Please choose an image, not a video.");
       return;
     }
-    const prevConfig =
-      draft.about.image?.imageConfig ?? DEFAULT_IMAGE_DISPLAY_CONFIG;
-    patchAbout({
-      image: createMediaImageRef(asset.id, prevConfig),
+    if (pickerTarget === "about") {
+      const prevConfig =
+        draft.about.image?.imageConfig ?? DEFAULT_IMAGE_DISPLAY_CONFIG;
+      patchAbout({
+        image: createMediaImageRef(asset.id, prevConfig),
+      });
+      return;
+    }
+    const item = draft.hobbies.items[pickerTarget];
+    if (!item) return;
+    updateHobbyItem(pickerTarget, {
+      image: createMediaImageRef(asset.id, item.imageConfig),
+      imageConfig: item.imageConfig,
     });
   };
 
-  const clearImage = () => {
+  const clearAboutImage = () => {
     patchAbout({ image: null });
   };
 
@@ -143,8 +249,8 @@ export default function AdminProfile() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-2xl">
           <p className="text-sm text-white/50">
-            Shared Home and About content. The Home hero image stays static and
-            is not edited here. Contact lives on its own page.
+            Shared Home, About, and Away From Work content. The Home hero image
+            stays static and is not edited here. Contact lives on its own page.
           </p>
           {profileQuery.data?.updatedAt ? (
             <p className="mt-2 font-title text-[9px] uppercase tracking-[2px] text-white/35">
@@ -159,14 +265,15 @@ export default function AdminProfile() {
           [
             { id: "home", label: "Home presentation" },
             { id: "about", label: "About" },
+            { id: "hobbies", label: "Away From Work" },
           ] as const
-        ).map((item) => (
+        ).map((item, index) => (
           <button
             key={item.id}
             type="button"
             onClick={() => setTab(item.id)}
             className={`px-4 py-2.5 font-title text-[9px] uppercase tracking-[1.5px] ${
-              item.id !== "home" ? "border-l border-white/12 " : ""
+              index > 0 ? "border-l border-white/12 " : ""
             }${
               tab === item.id
                 ? "bg-white/10 text-white"
@@ -252,12 +359,6 @@ export default function AdminProfile() {
               className="w-full resize-y rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-accent/60"
             />
           </label>
-
-          {/* <p className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/45">
-            Home hero image is fixed at{" "}
-            <code className="text-accent-light">/images/hero-picture.jpeg</code>{" "}
-            and is not managed in the CMS.
-          </p> */}
         </div>
       ) : null}
 
@@ -327,15 +428,15 @@ export default function AdminProfile() {
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={() => setPickerOpen(true)}
+                  onClick={() => openPicker("about")}
                   className="rounded-lg bg-accent px-4 py-3 font-title text-[10px] uppercase tracking-[2px] text-white hover:bg-accent-light"
                 >
-                  {selectedImageId ? "Change image" : "Select image"}
+                  {aboutImageId ? "Change image" : "Select image"}
                 </button>
-                {selectedImageId ? (
+                {aboutImageId ? (
                   <button
                     type="button"
-                    onClick={clearImage}
+                    onClick={clearAboutImage}
                     className="rounded-lg border border-white/12 px-4 py-3 font-title text-[10px] uppercase tracking-[2px] text-white/60 hover:text-white"
                   >
                     Use site fallback
@@ -344,7 +445,7 @@ export default function AdminProfile() {
               </div>
             </div>
 
-            {!selectedImageId ? (
+            {!aboutImageId ? (
               <p className="text-sm text-white/40">
                 Using static fallback{" "}
                 <code className="text-accent-light">
@@ -355,10 +456,10 @@ export default function AdminProfile() {
             ) : null}
 
             <ImagePositionEditor
-              imageUrl={previewUrl}
+              imageUrl={aboutPreviewUrl}
               alt={
-                selectedMedia.data?.altText ||
-                selectedMedia.data?.title ||
+                selectedAboutMedia.data?.altText ||
+                selectedAboutMedia.data?.title ||
                 ABOUT_IMAGE_FALLBACK_ALT
               }
               aspectRatio={ABOUT_IMAGE_ASPECT}
@@ -373,12 +474,10 @@ export default function AdminProfile() {
                       imageConfig,
                     },
                   });
-                  return;
                 }
-                // Positioning the fallback preview only — keep image null until selected.
               }}
             />
-            {!selectedImageId ? (
+            {!aboutImageId ? (
               <p className="text-[12px] text-white/35">
                 Position controls apply after you select a Media Library image.
               </p>
@@ -387,11 +486,119 @@ export default function AdminProfile() {
         </div>
       ) : null}
 
+      {tab === "hobbies" ? (
+        <div className="space-y-6 rounded-xl border border-white/10 bg-navy-800/40 p-5 sm:p-6">
+          <div>
+            <h2 className="font-display text-xl font-light">
+              Away From Work
+            </h2>
+            <p className="mt-1 text-sm text-white/45">
+              Section heading and cards for “The Man Behind the PhD” on the
+              About page.
+            </p>
+          </div>
+
+          <label className="block">
+            <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/50">
+              Eyebrow
+            </span>
+            <input
+              value={draft.hobbies.eyebrow}
+              onChange={(e) => patchHobbies({ eyebrow: e.target.value })}
+              className="w-full rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-accent/60"
+            />
+          </label>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block">
+              <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/50">
+                Title
+              </span>
+              <input
+                value={draft.hobbies.title}
+                onChange={(e) => patchHobbies({ title: e.target.value })}
+                className="w-full rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-accent/60"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/50">
+                Title Accent (italic and blue)
+              </span>
+              <input
+                value={draft.hobbies.titleAccent}
+                onChange={(e) => patchHobbies({ titleAccent: e.target.value })}
+                className="w-full rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-accent/60"
+              />
+            </label>
+          </div>
+
+          <label className="block">
+            <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/50">
+              Subtitle
+            </span>
+            <textarea
+              value={draft.hobbies.subtitle}
+              onChange={(e) => patchHobbies({ subtitle: e.target.value })}
+              rows={2}
+              className="w-full resize-y rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-accent/60"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/50">
+              Closing quote
+            </span>
+            <textarea
+              value={draft.hobbies.quote}
+              onChange={(e) => patchHobbies({ quote: e.target.value })}
+              rows={3}
+              className="w-full resize-y rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-accent/60"
+            />
+          </label>
+
+          <div className="space-y-4 border-t border-white/10 pt-5">
+            <div>
+              <h3 className="font-display text-lg font-light">Cards</h3>
+              <p className="mt-1 text-sm text-white/45">
+                Each card needs a title, description, and a Media Library image.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {draft.hobbies.items.map((item, index) => (
+                <HobbyItemEditor
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  total={draft.hobbies.items.length}
+                  onChange={(patch) => updateHobbyItem(index, patch)}
+                  onMove={(dir) => moveHobbyItem(index, dir)}
+                  onRemove={() => removeHobbyItem(index)}
+                  onPickImage={() => openPicker(index)}
+                  onRemoveImage={() =>
+                    setPendingRemove({ kind: "hobby-image", index })
+                  }
+                />
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={addHobbyItem}
+              className="rounded-lg border border-dashed border-white/20 px-4 py-3 font-title text-[9px] uppercase tracking-[2px] text-white/55 hover:border-white/35 hover:text-white"
+            >
+              Add card
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="sticky bottom-0 z-20 -mx-1 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-navy-900/95 px-4 py-4 backdrop-blur-sm sm:px-1">
         <p className="text-sm text-white/45">
           One submit saves <span className="text-white/75">roles</span>,{" "}
-          <span className="text-white/75">quote</span>, and{" "}
-          <span className="text-white/75">About</span> (text + image) together.
+          <span className="text-white/75">quote</span>,{" "}
+          <span className="text-white/75">About</span>, and{" "}
+          <span className="text-white/75">Away From Work</span> together.
         </p>
         <button
           type="button"
@@ -408,7 +615,161 @@ export default function AdminProfile() {
         onClose={() => setPickerOpen(false)}
         onSelect={onSelectMedia}
         selectedId={selectedImageId}
-        title="Select About image"
+        title={
+          pickerTarget === "about"
+            ? "Select About image"
+            : "Select Away From Work image"
+        }
+      />
+
+      <AdminConfirmDialog
+        open={pendingRemove !== null}
+        eyebrow={
+          pendingRemove?.kind === "hobby-image"
+            ? "Remove image"
+            : pendingRemove?.kind === "hobby"
+              ? "Remove card"
+              : "Remove role"
+        }
+        title={
+          pendingRemove?.kind === "hobby-image"
+            ? "Remove this image?"
+            : pendingRemove?.kind === "hobby"
+              ? "Remove this card?"
+              : "Remove this role?"
+        }
+        description={
+          pendingRemove?.kind === "hobby-image"
+            ? "The image will be cleared from this draft. Submit to apply the change on the public site."
+            : "It will be dropped from the list when you submit. You can cancel if this was a mistake."
+        }
+        confirmLabel="Remove"
+        onCancel={() => setPendingRemove(null)}
+        onConfirm={confirmPendingRemove}
+      />
+    </div>
+  );
+}
+
+function HobbyItemEditor({
+  item,
+  index,
+  total,
+  onChange,
+  onMove,
+  onRemove,
+  onPickImage,
+  onRemoveImage,
+}: {
+  item: ProfileHobbyItem;
+  index: number;
+  total: number;
+  onChange: (patch: Partial<ProfileHobbyItem>) => void;
+  onMove: (dir: -1 | 1) => void;
+  onRemove: () => void;
+  onPickImage: () => void;
+  onRemoveImage: () => void;
+}) {
+  const media = useMediaById(item.image?.galleryImageId ?? null);
+  const previewUrl = media.data?.imageUrl || null;
+
+  return (
+    <div className="space-y-3 rounded-lg border border-white/10 bg-navy-900/40 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="font-title text-[9px] uppercase tracking-[2px] text-accent-light">
+          Card {String(index + 1).padStart(2, "0")}
+        </span>
+        <div className="flex gap-1">
+          <button
+            type="button"
+            disabled={index === 0}
+            onClick={() => onMove(-1)}
+            className="rounded-md border border-white/12 px-2.5 py-2 text-xs text-white/60 hover:text-white disabled:opacity-30"
+            aria-label="Move up"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            disabled={index >= total - 1}
+            onClick={() => onMove(1)}
+            className="rounded-md border border-white/12 px-2.5 py-2 text-xs text-white/60 hover:text-white disabled:opacity-30"
+            aria-label="Move down"
+          >
+            ↓
+          </button>
+          <button
+            type="button"
+            disabled={total <= 1}
+            onClick={onRemove}
+            className="rounded-md border border-white/12 px-2.5 py-2 text-xs text-red-300/80 hover:text-red-200 disabled:opacity-30"
+            aria-label="Remove card"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+        <input
+          value={item.title}
+          onChange={(e) => onChange({ title: e.target.value })}
+          placeholder="Card title"
+          className="w-full rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-accent/60"
+        />
+        <input
+          value={item.icon}
+          onChange={(e) => onChange({ icon: e.target.value })}
+          placeholder="Icon"
+          maxLength={4}
+          className="w-full rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-center text-sm text-white outline-none focus:border-accent/60 md:w-24"
+          aria-label="Badge icon"
+        />
+      </div>
+      <textarea
+        value={item.description}
+        onChange={(e) => onChange({ description: e.target.value })}
+        rows={3}
+        placeholder="Description"
+        className="w-full resize-y rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm leading-relaxed text-white outline-none focus:border-accent/60"
+      />
+
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={onPickImage}
+          className="rounded-lg bg-accent px-4 py-2.5 font-title text-[10px] uppercase tracking-[2px] text-white hover:bg-accent-light"
+        >
+          {item.image ? "Change image" : "Select image"}
+        </button>
+        {item.image ? (
+          <button
+            type="button"
+            onClick={onRemoveImage}
+            className="rounded-lg border border-white/12 px-4 py-2.5 font-title text-[10px] uppercase tracking-[2px] text-white/60 hover:text-white"
+          >
+            Remove image
+          </button>
+        ) : null}
+      </div>
+
+      <ImagePositionEditor
+        imageUrl={previewUrl}
+        alt={media.data?.altText || media.data?.title || item.title}
+        aspectRatio={HOBBIES_IMAGE_ASPECT}
+        emptyLabel="No image"
+        value={item.imageConfig}
+        onChange={(imageConfig) => {
+          onChange({
+            imageConfig,
+            image: item.image
+              ? {
+                  galleryImageId: item.image.galleryImageId,
+                  imageConfig,
+                }
+              : null,
+          });
+        }}
       />
     </div>
   );

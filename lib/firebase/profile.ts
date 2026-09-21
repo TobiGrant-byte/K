@@ -82,6 +82,7 @@ export async function saveProfileContent(
     {
       home: payload.home,
       about: payload.about,
+      hobbies: payload.hobbies,
       updatedAt: serverTimestamp(),
     },
     { merge: true },
@@ -109,10 +110,12 @@ export async function ensureProfileContentSeeded(): Promise<ProfileContent> {
   const seed = toProfileWritePayload({
     home: PROFILE_FALLBACK.home,
     about: PROFILE_FALLBACK.about,
+    hobbies: PROFILE_FALLBACK.hobbies,
   });
   await setDoc(ref, {
     home: seed.home,
     about: seed.about,
+    hobbies: seed.hobbies,
     updatedAt: serverTimestamp(),
   });
   return {

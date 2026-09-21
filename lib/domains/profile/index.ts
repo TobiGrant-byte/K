@@ -2,9 +2,14 @@ export type {
   ProfileAboutContent,
   ProfileContent,
   ProfileContentInput,
+  ProfileHobbiesContent,
+  ProfileHobbyItem,
   ProfileHomeContent,
 } from "@/lib/domains/profile/types";
-export { ABOUT_IMAGE_ASPECT } from "@/lib/domains/profile/types";
+export {
+  ABOUT_IMAGE_ASPECT,
+  HOBBIES_IMAGE_ASPECT,
+} from "@/lib/domains/profile/types";
 export {
   ABOUT_IMAGE_FALLBACK_ALT,
   ABOUT_IMAGE_FALLBACK_SRC,
@@ -14,6 +19,8 @@ export {
 export {
   normalizeProfileAbout,
   normalizeProfileContent,
+  normalizeProfileHobbies,
+  normalizeProfileHobbyItems,
   normalizeProfileHome,
   profileBodyParagraphs,
   roleLines,

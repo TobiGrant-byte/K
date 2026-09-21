@@ -15,6 +15,7 @@ import {
   type AdminBlogComment,
   type BlogPost,
 } from "@/lib/domains/blog/service";
+import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
 const BLOG_STALE = 5 * 60_000;
 
@@ -97,6 +98,7 @@ export function useSavePostMutation() {
     onSuccess: () => {
       // Realtime listeners will update cache; invalidate as a safety net.
       void queryClient.invalidateQueries({ queryKey: blogKeys.all });
+      void revalidatePublicSite("blog");
     },
   });
 }
@@ -107,6 +109,7 @@ export function useRemovePostMutation() {
     mutationFn: (postId: string) => removePost(postId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: blogKeys.all });
+      void revalidatePublicSite("blog");
     },
   });
 }

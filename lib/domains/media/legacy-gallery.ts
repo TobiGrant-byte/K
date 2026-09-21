@@ -1,12 +1,10 @@
 import type { GalleryCategory } from "@/lib/media";
 
 /**
- * Exact catalog from the previous static public Gallery.
- * Used to import into the Media Library without deleting /public files.
- * Presentation hints preserve the original masonry look when URLs match.
+ * Presentation hints for Gallery masonry (matched by filename in ImageKit
+ * or legacy /images/ URLs).
  */
 export type LegacyGalleryItem = {
-  /** Public path under /public — never deleted by import. */
   src: string;
   caption: string;
   category: GalleryCategory;
@@ -180,10 +178,6 @@ export const LEGACY_SITE_GALLERY: LegacyGalleryItem[] = [
   },
 ];
 
-/**
- * Public-only video — stays as a /public file, not a Media Library image asset.
- * Shown on the public Gallery; excluded from Admin Media Library.
- */
 export const PUBLIC_GALLERY_STATIC_VIDEO: LegacyGalleryItem = {
   src: "/images/img7.MP4",
   caption: "PhD Holding Ceremony",
@@ -193,39 +187,23 @@ export const PUBLIC_GALLERY_STATIC_VIDEO: LegacyGalleryItem = {
   height: 1080,
 };
 
-/**
- * Site images for Media Library only — not shown on public Gallery.
- * Used by “The Man Behind the PhD” (hobbies) and similar sections.
- */
-export const LIBRARY_ONLY_SITE_MEDIA: LegacyGalleryItem[] = [
-  {
-    src: "/images/couple.png",
-    caption: "Talking with His Wife",
-    category: "Others",
-    width: 1200,
-    height: 1500,
-    objectPosition: "center 22%",
-  },
-  {
-    src: "/images/chess-img.jpg",
-    caption: "Playing Chess",
-    category: "Others",
-    width: 1200,
-    height: 900,
-    objectPosition: "center center",
-  },
-  {
-    src: "/images/soccer-image.jpg",
-    caption: "Watching Football",
-    category: "Others",
-    width: 1200,
-    height: 900,
-    objectPosition: "center center",
-  },
-];
+/** @deprecated Local path seeding removed — ImageKit migration owns Media Library. */
+export const LIBRARY_ONLY_SITE_MEDIA: LegacyGalleryItem[] = [];
 
 export function isVideoMediaUrl(url: string): boolean {
   return /\.(mp4|webm|mov)(\?|$)/i.test(url);
+}
+
+export function isLocalPublicMediaUrl(url: string): boolean {
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+  if (trimmed.startsWith("/images/") || trimmed.startsWith("/public/")) {
+    return true;
+  }
+  if (!/^https?:\/\//i.test(trimmed) && trimmed.includes("/images/")) {
+    return true;
+  }
+  return false;
 }
 
 export function legacyGalleryId(src: string): string {
@@ -253,12 +231,18 @@ export function presentationForMediaUrl(imageUrl: string): {
       media: "video",
     };
   }
-  const match = LEGACY_SITE_GALLERY.find(
-    (item) =>
+  const match = LEGACY_SITE_GALLERY.find((item) => {
+    const fileName = item.src.split("/").pop() ?? "";
+    return (
       imageUrl === item.src ||
       imageUrl.endsWith(item.src) ||
-      imageUrl.includes(item.src.replace(/^\//, "")),
-  );
+      imageUrl.includes(item.src.replace(/^\//, "")) ||
+      (fileName.length > 0 &&
+        (imageUrl.includes(`/site-media/${fileName}`) ||
+          imageUrl.includes(`/site-media/${encodeURIComponent(fileName)}`) ||
+          imageUrl.endsWith(`/${fileName}`)))
+    );
+  });
   if (match) {
     return {
       width: match.width,

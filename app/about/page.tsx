@@ -14,7 +14,8 @@ export const metadata: Metadata = {
     "Meet Dr. Sunday Okafor — Transportation Engineer, Researcher, and Leader dedicated to safer roads and stronger communities.",
 };
 
-export const revalidate = 60;
+/** ISR: serve cached HTML; admin saves bust the cache via /api/revalidate. */
+export const revalidate = 300;
 
 export default async function AboutPage() {
   let profile = PROFILE_FALLBACK;
@@ -25,20 +26,42 @@ export default async function AboutPage() {
   }
 
   let aboutMedia = null;
-  const imageId = profile.about.image?.galleryImageId;
-  if (imageId) {
+  const aboutImageId = profile.about.image?.galleryImageId;
+  if (aboutImageId) {
     try {
-      aboutMedia = await fetchMediaAssetById(imageId);
+      aboutMedia = await fetchMediaAssetById(aboutImageId);
     } catch {
       aboutMedia = null;
     }
   }
 
+  const hobbyMediaById: Record<
+    string,
+    Awaited<ReturnType<typeof fetchMediaAssetById>>
+  > = {};
+  const hobbyIds = [
+    ...new Set(
+      profile.hobbies.items
+        .map((item) => item.image?.galleryImageId)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+  await Promise.all(
+    hobbyIds.map(async (id) => {
+      try {
+        const asset = await fetchMediaAssetById(id);
+        if (asset) hobbyMediaById[id] = asset;
+      } catch {
+        // Keep fallback image for this card.
+      }
+    }),
+  );
+
   return (
     <PageShell>
       <main>
         <About about={profile.about} aboutMedia={aboutMedia} />
-        <Hobbies />
+        <Hobbies hobbies={profile.hobbies} mediaById={hobbyMediaById} />
       </main>
     </PageShell>
   );

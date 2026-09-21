@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import AdminOverview from "@/components/admin/cms/AdminOverview";
 import AdminPosts from "@/components/admin/AdminPosts";
 import AdminMediaLibrary from "@/components/admin/AdminMediaLibrary";
 import AdminProfile from "@/components/admin/AdminProfile";
 import AdminResearch from "@/components/admin/AdminResearch";
+import AdminPublications from "@/components/admin/AdminPublications";
 import AdminShell from "@/components/admin/cms/AdminShell";
 import AdminToasts from "@/components/admin/cms/AdminToasts";
+import AdminUrlSync from "@/components/admin/cms/AdminUrlSync";
 import {
   signInAdminWithGoogle,
   signOutAdmin,
@@ -41,10 +43,10 @@ export default function AdminApp() {
     }
     if (authState.status === "error") {
       adminToast.error(authState.message);
-      const t = window.setTimeout(() => {
-        setAuthState({ status: "signed-out", user: null, isAdmin: false });
-      }, 8000);
-      return () => window.clearTimeout(t);
+    const t = window.setTimeout(() => {
+      setAuthState({ status: "signed-out", user: null, isAdmin: false });
+    }, 8000);
+    return () => window.clearTimeout(t);
     }
   }, [authState]);
 
@@ -85,43 +87,47 @@ export default function AdminApp() {
           <div className="w-full max-w-md rounded-xl border border-white/10 bg-navy-800 p-8">
             <div className="mb-2 font-title text-[10px] uppercase tracking-[3px] text-white/50">
               CMS
-            </div>
-            <h1 className="mb-2 font-display text-3xl font-light text-white">
-              Sign in
-            </h1>
+          </div>
+          <h1 className="mb-2 font-display text-3xl font-light text-white">
+            Sign in
+          </h1>
             <p className="mb-8 text-sm leading-relaxed text-white/50">
               Continue with an authorized Google account to manage site content.
             </p>
 
-            <button
-              type="button"
-              onClick={handleLogin}
-              disabled={signingIn}
-              className="w-full rounded-lg bg-accent py-3.5 font-title text-[11px] uppercase tracking-[2.5px] text-white transition-colors hover:bg-accent-light disabled:opacity-60"
-            >
-              {signingIn ? "Signing in…" : "Continue with Google"}
-            </button>
+          <button
+            type="button"
+            onClick={handleLogin}
+            disabled={signingIn}
+            className="w-full rounded-lg bg-accent py-3.5 font-title text-[11px] uppercase tracking-[2.5px] text-white transition-colors hover:bg-accent-light disabled:opacity-60"
+          >
+            {signingIn ? "Signing in…" : "Continue with Google"}
+          </button>
 
-            <Link
-              href="/"
+          <Link
+            href="/"
               className="mt-6 inline-flex font-title text-[9px] uppercase tracking-[2px] text-white/40 no-underline hover:text-white/70"
-            >
-              ← Back to site
-            </Link>
-          </div>
+          >
+            ← Back to site
+          </Link>
         </div>
+      </div>
       </>
     );
   }
 
   return (
     <AdminShell user={authState.user} onLogout={handleLogout}>
+      <Suspense fallback={null}>
+        <AdminUrlSync />
+      </Suspense>
       <AdminToasts />
       {section === "overview" ? <AdminOverview /> : null}
       {section === "blog-posts" ? <AdminPosts /> : null}
       {section === "gallery" ? <AdminMediaLibrary /> : null}
       {section === "about" ? <AdminProfile /> : null}
       {section === "research-dev" ? <AdminResearch /> : null}
+      {section === "publications" ? <AdminPublications /> : null}
     </AdminShell>
   );
 }

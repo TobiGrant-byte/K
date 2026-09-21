@@ -7,6 +7,7 @@ import {
   saveResearchContent,
 } from "@/lib/firebase/research";
 import type { ResearchContentInput } from "@/lib/domains/research/types";
+import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
 const RESEARCH_STALE = 5 * 60_000;
 
@@ -25,6 +26,7 @@ export function useSaveResearchMutation() {
     mutationFn: (input: ResearchContentInput) => saveResearchContent(input),
     onSuccess: (data) => {
       queryClient.setQueryData(researchKeys.content(), data);
+      void revalidatePublicSite("research");
     },
   });
 }

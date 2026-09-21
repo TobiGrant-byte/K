@@ -14,7 +14,8 @@ export const metadata: Metadata = {
     "Traffic safety, connected infrastructure, and inclusive mobility — R&D focus areas for safer transportation systems.",
 };
 
-export const revalidate = 60;
+/** ISR: serve cached HTML; admin saves bust the cache via /api/revalidate. */
+export const revalidate = 300;
 
 type MediaPick = Pick<MediaAsset, "imageUrl" | "altText" | "title"> | null;
 
