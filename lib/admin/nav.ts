@@ -10,7 +10,7 @@ export type AdminNavItem = {
 /**
  * CMS navigation. Comments live under Posts (View comments), not as a separate item.
  *
- * Rollout: only Overview, Blog, Media, and Profile are unlocked for now.
+ * Rollout: Overview, Blog, Media, Profile, and Research are unlocked for now.
  * Later sections stay wired and work via deep link (`?section=…`); flip
  * `enabled` to true when ready to expose them in the sidebar.
  */
@@ -22,7 +22,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   {
     id: "research-dev",
     label: "Research",
-    enabled: false,
+    enabled: true,
     group: "Site",
   },
   {

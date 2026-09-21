@@ -72,9 +72,9 @@ export default function AdminOverview() {
   return (
     <div className="space-y-8">
       <p className="max-w-2xl text-sm leading-relaxed text-white/50">
-        Welcome to the content management system. Blog, Media Library, and
-        Profile are available now. Additional site sections will open here as
-        they roll out.
+        Welcome to the content management system. Blog, Media Library, Profile,
+        and Research are available now. Additional site sections will open here
+        as they roll out.
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
