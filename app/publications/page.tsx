@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import PressSection from "@/components/PressSection";
-import {
-  fetchPublicationsContent,
-  PUBLICATIONS_FALLBACK,
-} from "@/lib/domains/publications";
+import { fetchPublicationsContent } from "@/lib/domains/publications";
 import { fetchMediaAssetById } from "@/lib/domains/media";
 import type { MediaAsset } from "@/lib/media";
 
@@ -20,12 +17,7 @@ export const revalidate = 300;
 type MediaPick = Pick<MediaAsset, "imageUrl" | "altText" | "title"> | null;
 
 export default async function PublicationsPage() {
-  let publications = PUBLICATIONS_FALLBACK;
-  try {
-    publications = await fetchPublicationsContent();
-  } catch {
-    publications = PUBLICATIONS_FALLBACK;
-  }
+  const publications = await fetchPublicationsContent();
 
   const mediaIds = [
     ...new Set(

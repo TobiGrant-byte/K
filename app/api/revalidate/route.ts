@@ -13,6 +13,8 @@ const SCOPES = new Set<SiteRevalidateScope>([
   "profile",
   "research",
   "publications",
+  "philanthropy",
+  "achievements",
   "gallery",
   "blog",
   "all",

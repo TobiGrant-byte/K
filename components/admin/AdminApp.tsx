@@ -8,6 +8,8 @@ import AdminMediaLibrary from "@/components/admin/AdminMediaLibrary";
 import AdminProfile from "@/components/admin/AdminProfile";
 import AdminResearch from "@/components/admin/AdminResearch";
 import AdminPublications from "@/components/admin/AdminPublications";
+import AdminPhilanthropy from "@/components/admin/AdminPhilanthropy";
+import AdminAchievements from "@/components/admin/AdminAchievements";
 import AdminShell from "@/components/admin/cms/AdminShell";
 import AdminToasts from "@/components/admin/cms/AdminToasts";
 import AdminUrlSync from "@/components/admin/cms/AdminUrlSync";
@@ -128,6 +130,8 @@ export default function AdminApp() {
       {section === "about" ? <AdminProfile /> : null}
       {section === "research-dev" ? <AdminResearch /> : null}
       {section === "publications" ? <AdminPublications /> : null}
+      {section === "philanthropy" ? <AdminPhilanthropy /> : null}
+      {section === "achievements" ? <AdminAchievements /> : null}
     </AdminShell>
   );
 }

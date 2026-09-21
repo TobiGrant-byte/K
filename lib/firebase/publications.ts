@@ -11,9 +11,10 @@ import {
   getFirebaseFirestore,
   missingFirebaseEnvironmentVariables,
 } from "@/lib/firebase/config";
-import { PUBLICATIONS_FALLBACK } from "@/lib/domains/publications/defaults";
 import {
   normalizePublicationsContent,
+  publicationsSeedPayload,
+  PUBLICATIONS_PUBLIC_EMPTY,
   toPublicationsWritePayload,
 } from "@/lib/domains/publications/normalize";
 import type {
@@ -41,12 +42,13 @@ function requireFirebase() {
 }
 
 function fromFirestoreData(data: DocumentData | undefined): PublicationsContent {
-  if (!data) return { ...PUBLICATIONS_FALLBACK };
+  if (!data) return { ...PUBLICATIONS_PUBLIC_EMPTY };
   return normalizePublicationsContent(data, dateString(data.updatedAt));
 }
 
+/** Public / SSR: Firebase only — never reinject seed copy. */
 export async function fetchPublicationsContent(): Promise<PublicationsContent> {
-  if (!firebaseConfigured) return { ...PUBLICATIONS_FALLBACK };
+  if (!firebaseConfigured) return { ...PUBLICATIONS_PUBLIC_EMPTY };
   try {
     const snap = await getDoc(
       doc(
@@ -55,10 +57,10 @@ export async function fetchPublicationsContent(): Promise<PublicationsContent> {
         PUBLICATIONS_DOC_PATH.id,
       ),
     );
-    if (!snap.exists()) return { ...PUBLICATIONS_FALLBACK };
+    if (!snap.exists()) return { ...PUBLICATIONS_PUBLIC_EMPTY };
     return fromFirestoreData(snap.data());
   } catch {
-    return { ...PUBLICATIONS_FALLBACK };
+    return { ...PUBLICATIONS_PUBLIC_EMPTY };
   }
 }
 
@@ -90,15 +92,29 @@ export async function ensurePublicationsContentSeeded(): Promise<PublicationsCon
     PUBLICATIONS_DOC_PATH.id,
   );
   const snap = await getDoc(ref);
-  if (snap.exists()) return fromFirestoreData(snap.data());
+  const seed = publicationsSeedPayload();
 
-  const seed = toPublicationsWritePayload({
-    title: PUBLICATIONS_FALLBACK.title,
-    titleAccent: PUBLICATIONS_FALLBACK.titleAccent,
-    subtitle: PUBLICATIONS_FALLBACK.subtitle,
-    items: PUBLICATIONS_FALLBACK.items,
-    tips: PUBLICATIONS_FALLBACK.tips,
-  });
+  if (snap.exists()) {
+    const current = fromFirestoreData(snap.data());
+    const needsTips = current.tips.items.length === 0;
+    const needsPress = current.items.length === 0;
+    const needsHeader = !current.title.trim() || !current.subtitle.trim();
+    if (!needsTips && !needsPress && !needsHeader) return current;
+
+    const merged = toPublicationsWritePayload({
+      title: current.title.trim() || seed.title,
+      titleAccent: current.titleAccent.trim() || seed.titleAccent,
+      subtitle: current.subtitle.trim() || seed.subtitle,
+      items: needsPress ? seed.items : current.items,
+      tips: needsTips ? seed.tips : current.tips,
+    });
+    await setDoc(ref, {
+      ...merged,
+      updatedAt: serverTimestamp(),
+    });
+    return { ...merged, updatedAt: new Date().toISOString() };
+  }
+
   await setDoc(ref, {
     ...seed,
     updatedAt: serverTimestamp(),

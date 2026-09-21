@@ -113,7 +113,7 @@ export default function Gallery({ initialMedia = [] }: Props) {
     [mediaQuery.data],
   );
   const allPhotos = useMemo(() => {
-    // CMS images only — video stays a public static file, not a Media Library asset.
+    // CMS images from Firebase/ImageKit; video stays a public static file.
     const fromCms = mediaItems
       .filter((asset) => !isVideoMediaUrl(asset.imageUrl))
       .map(mediaToPhoto);

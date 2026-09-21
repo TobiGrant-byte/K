@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import Hero from "@/components/Hero";
 import AboutTeaser from "@/components/AboutTeaser";
-import {
-  fetchProfileContent,
-  PROFILE_FALLBACK,
-} from "@/lib/domains/profile";
+import { fetchProfileContent } from "@/lib/domains/profile";
 import { fetchMediaAssetById } from "@/lib/domains/media";
 
 export const metadata: Metadata = {
@@ -17,12 +14,7 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function Home() {
-  let profile = PROFILE_FALLBACK;
-  try {
-    profile = await fetchProfileContent();
-  } catch {
-    profile = PROFILE_FALLBACK;
-  }
+  const profile = await fetchProfileContent();
 
   let aboutMedia = null;
   const imageId = profile.about.image?.galleryImageId;

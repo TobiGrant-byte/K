@@ -104,7 +104,7 @@ export default function AdminMediaLibrary() {
     void removeVideos.mutateAsync().then((count) => {
       if (count > 0) {
         adminToast.info(
-          `Removed ${count} video file${count === 1 ? "" : "s"} from Media Library. The public video is still on the Gallery page.`,
+          `Removed ${count} video file${count === 1 ? "" : "s"} from Media Library. The public Gallery video is still served from /images.`,
         );
       }
     });

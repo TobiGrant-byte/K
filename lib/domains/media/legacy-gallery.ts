@@ -178,6 +178,7 @@ export const LEGACY_SITE_GALLERY: LegacyGalleryItem[] = [
   },
 ];
 
+/** Public Gallery video — stays on /public, never Media Library / Firebase. */
 export const PUBLIC_GALLERY_STATIC_VIDEO: LegacyGalleryItem = {
   src: "/images/img7.MP4",
   caption: "PhD Holding Ceremony",

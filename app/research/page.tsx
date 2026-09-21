@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import Research from "@/components/Research";
-import {
-  fetchResearchContent,
-  RESEARCH_FALLBACK,
-} from "@/lib/domains/research";
+import { fetchResearchContent } from "@/lib/domains/research";
 import { fetchMediaAssetById } from "@/lib/domains/media";
 import type { MediaAsset } from "@/lib/media";
 
@@ -20,12 +17,7 @@ export const revalidate = 300;
 type MediaPick = Pick<MediaAsset, "imageUrl" | "altText" | "title"> | null;
 
 export default async function ResearchPage() {
-  let research = RESEARCH_FALLBACK;
-  try {
-    research = await fetchResearchContent();
-  } catch {
-    research = RESEARCH_FALLBACK;
-  }
+  const research = await fetchResearchContent();
 
   let developmentMedia: MediaPick = null;
   const developmentImageId = research.development.image?.galleryImageId;

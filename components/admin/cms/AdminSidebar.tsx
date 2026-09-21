@@ -75,24 +75,28 @@ export default function AdminSidebar() {
         </div>
 
         <nav className="min-h-0 flex-1 space-y-5 overflow-y-auto px-3 py-4">
-          {(groups.get(null) ?? []).map((item) =>
-            navButton(item.id, item.label, item.enabled),
-          )}
+          {(groups.get(null) ?? [])
+            .filter((item) => item.enabled)
+            .map((item) => navButton(item.id, item.label, item.enabled))}
 
           {[...groups.entries()]
             .filter(([key]) => key !== null)
-            .map(([group, items]) => (
-              <div key={group!}>
-                <div className="mb-1.5 px-3 font-title text-[9px] uppercase tracking-[2px] text-white/35">
-                  {group}
+            .map(([group, items]) => {
+              const visible = items.filter((item) => item.enabled);
+              if (!visible.length) return null;
+              return (
+                <div key={group!}>
+                  <div className="mb-1.5 px-3 font-title text-[9px] uppercase tracking-[2px] text-white/35">
+                    {group}
+                  </div>
+                  <div className="space-y-0.5">
+                    {visible.map((item) =>
+                      navButton(item.id, item.label, item.enabled),
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  {items.map((item) =>
-                    navButton(item.id, item.label, item.enabled),
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
         </nav>
 
         <div className="shrink-0 border-t border-white/10 px-5 py-4">

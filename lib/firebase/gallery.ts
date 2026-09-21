@@ -146,17 +146,15 @@ export async function fetchMediaAssetById(
   id: string,
 ): Promise<MediaAsset | null> {
   if (!firebaseConfigured || !id.trim()) return null;
-  const trimmed = id.trim();
   try {
-    const snap = await getDoc(doc(getFirebaseFirestore(), "gallery", trimmed));
-    if (snap.exists()) return mediaFromData(snap.id, snap.data());
+    const snap = await getDoc(
+      doc(getFirebaseFirestore(), "gallery", id.trim()),
+    );
+    if (!snap.exists()) return null;
+    return mediaFromData(snap.id, snap.data());
   } catch {
-    // Fall through to known hosted catalog (recovered press / site-media).
+    return null;
   }
-  const { knownHostedMediaAsset } = await import(
-    "@/lib/domains/media/press-media-recovery"
-  );
-  return knownHostedMediaAsset(trimmed);
 }
 
 export async function createMediaRecord(args: {
@@ -213,42 +211,15 @@ export async function createMediaRecordsBatch(
 }
 
 /**
- * Import the existing /public site Gallery into Media Library.
- * Keeps public files in place; points imageUrl at those paths.
- * Idempotent: skips ids / urls already present.
+ * Local /public Gallery import disabled — site images live on ImageKit only.
+ * Kept as a no-op so older admin hooks do not recreate broken /images/ rows.
  */
 export async function importLegacySiteGallery(
   existing: MediaAsset[],
 ): Promise<{ created: number; skipped: number }> {
-  requireFirebase();
-  const existingIds = new Set(existing.map((item) => item.id));
-  const existingUrls = new Set(existing.map((item) => item.imageUrl));
-
-  const toCreate = LEGACY_SITE_GALLERY.filter((item) => {
-    const id = legacyGalleryId(item.src);
-    return !existingIds.has(id) && !existingUrls.has(item.src);
-  }).map((item) => {
-    const description = item.caption.trim();
-    return {
-      id: legacyGalleryId(item.src),
-      imageUrl: item.src,
-      imageKitFileId: "",
-      metadata: normalizeMediaMetadata({
-        title: description,
-        altText: description,
-        category: item.category,
-        showInGallery: true,
-      }),
-    };
-  });
-
-  if (toCreate.length) {
-    await createMediaRecordsBatch(toCreate);
-  }
-
   return {
-    created: toCreate.length,
-    skipped: LEGACY_SITE_GALLERY.length - toCreate.length,
+    created: 0,
+    skipped: existing.length || LEGACY_SITE_GALLERY.length,
   };
 }
 
