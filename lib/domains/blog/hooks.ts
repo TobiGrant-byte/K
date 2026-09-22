@@ -93,12 +93,14 @@ export function useAdminComments() {
 export function useSavePostMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (args: { post: BlogPost; creating: boolean }) =>
-      savePost(args.post, { creating: args.creating }),
+    mutationFn: async (args: { post: BlogPost; creating: boolean }) => {
+      const data = await savePost(args.post, { creating: args.creating });
+      await revalidatePublicSite("blog");
+      return data;
+    },
     onSuccess: () => {
       // Realtime listeners will update cache; invalidate as a safety net.
       void queryClient.invalidateQueries({ queryKey: blogKeys.all });
-      void revalidatePublicSite("blog");
     },
   });
 }
@@ -106,10 +108,13 @@ export function useSavePostMutation() {
 export function useRemovePostMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (postId: string) => removePost(postId),
+    mutationFn: async (postId: string) => {
+      const data = await removePost(postId);
+      await revalidatePublicSite("blog");
+      return data;
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: blogKeys.all });
-      void revalidatePublicSite("blog");
     },
   });
 }

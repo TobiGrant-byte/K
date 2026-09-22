@@ -23,10 +23,13 @@ export function useResearchContent() {
 export function useSaveResearchMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: ResearchContentInput) => saveResearchContent(input),
+    mutationFn: async (input: ResearchContentInput) => {
+      const data = await saveResearchContent(input);
+      await revalidatePublicSite("research");
+      return data;
+    },
     onSuccess: (data) => {
       queryClient.setQueryData(researchKeys.content(), data);
-      void revalidatePublicSite("research");
     },
   });
 }

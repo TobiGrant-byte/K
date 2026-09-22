@@ -22,11 +22,13 @@ export function useAchievementsContent() {
 export function useSaveAchievementsMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: AchievementsContentInput) =>
-      saveAchievementsContent(input),
+    mutationFn: async (input: AchievementsContentInput) => {
+      const data = await saveAchievementsContent(input);
+      await revalidatePublicSite("achievements");
+      return data;
+    },
     onSuccess: (data) => {
       queryClient.setQueryData(achievementsKeys.content(), data);
-      void revalidatePublicSite("achievements");
     },
   });
 }

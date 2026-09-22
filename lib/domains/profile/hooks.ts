@@ -26,10 +26,13 @@ export function useProfileContent() {
 export function useSaveProfileMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: ProfileContentInput) => saveProfileContent(input),
+    mutationFn: async (input: ProfileContentInput) => {
+      const data = await saveProfileContent(input);
+      await revalidatePublicSite("profile");
+      return data;
+    },
     onSuccess: (data) => {
       queryClient.setQueryData(profileKeys.content(), data);
-      void revalidatePublicSite("profile");
     },
   });
 }

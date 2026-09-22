@@ -31,8 +31,8 @@ import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
 const MEDIA_STALE = 5 * 60_000;
 
-function bumpPublicMedia() {
-  void revalidatePublicSite("gallery");
+async function bumpPublicMedia() {
+  await revalidatePublicSite("gallery");
 }
 
 /** Admin Media Library + Media Picker: shared list + one Firestore listener. */
@@ -124,17 +124,20 @@ export function useUploadMediaFilesMutation() {
 export function useCreateMediaBatchMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (
+    mutationFn: async (
       items: Array<{
         id: string;
         imageUrl: string;
         imageKitFileId?: string;
         metadata: MediaMetadataInput;
       }>,
-    ) => createMediaRecordsBatch(items),
+    ) => {
+      const data = await createMediaRecordsBatch(items);
+      await bumpPublicMedia();
+      return data;
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
-      bumpPublicMedia();
     },
   });
 }
@@ -146,11 +149,12 @@ export function useImportLegacyGalleryMutation() {
     mutationFn: async () => {
       const existing =
         queryClient.getQueryData<MediaAsset[]>(mediaKeys.list()) ?? [];
-      return importLegacySiteGallery(existing);
+      const data = await importLegacySiteGallery(existing);
+      await bumpPublicMedia();
+      return data;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
-      bumpPublicMedia();
     },
   });
 }
@@ -162,11 +166,12 @@ export function useImportLibraryOnlyMediaMutation() {
     mutationFn: async () => {
       const existing =
         queryClient.getQueryData<MediaAsset[]>(mediaKeys.list()) ?? [];
-      return importLibraryOnlySiteMedia(existing);
+      const data = await importLibraryOnlySiteMedia(existing);
+      await bumpPublicMedia();
+      return data;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
-      bumpPublicMedia();
     },
   });
 }
@@ -175,9 +180,13 @@ export function useImportLibraryOnlyMediaMutation() {
 export function useUpdateMediaBatchMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (
+    mutationFn: async (
       updates: Array<{ id: string; metadata: Partial<MediaMetadataInput> }>,
-    ) => updateMediaRecordsBatch(updates),
+    ) => {
+      const data = await updateMediaRecordsBatch(updates);
+      await bumpPublicMedia();
+      return data;
+    },
     onMutate: async (updates) => {
       await queryClient.cancelQueries({ queryKey: mediaKeys.list() });
       const previous = queryClient.getQueryData<MediaAsset[]>(mediaKeys.list());
@@ -204,7 +213,6 @@ export function useUpdateMediaBatchMutation() {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
-      bumpPublicMedia();
     },
   });
 }
@@ -213,8 +221,14 @@ export function useUpdateMediaBatchMutation() {
 export function useSetMediaVisibilityBatchMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (args: { ids: string[]; showInGallery: boolean }) =>
-      setMediaVisibilityBatch(args.ids, args.showInGallery),
+    mutationFn: async (args: { ids: string[]; showInGallery: boolean }) => {
+      const data = await setMediaVisibilityBatch(
+        args.ids,
+        args.showInGallery,
+      );
+      await bumpPublicMedia();
+      return data;
+    },
     onMutate: async (args) => {
       await queryClient.cancelQueries({ queryKey: mediaKeys.list() });
       const previous = queryClient.getQueryData<MediaAsset[]>(mediaKeys.list());
@@ -239,7 +253,6 @@ export function useSetMediaVisibilityBatchMutation() {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
-      bumpPublicMedia();
     },
   });
 }
@@ -254,11 +267,12 @@ export function useRemoveVideoMediaMutation() {
     mutationFn: async () => {
       const existing =
         queryClient.getQueryData<MediaAsset[]>(mediaKeys.list()) ?? [];
-      return removeVideoAssetsFromMediaLibrary(existing);
+      const data = await removeVideoAssetsFromMediaLibrary(existing);
+      await bumpPublicMedia();
+      return data;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
-      bumpPublicMedia();
     },
   });
 }
@@ -273,11 +287,12 @@ export function useRemoveLocalPublicMediaMutation() {
     mutationFn: async () => {
       const existing =
         queryClient.getQueryData<MediaAsset[]>(mediaKeys.list()) ?? [];
-      return removeLocalPublicMediaFromMediaLibrary(existing);
+      const data = await removeLocalPublicMediaFromMediaLibrary(existing);
+      await bumpPublicMedia();
+      return data;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
-      bumpPublicMedia();
     },
   });
 }
@@ -292,15 +307,17 @@ export function useMigrateSiteMediaMutation() {
     mutationFn: async () => {
       const existing =
         queryClient.getQueryData<MediaAsset[]>(mediaKeys.list()) ?? [];
-      return migrateSiteMediaToImageKit(existing);
+      const data = await migrateSiteMediaToImageKit(existing);
+      await Promise.all([
+        revalidatePublicSite("gallery"),
+        revalidatePublicSite("profile"),
+        revalidatePublicSite("research"),
+        revalidatePublicSite("publications"),
+      ]);
+      return data;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
-      bumpPublicMedia();
-      void revalidatePublicSite("gallery");
-      void revalidatePublicSite("profile");
-      void revalidatePublicSite("research");
-      void revalidatePublicSite("publications");
     },
   });
 }
