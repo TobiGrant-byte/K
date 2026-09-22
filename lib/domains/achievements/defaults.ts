@@ -36,7 +36,6 @@ export const ACHIEVEMENTS_SEED: AchievementsContent = {
         description:
           "Recognized with the Transportation Peak Performer Award at the Garver 2025 Summit in Houston — honoring exceptional performance and potential among professionals in their first two years of practice.",
         href: "https://www.linkedin.com/posts/sunday-okafor_i-was-recognized-with-the-transportation-activity-7388638154087510016-vvWI",
-        fit: "cover",
         image: img("legacy-garver-award-1.png", 0.5, 0.3),
         imageConfig: config(0.5, 0.3),
         extraLinks: [],
@@ -49,7 +48,6 @@ export const ACHIEVEMENTS_SEED: AchievementsContent = {
         description:
           "Certified as a Project Management Professional (PMP)® by the Project Management Institute — earning Above Target performance across People, Process, and Business Environment. The preparation strengthened day-to-day project leadership, stakeholder engagement, and a lasting commitment to continuous professional growth.",
         href: "https://www.linkedin.com/posts/sunday-okafor_pmp-projectmanagement-pmi-ugcPost-7499966985686904832-ITqh",
-        fit: "contain",
         image: img("legacy-img6.jpg", 0.5, 0.5),
         imageConfig: config(0.5, 0.5),
         extraLinks: [],
@@ -62,7 +60,6 @@ export const ACHIEVEMENTS_SEED: AchievementsContent = {
         description:
           "Obtained licensure as a Professional Engineer in Texas — a rigorous credential affirming readiness to practice and contribute to safer transportation systems for all road users.",
         href: "https://www.linkedin.com/posts/sunday-okafor_i-have-obtained-my-license-as-a-professional-activity-7465794480223318017-_w9Z",
-        fit: "cover",
         image: img("legacy-credentials.png", 0.5, 0.42, 1.15),
         imageConfig: config(0.5, 0.42, 1.15),
         extraLinks: [],
@@ -75,7 +72,6 @@ export const ACHIEVEMENTS_SEED: AchievementsContent = {
         description:
           "Conferred PhD in Civil Engineering, specializing in Transportation Systems Engineering from the Department of Civil, Construction and Environmental Engineering with dissertation research on the integration of connected vehicle data for proactive road safety improvement.",
         href: "https://www.linkedin.com/posts/sunday-okafor_its-official-dr-sunday-chizoba-okafor-activity-7227998699619045376-s8NH",
-        fit: "cover",
         image: img("legacy-graduation-denny.webp", 0.5, 0.38, 1.25),
         imageConfig: config(0.5, 0.38, 1.25),
         extraLinks: [
@@ -94,7 +90,6 @@ export const ACHIEVEMENTS_SEED: AchievementsContent = {
         description:
           "Funded graduate research across transportation operations, policy, and mobility centers — advancing crash analytics, inclusive mobility, and data-driven safety practice.",
         href: "",
-        fit: "cover",
         image: img("legacy-lecture-hall.jpg", 0.5, 0.35),
         imageConfig: config(0.5, 0.35),
         extraLinks: [],
@@ -107,7 +102,6 @@ export const ACHIEVEMENTS_SEED: AchievementsContent = {
         description:
           "Selected as a Traffic Safety Scholar at the prestigious LIFESAVERS 2023 National Conference on Highway Safety Priorities in Seattle, Washington — recognizing emerging researchers in road safety.",
         href: "",
-        fit: "cover",
         image: img("legacy-lifesavers-conf.webp", 0.5, 0.28),
         imageConfig: config(0.5, 0.28),
         extraLinks: [],
@@ -120,7 +114,6 @@ export const ACHIEVEMENTS_SEED: AchievementsContent = {
         description:
           "Elected President of the African Students Association at UA, leading initiatives that promoted African culture, supported international students, and strengthened community bonds.",
         href: "https://www.linkedin.com/posts/sunday-okafor_i-am-delighted-to-announce-my-election-as-activity-6923901748248002560-AvzO",
-        fit: "cover",
         image: img("legacy-asa-board.jpg", 0.5, 0.25),
         imageConfig: config(0.5, 0.25),
         extraLinks: [],
@@ -133,7 +126,6 @@ export const ACHIEVEMENTS_SEED: AchievementsContent = {
         description:
           "Awarded the 2022 HSIS Excellence in Safety Data Award at the ITE International Annual Meeting and Exhibition in New Orleans — recognizing outstanding contributions in highway safety information systems and data-driven safety practice.",
         href: "https://www.linkedin.com/posts/sunday-okafor_itenola2022-rolltide-activity-6960599624537575424-KIzi",
-        fit: "cover",
         image: img("legacy-hsis.jpg", 0.5, 0.3),
         imageConfig: config(0.5, 0.3),
         extraLinks: [],
@@ -146,7 +138,6 @@ export const ACHIEVEMENTS_SEED: AchievementsContent = {
         description:
           "Awarded a Master of Science in Civil Engineering with Distinction and recognized as the most outstanding student in the cohort. Served as class academic representative and founded the NTU Chess Society — completing a demanding year of study with support from the Commonwealth Scholarship Commission, UK.",
         href: "https://www.linkedin.com/posts/sunday-okafor_ntugraduation-mscbagged-csc-activity-6610700597085650944-WDHN",
-        fit: "cover",
         image: img("legacy-msc-graduation.jpg", 0.5, 0.05, 1.18),
         imageConfig: config(0.5, 0.05, 1.18),
         extraLinks: [],
@@ -159,7 +150,6 @@ export const ACHIEVEMENTS_SEED: AchievementsContent = {
         description:
           "Received full funding for MSc study at Nottingham Trent University — awarded to exceptional students from Commonwealth nations who demonstrate academic excellence and leadership potential.",
         href: "",
-        fit: "cover",
         image: img("legacy-commonwealth-scholarship.png", 0.5, 0.5),
         imageConfig: config(0.5, 0.5),
         extraLinks: [],

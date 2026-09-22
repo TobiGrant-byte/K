@@ -15,10 +15,50 @@ type Props = {
   onLogout: () => void;
 };
 
+function SunIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      aria-hidden
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path
+        strokeLinecap="round"
+        d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.6 5.6l1.1 1.1M17.3 17.3l1.1 1.1M18.4 5.6l-1.1 1.1M6.7 17.3l-1.1 1.1"
+      />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 7 7 0 1 0 20.5 14.5Z"
+      />
+    </svg>
+  );
+}
+
 export default function AdminHeader({ user, onLogout }: Props) {
   const section = useAdminUiStore((s) => s.section);
   const commentsPostId = useAdminUiStore((s) => s.commentsPostId);
+  const theme = useAdminUiStore((s) => s.theme);
   const toggleSidebar = useAdminUiStore((s) => s.toggleSidebar);
+  const toggleTheme = useAdminUiStore((s) => s.toggleTheme);
   const crumbs = commentsPostId
     ? ["Admin", "Blog", "Posts", "Comments"]
     : sectionBreadcrumb(section);
@@ -27,6 +67,7 @@ export default function AdminHeader({ user, onLogout }: Props) {
   const publicLabel = commentsPostId
     ? "View blog"
     : sectionPublicLabel(section);
+  const isLight = theme === "light";
 
   return (
     <header
@@ -61,6 +102,15 @@ export default function AdminHeader({ user, onLogout }: Props) {
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/12 text-white/70 transition-colors hover:border-accent/40 hover:text-accent-light"
+            aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
+            title={isLight ? "Dark mode" : "Light mode"}
+          >
+            {isLight ? <MoonIcon /> : <SunIcon />}
+          </button>
           {publicPath && publicLabel ? (
             <Link
               href={publicPath}

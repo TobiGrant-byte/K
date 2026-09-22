@@ -22,8 +22,6 @@ type ManagedImageProps = {
   frameClassName?: string;
   /** Extra classes on the Next/Image element (defaults include object-cover). */
   imageClassName?: string;
-  /** Object-fit for the image (default cover). */
-  objectFit?: "cover" | "contain";
   /** Override Media Library alt; empty string stays empty (decorative). */
   alt?: string;
   sizes?: string;
@@ -35,13 +33,13 @@ type ManagedImageProps = {
  *
  * Reuses the original ImageKit / public URL — no duplicate uploads or gallery docs.
  * Safe for Server Components (no client hooks).
+ * Framing is always cover; crop with ImageDisplayConfig (position / zoom).
  */
 export default function ManagedImage({
   media,
   config,
   frameClassName,
   imageClassName = "",
-  objectFit = "cover",
   alt,
   sizes = "100vw",
   priority = false,
@@ -52,7 +50,6 @@ export default function ManagedImage({
     alt !== undefined
       ? alt
       : (media.altText || media.title || "").trim();
-  const fitClass = objectFit === "contain" ? "object-contain" : "object-cover";
 
   const image = (
     <Image
@@ -61,7 +58,7 @@ export default function ManagedImage({
       fill
       priority={priority}
       sizes={sizes}
-      className={`${fitClass} ${imageClassName}`.trim()}
+      className={`object-cover ${imageClassName}`.trim()}
       style={style}
     />
   );

@@ -17,16 +17,22 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { id: "gallery", label: "Media Library", enabled: true, group: "Media" },
   { id: "about", label: "Profile", enabled: true, group: "Site" },
   {
+    id: "philanthropy",
+    label: "Impacts",
+    enabled: true,
+    group: "Site",
+  },
+  {
     id: "research-dev",
     label: "Research",
     enabled: true,
-    group: "Site",
+    group: "Professional",
   },
   {
     id: "publications",
     label: "Publications",
     enabled: true,
-    group: "Site",
+    group: "Professional",
   },
   {
     id: "scholarship",
@@ -37,14 +43,8 @@ export const ADMIN_NAV: AdminNavItem[] = [
   {
     id: "achievements",
     label: "Achievements",
-    enabled: false,
+    enabled: true,
     group: "Professional",
-  },
-  {
-    id: "philanthropy",
-    label: "Impacts",
-    enabled: false,
-    group: "Site",
   },
 ];
 export function isAdminNavEnabled(section: AdminSection): boolean {

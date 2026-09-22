@@ -353,7 +353,6 @@ export default function AdminAchievements() {
                       org: "",
                       description: "",
                       href: "",
-                      fit: "cover",
                       image: null,
                       imageConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
                       extraLinks: [],
@@ -810,16 +809,6 @@ function MilestoneEditor({
         placeholder="Link URL (optional)"
         className="w-full rounded-lg border border-white/12 bg-navy-900 px-3 py-2.5 text-sm text-white outline-none focus:border-accent/50"
       />
-      <label className="flex items-center gap-2 text-sm text-white/60">
-        <input
-          type="checkbox"
-          checked={item.fit === "contain"}
-          onChange={(e) =>
-            onChange({ fit: e.target.checked ? "contain" : "cover" })
-          }
-        />
-        Fit contain (certificates)
-      </label>
       <div className="flex flex-wrap gap-2">
         <button
           type="button"

@@ -89,8 +89,6 @@ function normalizeMilestoneItem(
         ? (raw.imageConfig as Record<string, unknown>)
         : undefined),
   );
-  const fitRaw = asString(raw.fit).trim();
-  const fit = fitRaw === "contain" ? "contain" : "cover";
   const extraLinks = Array.isArray(raw.extraLinks)
     ? raw.extraLinks
         .map((item, i) => normalizeExtraLink(item, i))
@@ -104,7 +102,6 @@ function normalizeMilestoneItem(
     org: asString(raw.org).trim(),
     description,
     href: asString(raw.href).trim(),
-    fit,
     image: withImage(image, imageConfig),
     imageConfig,
     extraLinks,
@@ -226,7 +223,12 @@ export function toAchievementsWritePayload(
       items: normalized.milestones.items.map((item) => {
         const imageConfig = normalizeImageDisplayConfig(item.imageConfig);
         return {
-          ...item,
+          id: item.id,
+          year: item.year,
+          title: item.title,
+          org: item.org,
+          description: item.description,
+          href: item.href,
           imageConfig,
           image: withImage(item.image, imageConfig),
           extraLinks: item.extraLinks.map((link) => ({ ...link })),

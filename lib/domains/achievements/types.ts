@@ -22,7 +22,6 @@ export type AchievementMilestoneItem = {
   org: string;
   description: string;
   href: string;
-  fit: "cover" | "contain";
   image: MediaImageRef | null;
   imageConfig: ImageDisplayConfig;
   extraLinks: AchievementExtraLink[];
