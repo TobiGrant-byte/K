@@ -26,6 +26,7 @@ export {
   profileBodyParagraphs,
   roleLines,
   toProfileWritePayload,
+  validateProfileWritePayload,
 } from "@/lib/domains/profile/normalize";
 export { profileKeys } from "@/lib/domains/profile/keys";
 export {

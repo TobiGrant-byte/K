@@ -136,6 +136,69 @@ export function normalizeProfileHobbies(
   };
 }
 
+/** Client-side checks aligned with Firestore `validProfileContent`. */
+export function validateProfileWritePayload(
+  input: ProfileContentInput,
+): string | null {
+  const home = normalizeProfileHome(input.home);
+  const about = normalizeProfileAbout(input.about);
+  const hobbiesInput = input.hobbies;
+  const rawItems = Array.isArray(hobbiesInput?.items) ? hobbiesInput.items : [];
+
+  if (!home.roles.length) {
+    return "Add at least one professional role (empty roles are ignored).";
+  }
+  if (home.roles.length > 20) {
+    return "You can save at most 20 professional roles.";
+  }
+  if (!home.quote.trim()) {
+    return "Home quote is required.";
+  }
+  if (home.quote.length > 500) {
+    return "Home quote must be 500 characters or fewer.";
+  }
+  if (!about.title.trim()) {
+    return "About title is required.";
+  }
+  if (about.title.length > 300) {
+    return "About title must be 300 characters or fewer.";
+  }
+  if (about.titleAccent.length > 200) {
+    return "About title accent must be 200 characters or fewer.";
+  }
+  if (!about.excerpt.trim()) {
+    return "About excerpt is required.";
+  }
+  if (about.excerpt.length > 4000) {
+    return "About excerpt must be 4000 characters or fewer.";
+  }
+  if (!about.body.trim()) {
+    return "About body is required.";
+  }
+  if (about.body.length > 20000) {
+    return "About body must be 20000 characters or fewer.";
+  }
+
+  const quote = asString(hobbiesInput?.quote).trim();
+  if (quote.length > 800) {
+    return "Hobbies quote must be 800 characters or fewer.";
+  }
+  if (!rawItems.length) {
+    return "Add at least one hobbies card.";
+  }
+  if (rawItems.length > 12) {
+    return "You can save at most 12 hobbies cards.";
+  }
+  for (const [index, item] of rawItems.entries()) {
+    const title = asString(item?.title).trim();
+    const description = asString(item?.description).trim();
+    if (!title || !description) {
+      return `Hobbies card ${index + 1} needs a title and description.`;
+    }
+  }
+  return null;
+}
+
 /** Normalize Firestore profile data — About may use seed text; home/hobbies do not. */
 export function normalizeProfileContent(
   input?: Partial<ProfileContent> | Record<string, unknown> | null,
@@ -169,9 +232,15 @@ export function toProfileWritePayload(
   const about = normalizeProfileAbout(input.about);
   const hobbies = normalizeProfileHobbies(input.hobbies);
   return {
-    home,
+    home: {
+      roles: home.roles,
+      quote: home.quote,
+    },
     about: {
-      ...about,
+      title: about.title,
+      titleAccent: about.titleAccent,
+      excerpt: about.excerpt,
+      body: about.body,
       image: about.image
         ? {
             galleryImageId: about.image.galleryImageId,
@@ -180,11 +249,14 @@ export function toProfileWritePayload(
         : null,
     },
     hobbies: {
-      ...hobbies,
+      quote: hobbies.quote,
       items: hobbies.items.map((item) => {
         const imageConfig = normalizeImageDisplayConfig(item.imageConfig);
         return {
-          ...item,
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          icon: item.icon,
           imageConfig,
           image: item.image
             ? {

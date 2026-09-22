@@ -22,11 +22,13 @@ export function usePublicationsContent() {
 export function useSavePublicationsMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: PublicationsContentInput) =>
-      savePublicationsContent(input),
+    mutationFn: async (input: PublicationsContentInput) => {
+      const data = await savePublicationsContent(input);
+      await revalidatePublicSite("publications");
+      return data;
+    },
     onSuccess: (data) => {
       queryClient.setQueryData(publicationsKeys.content(), data);
-      void revalidatePublicSite("publications");
     },
   });
 }

@@ -43,6 +43,7 @@ export type ResearchActionContent = {
 /**
  * Shared Research page document (`content/research`).
  * development = R&D block; action = Research in Action block.
+ * Google Scholar card stays hardcoded in `components/Research.tsx`.
  */
 export type ResearchContent = {
   development: ResearchDevelopmentContent;

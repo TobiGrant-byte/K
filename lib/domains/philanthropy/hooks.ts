@@ -22,11 +22,13 @@ export function usePhilanthropyContent() {
 export function useSavePhilanthropyMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: PhilanthropyContentInput) =>
-      savePhilanthropyContent(input),
+    mutationFn: async (input: PhilanthropyContentInput) => {
+      const data = await savePhilanthropyContent(input);
+      await revalidatePublicSite("philanthropy");
+      return data;
+    },
     onSuccess: (data) => {
       queryClient.setQueryData(philanthropyKeys.content(), data);
-      void revalidatePublicSite("philanthropy");
     },
   });
 }

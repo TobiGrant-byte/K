@@ -587,11 +587,11 @@ export default function AdminPosts() {
                       <h2 className="font-display text-[22px] leading-snug text-white sm:truncate sm:text-xl">
                         {post.title}
                       </h2>
-                      <p className="mt-1 text-[12px] text-white/50">
+                      <p className="admin-text-dim mt-1 text-[12px]">
                         By {post.author || DEFAULT_BLOG_AUTHOR}
                       </p>
                       {post.excerpt ? (
-                        <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-white/50 sm:line-clamp-1">
+                        <p className="admin-text-dim mt-1.5 line-clamp-2 text-[13px] leading-relaxed sm:line-clamp-1">
                           {htmlToPlainText(post.excerpt)}
                         </p>
                       ) : null}

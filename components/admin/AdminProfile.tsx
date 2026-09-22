@@ -11,6 +11,7 @@ import {
   normalizeProfileContent,
   useProfileContent,
   useSaveProfileMutation,
+  validateProfileWritePayload,
   type ProfileContentInput,
   type ProfileHobbyItem,
 } from "@/lib/domains/profile";
@@ -234,6 +235,11 @@ export default function AdminProfile() {
   };
 
   const save = async () => {
+    const validationError = validateProfileWritePayload(draft);
+    if (validationError) {
+      adminToast.error(validationError);
+      return;
+    }
     try {
       await saveMutation.mutateAsync(draft);
       adminToast.success("Submitted.");
@@ -249,8 +255,8 @@ export default function AdminProfile() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-2xl">
           <p className="text-sm text-white/50">
-            Shared Home, About, and Hobbies content. The Home hero image
-            stays static and is not edited here. Contact lives on its own page.
+            Shared Home, About, and Hobbies content. The Home hero image stays
+            static and is not edited here.
           </p>
           {profileQuery.data?.updatedAt ? (
             <p className="mt-2 font-title text-[9px] uppercase tracking-[2px] text-white/35">
@@ -262,28 +268,28 @@ export default function AdminProfile() {
 
       <div className="-mx-1 max-w-full overflow-x-auto pb-1">
         <div className="flex w-max min-w-full overflow-hidden rounded-lg border border-white/12 sm:w-fit sm:min-w-0">
-        {(
-          [
-            { id: "home", label: "Home presentation" },
-            { id: "about", label: "About" },
-            { id: "hobbies", label: "Hobbies" },
-          ] as const
-        ).map((item, index) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setTab(item.id)}
-            className={`shrink-0 px-4 py-2.5 font-title text-[9px] uppercase tracking-[1.5px] ${
-              index > 0 ? "border-l border-white/12 " : ""
-            }${
-              tab === item.id
-                ? "bg-white/10 text-white"
-                : "text-white/45 hover:text-white"
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
+          {(
+            [
+              { id: "home", label: "Home presentation" },
+              { id: "about", label: "About" },
+              { id: "hobbies", label: "Hobbies" },
+            ] as const
+          ).map((item, index) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setTab(item.id)}
+              className={`shrink-0 px-4 py-2.5 font-title text-[9px] uppercase tracking-[1.5px] ${
+                index > 0 ? "border-l border-white/12 " : ""
+              }${
+                tab === item.id
+                  ? "bg-white/10 text-white"
+                  : "text-white/45 hover:text-white"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
       </div>
 

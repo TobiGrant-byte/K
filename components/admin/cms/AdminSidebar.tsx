@@ -32,8 +32,8 @@ export default function AdminSidebar() {
         onClick={() => setSection(id)}
         className={`flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm transition-colors ${
           active
-            ? "bg-accent/20 text-accent-light"
-            : "text-white/70 hover:bg-white/5 hover:text-white"
+            ? "bg-accent/20 text-white"
+            : "text-white hover:bg-white/5"
         }`}
       >
         <span className="font-medium">{label}</span>
@@ -69,7 +69,7 @@ export default function AdminSidebar() {
           <button
             type="button"
             onClick={() => setSidebarOpen(false)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/12 text-white/70 lg:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/12 text-white lg:hidden"
             aria-label="Close menu"
           >
             <svg
@@ -96,7 +96,7 @@ export default function AdminSidebar() {
               if (!visible.length) return null;
               return (
                 <div key={group!}>
-                  <div className="mb-1.5 px-3 font-title text-[9px] uppercase tracking-[2px] text-white/35">
+                  <div className="mb-1.5 px-3 font-title text-[9px] uppercase tracking-[2px] text-white">
                     {group}
                   </div>
                   <div className="space-y-0.5">
@@ -109,7 +109,7 @@ export default function AdminSidebar() {
 
         <div className="shrink-0 border-t border-white/10 px-5 py-4">
           <div className="h-px w-10 bg-accent/50" />
-          <p className="mt-3 font-display text-xs italic text-white/40">
+          <p className="mt-3 font-display text-xs italic text-white">
             Dr. Sunday Okafor
           </p>
         </div>

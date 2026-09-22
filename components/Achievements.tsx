@@ -24,7 +24,6 @@ function CardMedia({
   item: AchievementMilestoneItem;
   media: MediaPick;
 }) {
-  const contain = item.fit === "contain";
   const hasImage =
     Boolean(media?.imageUrl) &&
     Boolean(item.image) &&
@@ -32,36 +31,19 @@ function CardMedia({
   const alt = media?.altText || media?.title || item.title;
 
   return (
-    <div
-      className={`img-zoom relative h-60 overflow-hidden ${
-        contain ? "bg-[#f3f0f8] p-3 sm:p-4" : "bg-navy-900/10"
-      }`}
-    >
-      <div
-        className={`relative h-full w-full ${contain ? "" : "absolute inset-0"}`}
-      >
+    <div className="img-zoom relative h-60 overflow-hidden bg-navy-900/10">
+      <div className="absolute inset-0">
         {hasImage && media ? (
           <ManagedImage
             media={media}
             config={item.imageConfig}
             alt={alt}
-            objectFit={contain ? "contain" : "cover"}
-            imageClassName={
-              contain
-                ? ""
-                : "transition-transform duration-500 group-hover:scale-[1.03]"
-            }
+            imageClassName="transition-transform duration-500 group-hover:scale-[1.03]"
             sizes="33vw"
           />
         ) : null}
       </div>
-      <div
-        className={`pointer-events-none absolute inset-0 ${
-          contain
-            ? "bg-[linear-gradient(to_top,rgba(5,13,26,0.5)_0%,transparent_42%)]"
-            : "bg-[linear-gradient(to_top,rgba(5,13,26,0.65)_0%,transparent_55%)]"
-        }`}
-      />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(5,13,26,0.65)_0%,transparent_55%)]" />
       <div className="absolute bottom-3 left-4 right-4 z-[1] flex items-end justify-between gap-2">
         <span className="font-title text-[10px] uppercase tracking-[3px] text-white/70">
           {item.year}
