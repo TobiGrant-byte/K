@@ -25,7 +25,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   {
     id: "publications",
     label: "Publications",
-    enabled: false,
+    enabled: true,
     group: "Site",
   },
   {
