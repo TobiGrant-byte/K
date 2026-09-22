@@ -11,6 +11,7 @@ import {
   normalizeProfileContent,
   useProfileContent,
   useSaveProfileMutation,
+  validateProfileWritePayload,
   type ProfileContentInput,
   type ProfileHobbyItem,
 } from "@/lib/domains/profile";
@@ -234,6 +235,11 @@ export default function AdminProfile() {
   };
 
   const save = async () => {
+    const validationError = validateProfileWritePayload(draft);
+    if (validationError) {
+      adminToast.error(validationError);
+      return;
+    }
     try {
       await saveMutation.mutateAsync(draft);
       adminToast.success("Submitted.");

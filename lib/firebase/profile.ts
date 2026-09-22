@@ -71,21 +71,29 @@ export async function saveProfileContent(
 ): Promise<ProfileContent> {
   requireFirebase();
   const payload = toProfileWritePayload(input);
+  if (!payload.home.roles.length) {
+    throw new Error("Add at least one professional role.");
+  }
+  if (!payload.home.quote.trim()) {
+    throw new Error("Home quote is required.");
+  }
+  if (!payload.about.title.trim() || !payload.about.excerpt.trim() || !payload.about.body.trim()) {
+    throw new Error("About title, excerpt, and body are required.");
+  }
+  if (!payload.hobbies.items.length) {
+    throw new Error("Add at least one hobbies card with a title and description.");
+  }
   const ref = doc(
     getFirebaseFirestore(),
     PROFILE_DOC_PATH.collection,
     PROFILE_DOC_PATH.id,
   );
-  await setDoc(
-    ref,
-    {
-      home: payload.home,
-      about: payload.about,
-      hobbies: payload.hobbies,
-      updatedAt: serverTimestamp(),
-    },
-    { merge: true },
-  );
+  await setDoc(ref, {
+    home: payload.home,
+    about: payload.about,
+    hobbies: payload.hobbies,
+    updatedAt: serverTimestamp(),
+  });
   return {
     ...payload,
     updatedAt: new Date().toISOString(),
