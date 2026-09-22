@@ -35,11 +35,6 @@ export const PROFILE_FALLBACK: ProfileContent = {
     image: null,
   },
   hobbies: {
-    eyebrow: "Away From Work",
-    title: "The Man Behind the",
-    titleAccent: "PhD",
-    subtitle:
-      "Excellence in engineering begins with a life well-lived outside of it.",
     quote:
       "A great mind is nothing without a great heart — and a great partner to share life with.",
     items: [

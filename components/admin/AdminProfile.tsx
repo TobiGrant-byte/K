@@ -249,7 +249,7 @@ export default function AdminProfile() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-2xl">
           <p className="text-sm text-white/50">
-            Shared Home, About, and Away From Work content. The Home hero image
+            Shared Home, About, and Hobbies content. The Home hero image
             stays static and is not edited here. Contact lives on its own page.
           </p>
           {profileQuery.data?.updatedAt ? (
@@ -260,19 +260,20 @@ export default function AdminProfile() {
         </div>
       </div>
 
-      <div className="flex overflow-hidden rounded-lg border border-white/12 w-fit">
+      <div className="-mx-1 max-w-full overflow-x-auto pb-1">
+        <div className="flex w-max min-w-full overflow-hidden rounded-lg border border-white/12 sm:w-fit sm:min-w-0">
         {(
           [
             { id: "home", label: "Home presentation" },
             { id: "about", label: "About" },
-            { id: "hobbies", label: "Away From Work" },
+            { id: "hobbies", label: "Hobbies" },
           ] as const
         ).map((item, index) => (
           <button
             key={item.id}
             type="button"
             onClick={() => setTab(item.id)}
-            className={`px-4 py-2.5 font-title text-[9px] uppercase tracking-[1.5px] ${
+            className={`shrink-0 px-4 py-2.5 font-title text-[9px] uppercase tracking-[1.5px] ${
               index > 0 ? "border-l border-white/12 " : ""
             }${
               tab === item.id
@@ -283,6 +284,7 @@ export default function AdminProfile() {
             {item.label}
           </button>
         ))}
+        </div>
       </div>
 
       {tab === "home" ? (
@@ -489,60 +491,11 @@ export default function AdminProfile() {
       {tab === "hobbies" ? (
         <div className="space-y-6 rounded-xl border border-white/10 bg-navy-800/40 p-5 sm:p-6">
           <div>
-            <h2 className="font-display text-xl font-light">
-              Away From Work
-            </h2>
+            <h2 className="font-display text-xl font-light">Hobbies</h2>
             <p className="mt-1 text-sm text-white/45">
-              Section heading and cards for “The Man Behind the PhD” on the
-              About page.
+              Cards and closing quote for the Hobbies section on the About page.
             </p>
           </div>
-
-          <label className="block">
-            <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/50">
-              Eyebrow
-            </span>
-            <input
-              value={draft.hobbies.eyebrow}
-              onChange={(e) => patchHobbies({ eyebrow: e.target.value })}
-              className="w-full rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-accent/60"
-            />
-          </label>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="block">
-              <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/50">
-                Title
-              </span>
-              <input
-                value={draft.hobbies.title}
-                onChange={(e) => patchHobbies({ title: e.target.value })}
-                className="w-full rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-accent/60"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/50">
-                Title Accent (italic and blue)
-              </span>
-              <input
-                value={draft.hobbies.titleAccent}
-                onChange={(e) => patchHobbies({ titleAccent: e.target.value })}
-                className="w-full rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-accent/60"
-              />
-            </label>
-          </div>
-
-          <label className="block">
-            <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/50">
-              Subtitle
-            </span>
-            <textarea
-              value={draft.hobbies.subtitle}
-              onChange={(e) => patchHobbies({ subtitle: e.target.value })}
-              rows={2}
-              className="w-full resize-y rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-accent/60"
-            />
-          </label>
 
           <label className="block">
             <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/50">
@@ -593,12 +546,12 @@ export default function AdminProfile() {
         </div>
       ) : null}
 
-      <div className="sticky bottom-0 z-20 -mx-1 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-navy-900/95 px-4 py-4 backdrop-blur-sm sm:px-1">
-        <p className="text-sm text-white/45">
+      <div className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-navy-900/95 px-4 py-3 backdrop-blur-sm sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <p className="max-w-md text-sm text-white/45">
           One submit saves <span className="text-white/75">roles</span>,{" "}
           <span className="text-white/75">quote</span>,{" "}
           <span className="text-white/75">About</span>, and{" "}
-          <span className="text-white/75">Away From Work</span> together.
+          <span className="text-white/75">Hobbies</span> together.
         </p>
         <button
           type="button"
@@ -618,7 +571,7 @@ export default function AdminProfile() {
         title={
           pickerTarget === "about"
             ? "Select About image"
-            : "Select Away From Work image"
+            : "Select Hobbies image"
         }
       />
 

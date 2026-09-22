@@ -271,7 +271,8 @@ export default function AdminAchievements() {
         ) : null}
       </div>
 
-      <div className="flex w-fit overflow-hidden rounded-lg border border-white/12">
+      <div className="-mx-1 max-w-full overflow-x-auto pb-1">
+        <div className="flex w-max min-w-full overflow-hidden rounded-lg border border-white/12 sm:w-fit sm:min-w-0">
         {(
           [
             { id: "milestones", label: "Milestones" },
@@ -282,7 +283,7 @@ export default function AdminAchievements() {
             key={item.id}
             type="button"
             onClick={() => setTab(item.id)}
-            className={`px-4 py-2.5 font-title text-[9px] uppercase tracking-[1.5px] ${
+            className={`shrink-0 px-4 py-2.5 font-title text-[9px] uppercase tracking-[1.5px] ${
               index > 0 ? "border-l border-white/12 " : ""
             }${
               tab === item.id
@@ -293,6 +294,7 @@ export default function AdminAchievements() {
             {item.label}
           </button>
         ))}
+        </div>
       </div>
 
       {tab === "milestones" ? (
@@ -629,17 +631,15 @@ export default function AdminAchievements() {
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-white/10 bg-navy-900/95 px-4 py-3 backdrop-blur md:left-[260px]">
-        <div className="mx-auto flex max-w-5xl items-center justify-end gap-3">
-          <button
-            type="button"
-            disabled={!dirty || saveMutation.isPending}
-            onClick={() => void onSubmit()}
-            className="rounded-lg bg-accent px-5 py-2.5 font-title text-[10px] uppercase tracking-[2px] text-white disabled:opacity-40"
-          >
-            {saveMutation.isPending ? "Saving…" : "Submit"}
-          </button>
-        </div>
+      <div className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-end gap-3 border-t border-white/10 bg-navy-900/95 px-4 py-3 backdrop-blur-sm sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <button
+          type="button"
+          disabled={!dirty || saveMutation.isPending}
+          onClick={() => void onSubmit()}
+          className="rounded-lg bg-accent px-5 py-2.5 font-title text-[10px] uppercase tracking-[2px] text-white disabled:opacity-40"
+        >
+          {saveMutation.isPending ? "Saving…" : "Submit"}
+        </button>
       </div>
 
       <MediaPicker

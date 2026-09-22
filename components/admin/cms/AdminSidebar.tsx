@@ -23,28 +23,20 @@ export default function AdminSidebar() {
     return map;
   })();
 
-  const navButton = (id: AdminSection, label: string, enabled: boolean) => {
+  const navButton = (id: AdminSection, label: string) => {
     const active = section === id;
     return (
       <button
         key={id}
         type="button"
-        disabled={!enabled}
-        onClick={() => enabled && setSection(id)}
-        className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors ${
-          !enabled
-            ? "cursor-not-allowed text-white/35"
-            : active
-              ? "bg-accent/20 text-accent-light"
-              : "text-white/70 hover:bg-white/5 hover:text-white"
+        onClick={() => setSection(id)}
+        className={`flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm transition-colors ${
+          active
+            ? "bg-accent/20 text-accent-light"
+            : "text-white/70 hover:bg-white/5 hover:text-white"
         }`}
       >
         <span className="font-medium">{label}</span>
-        {!enabled ? (
-          <span className="font-title text-[8px] uppercase tracking-[1.5px] text-white/30">
-            Soon
-          </span>
-        ) : null}
       </button>
     );
   };
@@ -55,29 +47,47 @@ export default function AdminSidebar() {
         <button
           type="button"
           aria-label="Close menu"
-          className="fixed inset-0 z-40 bg-navy-900/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-navy-900/60 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       ) : null}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-64 flex-col border-r border-white/10 bg-navy-800 transition-transform ${
+        className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-[min(18rem,88vw)] flex-col border-r border-white/10 bg-navy-800 transition-transform lg:w-64 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="shrink-0 border-b border-white/10 px-5 py-5">
-          <div className="font-title text-[10px] uppercase tracking-[2.5px] text-accent-light">
-            CMS
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-white/10 px-5 py-5">
+          <div>
+            <div className="font-title text-[10px] uppercase tracking-[2.5px] text-accent-light">
+              CMS
+            </div>
+            <div className="mt-1 font-display text-xl font-medium text-white">
+              Content Admin
+            </div>
           </div>
-          <div className="mt-1 font-display text-xl font-medium text-white">
-            Content Admin
-          </div>
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(false)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/12 text-white/70 lg:hidden"
+            aria-label="Close menu"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
         </div>
 
         <nav className="min-h-0 flex-1 space-y-5 overflow-y-auto px-3 py-4">
           {(groups.get(null) ?? [])
             .filter((item) => item.enabled)
-            .map((item) => navButton(item.id, item.label, item.enabled))}
+            .map((item) => navButton(item.id, item.label))}
 
           {[...groups.entries()]
             .filter(([key]) => key !== null)
@@ -90,9 +100,7 @@ export default function AdminSidebar() {
                     {group}
                   </div>
                   <div className="space-y-0.5">
-                    {visible.map((item) =>
-                      navButton(item.id, item.label, item.enabled),
-                    )}
+                    {visible.map((item) => navButton(item.id, item.label))}
                   </div>
                 </div>
               );

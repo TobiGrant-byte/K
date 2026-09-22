@@ -6,10 +6,6 @@ export const PROFILE_PUBLIC_EMPTY: ProfileContent = {
   home: { roles: [], quote: "" },
   about: { ...PROFILE_FALLBACK.about },
   hobbies: {
-    eyebrow: "",
-    title: "",
-    titleAccent: "",
-    subtitle: "",
     quote: "",
     items: [],
   },

@@ -264,17 +264,15 @@ export default function AdminPhilanthropy() {
         ))}
       </section>
 
-      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-white/10 bg-navy-900/95 px-4 py-3 backdrop-blur md:left-[260px]">
-        <div className="mx-auto flex max-w-5xl items-center justify-end gap-3">
-          <button
-            type="button"
-            disabled={!dirty || saveMutation.isPending}
-            onClick={() => void onSubmit()}
-            className="rounded-lg bg-accent px-5 py-2.5 font-title text-[10px] uppercase tracking-[2px] text-white disabled:opacity-40"
-          >
-            {saveMutation.isPending ? "Saving…" : "Submit"}
-          </button>
-        </div>
+      <div className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-end gap-3 border-t border-white/10 bg-navy-900/95 px-4 py-3 backdrop-blur-sm sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <button
+          type="button"
+          disabled={!dirty || saveMutation.isPending}
+          onClick={() => void onSubmit()}
+          className="rounded-lg bg-accent px-5 py-2.5 font-title text-[10px] uppercase tracking-[2px] text-white disabled:opacity-40"
+        >
+          {saveMutation.isPending ? "Saving…" : "Submit"}
+        </button>
       </div>
 
       <MediaPicker

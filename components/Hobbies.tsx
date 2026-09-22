@@ -63,24 +63,9 @@ export default function Hobbies({ hobbies, mediaById = {} }: Props) {
           transition={{ duration: 0.7 }}
           className="mb-[72px] text-center"
         >
-          <div className="mb-4 flex items-center justify-center gap-3.5">
-            <div className="section-rule-light" />
-            <span className="eyebrow">{hobbies.eyebrow}</span>
-            <div className="section-rule-light" />
-          </div>
           <h2 className="font-display text-[clamp(32px,5vw,58px)] font-light leading-[1.1] text-white">
-            {hobbies.title}{" "}
-            {hobbies.titleAccent ? (
-              <em className="font-semibold text-accent-light">
-                {hobbies.titleAccent}
-              </em>
-            ) : null}
+            <em className="font-semibold text-accent-light">Hobbies</em>
           </h2>
-          {hobbies.subtitle ? (
-            <p className="mx-auto mt-3.5 max-w-[480px] font-display text-lg italic text-white/45">
-              {hobbies.subtitle}
-            </p>
-          ) : null}
         </motion.div>
 
         <div className="mx-auto grid max-w-[1100px] grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3">

@@ -4,7 +4,7 @@ import type { ImageDisplayConfig, MediaImageRef } from "@/lib/domains/media/disp
 export const ABOUT_IMAGE_ASPECT = 360 / 480;
 
 /**
- * Away From Work card images — public cards use fixed `h-72` / `sm:h-[260px]`
+ * Hobbies card images — public cards use fixed `h-72` / `sm:h-[260px]`
  * over roughly a third of a 1100px row (~350px). Ratio ≈ 350∶260.
  */
 export const HOBBIES_IMAGE_ASPECT = 350 / 260;
@@ -44,10 +44,6 @@ export type ProfileHobbyItem = {
 };
 
 export type ProfileHobbiesContent = {
-  eyebrow: string;
-  title: string;
-  titleAccent: string;
-  subtitle: string;
   quote: string;
   items: ProfileHobbyItem[];
 };
