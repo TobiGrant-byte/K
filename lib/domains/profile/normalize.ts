@@ -131,10 +131,6 @@ export function normalizeProfileHobbies(
   input?: Partial<ProfileHobbiesContent> | null,
 ): ProfileHobbiesContent {
   return {
-    eyebrow: asString(input?.eyebrow).trim(),
-    title: asString(input?.title).trim(),
-    titleAccent: asString(input?.titleAccent).trim(),
-    subtitle: asString(input?.subtitle).trim(),
     quote: asString(input?.quote).trim(),
     items: normalizeProfileHobbyItems(input?.items),
   };

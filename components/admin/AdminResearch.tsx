@@ -279,7 +279,8 @@ export default function AdminResearch() {
         ) : null}
       </div>
 
-      <div className="flex w-fit overflow-hidden rounded-lg border border-white/12">
+      <div className="-mx-1 max-w-full overflow-x-auto pb-1">
+        <div className="flex w-max min-w-full overflow-hidden rounded-lg border border-white/12 sm:w-fit sm:min-w-0">
         {(
           [
             { id: "development", label: "Research & Development" },
@@ -290,7 +291,7 @@ export default function AdminResearch() {
             key={item.id}
             type="button"
             onClick={() => setTab(item.id)}
-            className={`px-4 py-2.5 font-title text-[9px] uppercase tracking-[1.5px] ${
+            className={`shrink-0 px-4 py-2.5 font-title text-[9px] uppercase tracking-[1.5px] ${
               item.id !== "development" ? "border-l border-white/12 " : ""
             }${
               tab === item.id
@@ -301,6 +302,7 @@ export default function AdminResearch() {
             {item.label}
           </button>
         ))}
+        </div>
       </div>
 
       {tab === "development" ? (
@@ -582,8 +584,8 @@ export default function AdminResearch() {
         </div>
       ) : null}
 
-      <div className="sticky bottom-0 z-20 -mx-1 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-navy-900/95 px-4 py-4 backdrop-blur-sm sm:px-1">
-        <p className="text-sm text-white/45">
+      <div className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-navy-900/95 px-4 py-3 backdrop-blur-sm sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <p className="max-w-md text-sm text-white/45">
           One submit saves{" "}
           <span className="text-white/75">Research & Development</span> and{" "}
           <span className="text-white/75">Research in Action</span> together.

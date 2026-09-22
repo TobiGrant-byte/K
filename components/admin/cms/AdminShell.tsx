@@ -21,7 +21,7 @@ export default function AdminShell({ user, onLogout, children }: Props) {
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_100%_0%,rgba(74,143,232,0.08)_0%,transparent_45%)]"
         />
         <AdminHeader user={user} onLogout={onLogout} />
-        <main className="relative flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <main className="relative flex-1 px-4 pb-28 pt-6 sm:px-6 lg:px-8">
           {children}
         </main>
       </div>

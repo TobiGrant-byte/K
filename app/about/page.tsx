@@ -53,9 +53,7 @@ export default async function AboutPage() {
     <PageShell>
       <main>
         <About about={profile.about} aboutMedia={aboutMedia} />
-        {profile.hobbies.items.length > 0 ||
-        profile.hobbies.title ||
-        profile.hobbies.eyebrow ? (
+        {profile.hobbies.items.length > 0 ? (
           <Hobbies hobbies={profile.hobbies} mediaById={hobbyMediaById} />
         ) : null}
       </main>

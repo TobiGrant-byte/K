@@ -256,7 +256,8 @@ export default function AdminPublications() {
         ) : null}
       </div>
 
-      <div className="flex w-fit overflow-hidden rounded-lg border border-white/12">
+      <div className="-mx-1 max-w-full overflow-x-auto pb-1">
+        <div className="flex w-max min-w-full overflow-hidden rounded-lg border border-white/12 sm:w-fit sm:min-w-0">
         {(
           [
             { id: "press", label: "In The Press" },
@@ -267,7 +268,7 @@ export default function AdminPublications() {
             key={item.id}
             type="button"
             onClick={() => setTab(item.id)}
-            className={`px-4 py-2.5 font-title text-[9px] uppercase tracking-[1.5px] ${
+            className={`shrink-0 px-4 py-2.5 font-title text-[9px] uppercase tracking-[1.5px] ${
               index > 0 ? "border-l border-white/12 " : ""
             }${
               tab === item.id
@@ -278,6 +279,7 @@ export default function AdminPublications() {
             {item.label}
           </button>
         ))}
+        </div>
       </div>
 
       {tab === "press" ? (
@@ -492,8 +494,8 @@ export default function AdminPublications() {
         </div>
       ) : null}
 
-      <div className="sticky bottom-0 z-20 -mx-1 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-navy-900/95 px-4 py-4 backdrop-blur-sm sm:px-1">
-        <p className="text-sm text-white/45">
+      <div className="sticky bottom-0 z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-navy-900/95 px-4 py-3 backdrop-blur-sm sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <p className="max-w-md text-sm text-white/45">
           One submit saves{" "}
           <span className="text-white/75">In The Press</span> and{" "}
           <span className="text-white/75">Scholarship Tips</span> together.
