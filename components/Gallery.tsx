@@ -22,6 +22,8 @@ type Photo = {
   category: MediaCategory;
   width: number;
   height: number;
+  /** ISO — used to show newest-added first in the masonry. */
+  createdAt: string;
   media?: "image" | "video";
   objectPosition?: string;
   zoom?: number;
@@ -40,6 +42,7 @@ function mediaToPhoto(asset: MediaAsset): Photo {
     category: asset.category,
     width: presentation.width,
     height: presentation.height,
+    createdAt: asset.createdAt || asset.updatedAt || "",
     media: presentation.media,
     objectPosition: presentation.objectPosition,
     zoom: presentation.zoom,
@@ -55,12 +58,57 @@ function staticPublicVideoPhoto(): Photo {
     category: PUBLIC_GALLERY_STATIC_VIDEO.category,
     width: PUBLIC_GALLERY_STATIC_VIDEO.width,
     height: PUBLIC_GALLERY_STATIC_VIDEO.height,
+    // Keep the static video after CMS uploads in newest-first order.
+    createdAt: "",
     media: "video",
   };
 }
 
 function isVideo(p: Photo) {
   return p.media === "video" || isVideoMediaUrl(p.src);
+}
+
+function sortNewestFirst(a: Photo, b: Photo): number {
+  const tb = b.createdAt ? Date.parse(b.createdAt) : 0;
+  const ta = a.createdAt ? Date.parse(a.createdAt) : 0;
+  if (tb !== ta) return tb - ta;
+  return b.id.localeCompare(a.id);
+}
+
+/**
+ * Split items left→right across columns (row order), then stack in each column.
+ * Keeps newest near the top across the row, with uneven heights (no grid gaps).
+ */
+function distributeIntoColumns<T>(items: T[], columnCount: number): T[][] {
+  const count = Math.max(1, columnCount);
+  const columns: T[][] = Array.from({ length: count }, () => []);
+  items.forEach((item, i) => {
+    columns[i % count]!.push(item);
+  });
+  return columns;
+}
+
+function useGalleryColumnCount() {
+  const [count, setCount] = useState(1);
+
+  useEffect(() => {
+    const sm = window.matchMedia("(min-width: 640px)");
+    const lg = window.matchMedia("(min-width: 1024px)");
+    const update = () => {
+      if (lg.matches) setCount(3);
+      else if (sm.matches) setCount(2);
+      else setCount(1);
+    };
+    update();
+    sm.addEventListener("change", update);
+    lg.addEventListener("change", update);
+    return () => {
+      sm.removeEventListener("change", update);
+      lg.removeEventListener("change", update);
+    };
+  }, []);
+
+  return count;
 }
 
 function imageAlt(caption: string): string {
@@ -106,6 +154,7 @@ export default function Gallery({ initialMedia = [] }: Props) {
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [filter, setFilter] = useState<GalleryFilter>("All");
   const [lightbox, setLightbox] = useState<number | null>(null);
+  const columnCount = useGalleryColumnCount();
 
   const mediaQuery = usePublicGalleryMedia(initialMedia);
   const mediaItems = useMemo(
@@ -116,7 +165,8 @@ export default function Gallery({ initialMedia = [] }: Props) {
     // CMS images from Firebase/ImageKit; video stays a public static file.
     const fromCms = mediaItems
       .filter((asset) => !isVideoMediaUrl(asset.imageUrl))
-      .map(mediaToPhoto);
+      .map(mediaToPhoto)
+      .sort(sortNewestFirst);
     return [...fromCms, staticPublicVideoPhoto()];
   }, [mediaItems]);
 
@@ -126,6 +176,11 @@ export default function Gallery({ initialMedia = [] }: Props) {
         ? allPhotos
         : allPhotos.filter((p) => p.category === filter),
     [allPhotos, filter],
+  );
+
+  const photoColumns = useMemo(
+    () => distributeIntoColumns(photos, columnCount),
+    [photos, columnCount],
   );
 
   const openAt = (index: number) => setLightbox(index);
@@ -201,13 +256,19 @@ export default function Gallery({ initialMedia = [] }: Props) {
       {loading ? (
         <div className="container mb-16">
           <div className="mb-8 h-4 w-40 animate-pulse rounded bg-white/10" />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="animate-pulse bg-white/5"
-                style={{ height: 180 + (i % 3) * 60 }}
-              />
+          <div className="flex gap-4">
+            {Array.from({ length: columnCount }).map((_, col) => (
+              <div key={col} className="flex min-w-0 flex-1 flex-col gap-4">
+                {Array.from({
+                  length: Math.ceil(6 / columnCount),
+                }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="animate-pulse bg-white/5"
+                    style={{ height: 180 + ((col + i) % 3) * 60 }}
+                  />
+                ))}
+              </div>
             ))}
           </div>
         </div>
@@ -300,74 +361,87 @@ export default function Gallery({ initialMedia = [] }: Props) {
 
           <AnimatePresence mode="wait">
             <motion.div
-              key={filter}
+              key={`${filter}-${columnCount}`}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.35 }}
-              className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              className="flex items-start gap-4"
             >
-              {photos.map((p, i) => (
-                <motion.button
-                  key={`${p.id}-${filter}`}
-                  type="button"
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{
-                    duration: 0.45,
-                    delay: Math.min(i * 0.04, 0.35),
-                  }}
-                  onClick={() => openAt(i)}
-                  className="group w-full cursor-zoom-in border-0 bg-transparent p-0 text-left"
+              {photoColumns.map((column, colIndex) => (
+                <div
+                  key={`col-${colIndex}`}
+                  className="flex min-w-0 flex-1 flex-col gap-4"
                 >
-                  <div className="relative overflow-hidden bg-navy-900/40">
-                    {isVideo(p) ? (
-                      <>
-                        <video
-                          src={p.src}
-                          muted
-                          playsInline
-                          preload="metadata"
-                          className="h-auto w-full object-contain"
-                          aria-label={p.caption || undefined}
-                        />
-                        <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                          <span className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-navy-900/70 text-white/90">
-                            <svg
-                              viewBox="0 0 24 24"
-                              className="ml-0.5 h-5 w-5"
-                              fill="currentColor"
-                              aria-hidden
-                            >
-                              <path d="M8 5.5v13l11-6.5L8 5.5Z" />
-                            </svg>
+                  {column.map((p, rowIndex) => {
+                    const i = photos.findIndex((x) => x.id === p.id);
+                    return (
+                      <motion.button
+                        key={`${p.id}-${filter}`}
+                        type="button"
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={inView ? { opacity: 1, y: 0 } : {}}
+                        transition={{
+                          duration: 0.45,
+                          delay: Math.min(
+                            (rowIndex * columnCount + colIndex) * 0.04,
+                            0.35,
+                          ),
+                        }}
+                        onClick={() => openAt(i < 0 ? 0 : i)}
+                        className="group w-full cursor-zoom-in border-0 bg-transparent p-0 text-left"
+                      >
+                        <div className="relative overflow-hidden bg-navy-900/40">
+                          {isVideo(p) ? (
+                            <>
+                              <video
+                                src={p.src}
+                                muted
+                                playsInline
+                                preload="metadata"
+                                className="h-auto w-full object-contain"
+                                aria-label={p.caption || undefined}
+                              />
+                              <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                                <span className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-navy-900/70 text-white/90">
+                                  <svg
+                                    viewBox="0 0 24 24"
+                                    className="ml-0.5 h-5 w-5"
+                                    fill="currentColor"
+                                    aria-hidden
+                                  >
+                                    <path d="M8 5.5v13l11-6.5L8 5.5Z" />
+                                  </svg>
+                                </span>
+                              </span>
+                            </>
+                          ) : (
+                            <Image
+                              src={p.src}
+                              alt={imageAlt(p.caption)}
+                              width={p.width}
+                              height={p.height}
+                              className="h-auto w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                              priority={rowIndex === 0 && colIndex < 3}
+                            />
+                          )}
+                        </div>
+                        <div className="mt-2.5 px-0.5">
+                          <span className="mb-1 block font-title text-[8px] uppercase tracking-[2px] text-accent-light">
+                            {p.category}
+                            {isVideo(p) ? " · Video" : ""}
                           </span>
-                        </span>
-                      </>
-                    ) : (
-                      <Image
-                        src={p.src}
-                        alt={imageAlt(p.caption)}
-                        width={p.width}
-                        height={p.height}
-                        className="h-auto w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        priority={i < 3}
-                      />
-                    )}
-                  </div>
-                  <div className="mt-2.5 px-0.5">
-                    <span className="mb-1 block font-title text-[8px] uppercase tracking-[2px] text-accent-light">
-                      {p.category}
-                      {isVideo(p) ? " · Video" : ""}
-                    </span>
-                    {p.caption ? (
-                      <p className="font-display text-[15px] italic leading-snug text-white/75 transition-colors group-hover:text-white">
-                        {p.caption}
-                      </p>
-                    ) : null}
-                  </div>
-                </motion.button>
+                          {p.caption ? (
+                            <p className="font-display text-[15px] italic leading-snug text-white/75 transition-colors group-hover:text-white">
+                              {p.caption}
+                            </p>
+                          ) : null}
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
               ))}
             </motion.div>
           </AnimatePresence>
