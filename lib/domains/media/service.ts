@@ -1,6 +1,7 @@
 export {
   createMediaRecord,
   createMediaRecordsBatch,
+  deleteMediaAssetsIfUnused,
   deleteMediaRecordsBatch,
   fetchMediaAssetById,
   fetchPublicGalleryMedia,
@@ -15,6 +16,14 @@ export {
   updateMediaRecordsBatch,
 } from "@/lib/firebase/gallery";
 export type { MediaAsset, MediaMetadataInput, GalleryCategory } from "@/lib/media";
+export {
+  MediaInUseError,
+  assertMediaAssetsUnused,
+  findMediaUsages,
+  findMediaUsagesForMany,
+  partitionMediaByUsage,
+  type MediaUsageRef,
+} from "@/lib/domains/media/media-usage";
 export {
   GALLERY_CATEGORIES,
   FEATURED_STRIP_IMAGE_ASPECT,
@@ -48,10 +57,12 @@ export {
   DEFAULT_IMAGE_DISPLAY_CONFIG,
   IMAGE_DISPLAY_MAX_ZOOM,
   IMAGE_DISPLAY_MIN_ZOOM,
+  computeImageCoverLayout,
   createMediaImageRef,
   imageDisplayPositionCss,
   imageDisplayStyle,
   normalizeImageDisplayConfig,
+  type ImageCoverLayout,
   type ImageDisplayConfig,
   type MediaImageRef,
 } from "@/lib/domains/media/display";

@@ -39,6 +39,7 @@ import {
   isVideoMediaUrl,
   legacyGalleryId,
 } from "@/lib/domains/media/legacy-gallery";
+import { partitionMediaByUsage, MediaInUseError } from "@/lib/domains/media/media-usage";
 
 function dateString(value: unknown): string {
   if (value instanceof Timestamp) return value.toDate().toISOString();
@@ -84,7 +85,7 @@ function requireFirebase() {
   }
 }
 
-/** Admin: all media assets, newest updates first. */
+/** Admin: all media assets, newest uploads first (createdAt). */
 export function subscribeToAllMedia(
   onMedia: (items: MediaAsset[]) => void,
   onError: (error: Error) => void,
@@ -99,7 +100,7 @@ export function subscribeToAllMedia(
   }
   const mediaQuery = query(
     collection(getFirebaseFirestore(), "gallery"),
-    orderBy("updatedAt", "desc"),
+    orderBy("createdAt", "desc"),
   );
   return onSnapshot(
     mediaQuery,
@@ -389,6 +390,27 @@ export async function deleteMediaRecordsBatch(ids: string[]): Promise<void> {
     batch.delete(doc(db, "gallery", id));
   }
   await batch.commit();
+}
+
+/**
+ * Delete Media Library records that are not referenced by CMS pages / posts.
+ * Unused assets are removed first. If any are still linked, throws
+ * MediaInUseError (with deletedIds of what already succeeded).
+ * Gallery-only usage (showInGallery) does not block deletion.
+ * Callers should also remove the matching ImageKit files for deletedIds.
+ */
+export async function deleteMediaAssetsIfUnused(
+  assets: MediaAsset[],
+): Promise<{ deletedIds: string[] }> {
+  const { free, blocked } = await partitionMediaByUsage(assets);
+  const deletedIds = free.map((asset) => asset.id);
+  if (deletedIds.length) {
+    await deleteMediaRecordsBatch(deletedIds);
+  }
+  if (blocked.length) {
+    throw new MediaInUseError(blocked, deletedIds);
+  }
+  return { deletedIds };
 }
 
 /**

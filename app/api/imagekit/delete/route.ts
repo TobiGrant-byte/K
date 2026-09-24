@@ -1,32 +1,46 @@
 import { NextResponse } from "next/server";
-import { MAX_BLOG_IMAGES } from "@/lib/blog";
 import {
   errorResponse,
   verifyFirebaseAdmin,
 } from "@/lib/firebase/verify-admin-server";
-import { deleteImageKitAsset } from "@/lib/imagekit/server";
+import {
+  deleteImageKitAsset,
+  deleteImageKitAssetByFileId,
+  IMAGEKIT_DELETE_BATCH_MAX,
+} from "@/lib/imagekit/server";
 
 export async function POST(request: Request) {
   try {
     await verifyFirebaseAdmin(request);
-    const body = (await request.json()) as { urls?: unknown };
+    const body = (await request.json()) as {
+      urls?: unknown;
+      fileIds?: unknown;
+    };
+
+    const urls = Array.isArray(body.urls)
+      ? body.urls.filter((url): url is string => typeof url === "string")
+      : [];
+    const fileIds = Array.isArray(body.fileIds)
+      ? body.fileIds.filter((id): id is string => typeof id === "string")
+      : [];
+
     if (
-      !Array.isArray(body.urls) ||
-      body.urls.some((url) => typeof url !== "string") ||
-      body.urls.length > MAX_BLOG_IMAGES
+      urls.length + fileIds.length === 0 ||
+      urls.length + fileIds.length > IMAGEKIT_DELETE_BATCH_MAX
     ) {
       return new Response(
-        `Provide up to ${MAX_BLOG_IMAGES} valid image URLs.`,
+        `Provide up to ${IMAGEKIT_DELETE_BATCH_MAX} ImageKit urls and/or file ids.`,
         { status: 400 },
       );
     }
 
-    if (body.urls.length === 0) {
-      return NextResponse.json({ deleted: 0 });
-    }
-
-    await Promise.all(body.urls.map((url) => deleteImageKitAsset(url)));
-    return NextResponse.json({ deleted: body.urls.length });
+    await Promise.all([
+      ...urls.map((url) => deleteImageKitAsset(url)),
+      ...fileIds.map((id) => deleteImageKitAssetByFileId(id)),
+    ]);
+    return NextResponse.json({
+      deleted: urls.length + fileIds.length,
+    });
   } catch (error) {
     return errorResponse(error);
   }

@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import ConfiguredFrameImage from "@/components/media/ConfiguredFrameImage";
 import {
   GALLERY_CATEGORIES,
   PUBLIC_GALLERY_STATIC_VIDEO,
-  imageDisplayStyle,
   isVideoMediaUrl,
   presentationForMediaUrl,
   usePublicGalleryMedia,
@@ -126,14 +126,11 @@ function StripThumb({
   caption: string;
   stripConfig: ImageDisplayConfig;
 }) {
-  const style = imageDisplayStyle(stripConfig);
   return (
-    <Image
+    <ConfiguredFrameImage
       src={src}
       alt={imageAlt(caption)}
-      fill
-      className="object-cover"
-      style={style}
+      config={stripConfig}
       sizes="240px"
     />
   );

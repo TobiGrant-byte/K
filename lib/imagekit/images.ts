@@ -228,3 +228,63 @@ export async function deleteImageKitImages(urls: string[]): Promise<void> {
     throw new Error((await response.text()) || "ImageKit deletion failed.");
   }
 }
+
+/**
+ * Delete Media Library originals from ImageKit after Firestore docs are gone.
+ * Skips /site-media and non-ImageKit URLs. Best-effort — does not throw on
+ * empty input.
+ */
+export async function deleteImageKitMediaAssets(
+  assets: Array<{ imageUrl: string; imageKitFileId?: string }>,
+): Promise<void> {
+  const endpoint = imageKitUrlEndpoint.replace(/\/+$/, "");
+  const urls: string[] = [];
+  const fileIds: string[] = [];
+
+  for (const asset of assets) {
+    const fileId = asset.imageKitFileId?.trim() ?? "";
+    if (fileId) {
+      fileIds.push(fileId);
+      continue;
+    }
+    const url = asset.imageUrl.trim();
+    if (
+      url.startsWith(`${endpoint}/`) &&
+      !url.includes("/site-media/")
+    ) {
+      urls.push(url);
+    }
+  }
+
+  const uniqueUrls = [...new Set(urls)];
+  const uniqueIds = [...new Set(fileIds)];
+  if (!uniqueUrls.length && !uniqueIds.length) return;
+
+  const chunkSize = 50;
+  const send = async (urlChunk: string[], idChunk: string[]) => {
+    if (!urlChunk.length && !idChunk.length) return;
+    const response = await fetch("/api/imagekit/delete", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${await adminToken()}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        urls: urlChunk,
+        fileIds: idChunk,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(
+        (await response.text()) || "ImageKit media deletion failed.",
+      );
+    }
+  };
+
+  for (let i = 0; i < uniqueIds.length; i += chunkSize) {
+    await send([], uniqueIds.slice(i, i + chunkSize));
+  }
+  for (let i = 0; i < uniqueUrls.length; i += chunkSize) {
+    await send(uniqueUrls.slice(i, i + chunkSize), []);
+  }
+}

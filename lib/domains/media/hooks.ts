@@ -15,6 +15,7 @@ import {
 } from "@/lib/domains/media/listeners";
 import {
   createMediaRecordsBatch,
+  deleteMediaAssetsIfUnused,
   importLegacySiteGallery,
   importLibraryOnlySiteMedia,
   removeLocalPublicMediaFromMediaLibrary,
@@ -23,10 +24,12 @@ import {
   updateMediaRecordsBatch,
   type MediaAsset,
   type MediaMetadataInput,
+  MediaInUseError,
   normalizeMediaMetadata,
   validateMediaFiles,
 } from "@/lib/domains/media/service";
 import { migrateSiteMediaToImageKit } from "@/lib/domains/media/migrate-site-media";
+import { deleteImageKitMediaAssets } from "@/lib/imagekit/images";
 import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
 const MEDIA_STALE = 5 * 60_000;
@@ -254,6 +257,63 @@ export function useSetMediaVisibilityBatchMutation() {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
+    },
+  });
+}
+
+/**
+ * Delete Media Library records that are unused by CMS / blog.
+ * Deletes free assets first (Firestore, then ImageKit); if any remain linked,
+ * throws MediaInUseError (includes deletedIds so the UI can refresh partial success).
+ */
+export function useDeleteMediaBatchMutation() {
+  const queryClient = useQueryClient();
+
+  const dropFromCache = (ids: string[]) => {
+    if (!ids.length) return;
+    const idSet = new Set(ids);
+    queryClient.setQueryData<MediaAsset[]>(mediaKeys.list(), (prev) =>
+      (prev ?? []).filter((item) => !idSet.has(item.id)),
+    );
+    void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
+  };
+
+  const purgeImageKit = async (
+    assets: MediaAsset[],
+    deletedIds: string[],
+  ) => {
+    const removed = assets.filter((asset) => deletedIds.includes(asset.id));
+    if (!removed.length) return;
+    await deleteImageKitMediaAssets(removed).catch((error) => {
+      console.error("ImageKit cleanup after media delete failed", error);
+    });
+  };
+
+  return useMutation({
+    mutationFn: async (assets: MediaAsset[]) => {
+      try {
+        const result = await deleteMediaAssetsIfUnused(assets);
+        await purgeImageKit(assets, result.deletedIds);
+        await bumpPublicMedia();
+        return result;
+      } catch (error) {
+        if (
+          error instanceof MediaInUseError &&
+          error.deletedIds.length > 0
+        ) {
+          await purgeImageKit(assets, error.deletedIds);
+          await bumpPublicMedia().catch(() => undefined);
+        }
+        throw error;
+      }
+    },
+    onSuccess: (result) => {
+      dropFromCache(result.deletedIds);
+    },
+    onError: (error) => {
+      if (error instanceof MediaInUseError) {
+        dropFromCache(error.deletedIds);
+      }
     },
   });
 }

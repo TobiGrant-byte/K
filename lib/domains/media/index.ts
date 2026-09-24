@@ -2,6 +2,7 @@ export { mediaKeys } from "@/lib/domains/media/keys";
 export * from "@/lib/domains/media/service";
 export {
   useCreateMediaBatchMutation,
+  useDeleteMediaBatchMutation,
   useImportLegacyGalleryMutation,
   useImportLibraryOnlyMediaMutation,
   useMediaById,

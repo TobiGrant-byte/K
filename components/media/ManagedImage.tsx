@@ -1,10 +1,6 @@
-import Image from "next/image";
 import type { MediaAsset } from "@/lib/media";
-import {
-  imageDisplayStyle,
-  normalizeImageDisplayConfig,
-  type ImageDisplayConfig,
-} from "@/lib/domains/media/display";
+import type { ImageDisplayConfig } from "@/lib/domains/media/display";
+import ConfiguredFrameImage from "@/components/media/ConfiguredFrameImage";
 
 type MediaSource = Pick<MediaAsset, "imageUrl" | "altText"> &
   Partial<Pick<MediaAsset, "title">>;
@@ -20,7 +16,7 @@ type ManagedImageProps = {
    * When omitted, the parent must already be `relative` with a defined size.
    */
   frameClassName?: string;
-  /** Extra classes on the Next/Image element (defaults include object-cover). */
+  /** Extra classes on the image element. */
   imageClassName?: string;
   /** Override Media Library alt; empty string stays empty (decorative). */
   alt?: string;
@@ -32,8 +28,7 @@ type ManagedImageProps = {
  * Renders a Media Library image with page-specific display configuration.
  *
  * Reuses the original ImageKit / public URL — no duplicate uploads or gallery docs.
- * Safe for Server Components (no client hooks).
- * Framing is always cover; crop with ImageDisplayConfig (position / zoom).
+ * Cover × zoom layout reveals more of the source when zoomed out (no fake CSS shrink).
  */
 export default function ManagedImage({
   media,
@@ -44,22 +39,19 @@ export default function ManagedImage({
   sizes = "100vw",
   priority = false,
 }: ManagedImageProps) {
-  const display = normalizeImageDisplayConfig(config);
-  const style = imageDisplayStyle(display);
   const resolvedAlt =
     alt !== undefined
       ? alt
       : (media.altText || media.title || "").trim();
 
   const image = (
-    <Image
+    <ConfiguredFrameImage
       src={media.imageUrl}
       alt={resolvedAlt}
-      fill
-      priority={priority}
+      config={config}
       sizes={sizes}
-      className={`object-cover ${imageClassName}`.trim()}
-      style={style}
+      priority={priority}
+      imageClassName={imageClassName}
     />
   );
 

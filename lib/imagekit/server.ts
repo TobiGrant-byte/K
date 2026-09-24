@@ -5,6 +5,9 @@ import { imageKitUrlEndpoint } from "@/lib/imagekit/config";
 
 const imageKitPrivateKey = "private_ur6ZjNxipETuZGEDGvna0v31ZBk=";
 
+/** Max URLs accepted by the ImageKit delete API in one request. */
+export const IMAGEKIT_DELETE_BATCH_MAX = 100;
+
 export function createImageKitUploadAuthentication() {
   const token = randomUUID();
   const expire = Math.floor(Date.now() / 1000) + 30 * 60;
@@ -22,17 +25,20 @@ function imageKitPath(url: string): {
   folder: string;
   name: string;
   path: string;
-} {
+} | null {
   const normalizedEndpoint = imageKitUrlEndpoint.replace(/\/+$/, "");
-  if (!url.startsWith(`${normalizedEndpoint}/blog/`)) {
-    throw new Error(
-      "Only blog images from this ImageKit account can be deleted.",
-    );
+  if (!url.startsWith(`${normalizedEndpoint}/`)) {
+    throw new Error("Only images from this ImageKit account can be deleted.");
   }
 
   const path = decodeURIComponent(
-    url.slice(normalizedEndpoint.length).split("?")[0],
+    url.slice(normalizedEndpoint.length).split("?")[0] ?? "",
   );
+  // Hardcoded site fallbacks — never delete via Media Library / blog cleanup.
+  if (path.startsWith("/site-media/") || path.startsWith("site-media/")) {
+    return null;
+  }
+
   const slash = path.lastIndexOf("/");
   if (slash <= 0) throw new Error("Invalid ImageKit image URL.");
   return {
@@ -50,6 +56,8 @@ type ImageKitFile = {
 
 export async function deleteImageKitAsset(url: string): Promise<void> {
   const target = imageKitPath(url);
+  if (!target) return;
+
   const params = new URLSearchParams({
     path: target.folder,
     name: target.name,
@@ -75,6 +83,25 @@ export async function deleteImageKitAsset(url: string): Promise<void> {
 
   const deleteResponse = await fetch(
     `https://api.imagekit.io/v1/files/${encodeURIComponent(file.fileId)}`,
+    {
+      method: "DELETE",
+      headers: { authorization: imageKitAuthorization() },
+      cache: "no-store",
+    },
+  );
+  if (!deleteResponse.ok && deleteResponse.status !== 404) {
+    throw new Error(`ImageKit deletion failed (${deleteResponse.status}).`);
+  }
+}
+
+/** Prefer fileId when Media Library stored it — skips path lookup. */
+export async function deleteImageKitAssetByFileId(
+  fileId: string,
+): Promise<void> {
+  const id = fileId.trim();
+  if (!id) return;
+  const deleteResponse = await fetch(
+    `https://api.imagekit.io/v1/files/${encodeURIComponent(id)}`,
     {
       method: "DELETE",
       headers: { authorization: imageKitAuthorization() },
