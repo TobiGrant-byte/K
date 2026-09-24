@@ -201,11 +201,11 @@ export default function Gallery({ initialMedia = [] }: Props) {
       {loading ? (
         <div className="container mb-16">
           <div className="mb-8 h-4 w-40 animate-pulse rounded bg-white/10" />
-          <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="mb-4 break-inside-avoid animate-pulse bg-white/5"
+                className="animate-pulse bg-white/5"
                 style={{ height: 180 + (i % 3) * 60 }}
               />
             ))}
@@ -305,7 +305,7 @@ export default function Gallery({ initialMedia = [] }: Props) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.35 }}
-              className="columns-1 gap-4 sm:columns-2 lg:columns-3"
+              className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3"
             >
               {photos.map((p, i) => (
                 <motion.button
@@ -318,7 +318,7 @@ export default function Gallery({ initialMedia = [] }: Props) {
                     delay: Math.min(i * 0.04, 0.35),
                   }}
                   onClick={() => openAt(i)}
-                  className="group mb-4 w-full break-inside-avoid cursor-zoom-in border-0 bg-transparent p-0 text-left"
+                  className="group w-full cursor-zoom-in border-0 bg-transparent p-0 text-left"
                 >
                   <div className="relative overflow-hidden bg-navy-900/40">
                     {isVideo(p) ? (

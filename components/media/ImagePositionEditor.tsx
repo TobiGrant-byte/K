@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   imageDisplayStyle,
   IMAGE_DISPLAY_MIN_ZOOM,
@@ -57,8 +57,33 @@ export default function ImagePositionEditor({
     [config, onChange],
   );
 
+  // Mobile: dragging the focal point must not scroll the admin page underneath.
+  useEffect(() => {
+    if (!dragging) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prev = {
+      htmlOverflow: html.style.overflow,
+      bodyOverflow: body.style.overflow,
+      bodyTouchAction: body.style.touchAction,
+      bodyOverscroll: body.style.overscrollBehavior,
+    };
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    body.style.touchAction = "none";
+    body.style.overscrollBehavior = "none";
+    return () => {
+      html.style.overflow = prev.htmlOverflow;
+      body.style.overflow = prev.bodyOverflow;
+      body.style.touchAction = prev.bodyTouchAction;
+      body.style.overscrollBehavior = prev.bodyOverscroll;
+    };
+  }, [dragging]);
+
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!hasImage || e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
     dragRef.current = {
       pointerId: e.pointerId,
@@ -74,6 +99,7 @@ export default function ImagePositionEditor({
     const drag = dragRef.current;
     const frame = frameRef.current;
     if (!drag || drag.pointerId !== e.pointerId || !frame) return;
+    e.preventDefault();
     const rect = frame.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
     const dx = (e.clientX - drag.startX) / rect.width;
@@ -101,14 +127,14 @@ export default function ImagePositionEditor({
     <div className={`space-y-3 ${className}`.trim()}>
       <div
         ref={frameRef}
-        className={`relative w-full max-w-sm overflow-hidden rounded-lg border border-white/15 bg-navy-900 select-none ${
+        className={`relative w-full max-w-sm overflow-hidden rounded-lg border border-white/15 bg-navy-900 select-none touch-none ${
           hasImage
             ? dragging
               ? "cursor-grabbing"
               : "cursor-grab"
             : "border-dashed border-white/20"
         }`}
-        style={{ aspectRatio }}
+        style={{ aspectRatio, touchAction: hasImage ? "none" : undefined }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
