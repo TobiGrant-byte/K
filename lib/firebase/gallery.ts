@@ -121,7 +121,11 @@ export function subscribeToPublicGalleryMedia(
     (snap) => {
       const items = snap.docs
         .map(mediaFromSnapshot)
-        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+        .sort((a, b) => {
+          const tb = b.createdAt || b.updatedAt || "";
+          const ta = a.createdAt || a.updatedAt || "";
+          return tb.localeCompare(ta);
+        });
       onMedia(items);
     },
     (error) => onError(error),
@@ -138,7 +142,11 @@ export async function fetchPublicGalleryMedia(): Promise<MediaAsset[]> {
   const snap = await getDocs(mediaQuery);
   return snap.docs
     .map(mediaFromSnapshot)
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    .sort((a, b) => {
+      const tb = b.createdAt || b.updatedAt || "";
+      const ta = a.createdAt || a.updatedAt || "";
+      return tb.localeCompare(ta);
+    });
 }
 
 /** Resolve a single Media Library asset by id (SSR / CMS image refs). */
