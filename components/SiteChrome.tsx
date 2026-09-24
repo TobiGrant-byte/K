@@ -7,6 +7,9 @@ import Footer from "@/components/Footer";
 import SearchHighlight from "@/components/SearchHighlight";
 import { CMS_REVALIDATE_STORAGE_KEY } from "@/lib/cms/revalidate-client";
 
+/** Away this long with the tab in the background → soft-refresh on return. */
+const STALE_TAB_MS = 2 * 60 * 60 * 1000; // 2 hours
+
 /** Soft-nav onto a public page soon after an admin save → refresh once. */
 function usePublicRouteRefreshAfterCmsSave(isAdmin: boolean) {
   const pathname = usePathname();
@@ -30,11 +33,45 @@ function usePublicRouteRefreshAfterCmsSave(isAdmin: boolean) {
   }, [isAdmin, pathname, router]);
 }
 
+/**
+ * Public tabs left in the background for a long time: when the visitor
+ * returns, soft-refresh once so they see current CMS content without a
+ * manual reload. Short tab switches are ignored. Admin is excluded.
+ */
+function useStaleTabRefresh(isAdmin: boolean) {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAdmin) return;
+
+    let hiddenAt: number | null =
+      document.visibilityState === "hidden" ? Date.now() : null;
+
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        hiddenAt = Date.now();
+        return;
+      }
+      if (hiddenAt == null) return;
+      const awayMs = Date.now() - hiddenAt;
+      hiddenAt = null;
+      if (awayMs < STALE_TAB_MS) return;
+      router.refresh();
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isAdmin, router]);
+}
+
 /** Site chrome is hidden on /admin so the CMS can own the full viewport. */
 export default function SiteChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAdmin = Boolean(pathname?.startsWith("/admin"));
   usePublicRouteRefreshAfterCmsSave(isAdmin);
+  useStaleTabRefresh(isAdmin);
 
   if (isAdmin) {
     return <>{children}</>;
