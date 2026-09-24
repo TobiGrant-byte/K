@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import ConfiguredFrameImage from "@/components/media/ConfiguredFrameImage";
 import {
   GALLERY_CATEGORIES,
   PUBLIC_GALLERY_STATIC_VIDEO,
@@ -10,8 +11,10 @@ import {
   presentationForMediaUrl,
   usePublicGalleryMedia,
   type GalleryCategory as MediaCategory,
+  type ImageDisplayConfig,
   type MediaAsset,
 } from "@/lib/domains/media";
+import { DEFAULT_IMAGE_DISPLAY_CONFIG } from "@/lib/domains/media/display";
 
 type GalleryFilter = "All" | MediaCategory;
 
@@ -25,9 +28,8 @@ type Photo = {
   /** ISO — used to show newest-added first in the masonry. */
   createdAt: string;
   media?: "image" | "video";
-  objectPosition?: string;
-  zoom?: number;
-  transformOrigin?: string;
+  /** Featured-moments strip crop from Media Library. */
+  stripConfig: ImageDisplayConfig;
 };
 
 const CATEGORIES: GalleryFilter[] = ["All", ...GALLERY_CATEGORIES];
@@ -44,9 +46,7 @@ function mediaToPhoto(asset: MediaAsset): Photo {
     height: presentation.height,
     createdAt: asset.createdAt || asset.updatedAt || "",
     media: presentation.media,
-    objectPosition: presentation.objectPosition,
-    zoom: presentation.zoom,
-    transformOrigin: presentation.transformOrigin,
+    stripConfig: asset.stripConfig ?? { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
   };
 }
 
@@ -61,6 +61,7 @@ function staticPublicVideoPhoto(): Photo {
     // Keep the static video after CMS uploads in newest-first order.
     createdAt: "",
     media: "video",
+    stripConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
   };
 }
 
@@ -119,27 +120,17 @@ function imageAlt(caption: string): string {
 function StripThumb({
   src,
   caption,
-  objectPosition,
-  zoom,
-  transformOrigin,
+  stripConfig,
 }: {
   src: string;
   caption: string;
-  objectPosition?: string;
-  zoom?: number;
-  transformOrigin?: string;
+  stripConfig: ImageDisplayConfig;
 }) {
   return (
-    <Image
+    <ConfiguredFrameImage
       src={src}
       alt={imageAlt(caption)}
-      fill
-      className="object-cover"
-      style={{
-        objectPosition: objectPosition || "center",
-        transform: zoom ? `scale(${zoom})` : undefined,
-        transformOrigin: transformOrigin || "center center",
-      }}
+      config={stripConfig}
       sizes="240px"
     />
   );
@@ -177,6 +168,18 @@ export default function Gallery({ initialMedia = [] }: Props) {
         : allPhotos.filter((p) => p.category === filter),
     [allPhotos, filter],
   );
+
+  const visibleCategories = useMemo(() => {
+    const present = new Set(allPhotos.map((p) => p.category));
+    return CATEGORIES.filter(
+      (c) => c === "All" || present.has(c as MediaCategory),
+    );
+  }, [allPhotos]);
+
+  useEffect(() => {
+    if (filter === "All") return;
+    if (!visibleCategories.includes(filter)) setFilter("All");
+  }, [filter, visibleCategories]);
 
   const photoColumns = useMemo(
     () => distributeIntoColumns(photos, columnCount),
@@ -314,9 +317,7 @@ export default function Gallery({ initialMedia = [] }: Props) {
                   <StripThumb
                     src={p.src}
                     caption={p.caption}
-                    objectPosition={p.objectPosition}
-                    zoom={p.zoom}
-                    transformOrigin={p.transformOrigin}
+                    stripConfig={p.stripConfig}
                   />
                 </button>
               ))}
@@ -335,7 +336,7 @@ export default function Gallery({ initialMedia = [] }: Props) {
             role="tablist"
             aria-label="Gallery categories"
           >
-            {CATEGORIES.map((c) => {
+            {visibleCategories.map((c) => {
               const selected = filter === c;
               return (
                 <button

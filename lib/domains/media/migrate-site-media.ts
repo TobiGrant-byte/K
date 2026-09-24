@@ -13,6 +13,7 @@ import {
   type MediaAsset,
 } from "@/lib/domains/media/service";
 import { normalizeMediaMetadata } from "@/lib/media";
+import { DEFAULT_IMAGE_DISPLAY_CONFIG } from "@/lib/domains/media/display";
 
 function isImageKitUrl(url: string): boolean {
   return /imagekit\.io/i.test(url) && !isLocalPublicMediaUrl(url);
@@ -147,6 +148,7 @@ export async function migrateSiteMediaToImageKit(
         altText: meta.altText,
         category: meta.category,
         showInGallery: meta.showInGallery,
+        stripConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
         imageKitFileId: hostedDoc?.imageKitFileId || item.imageKitFileId || "",
         createdAt: "",
         updatedAt: "",
@@ -171,6 +173,7 @@ export async function migrateSiteMediaToImageKit(
         altText: meta.altText,
         category: meta.category,
         showInGallery: meta.showInGallery,
+        stripConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
         imageKitFileId: fileId,
         createdAt: "",
         updatedAt: "",

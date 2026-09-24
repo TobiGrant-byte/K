@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import ConfiguredFrameImage from "@/components/media/ConfiguredFrameImage";
 import {
-  imageDisplayStyle,
   IMAGE_DISPLAY_MIN_ZOOM,
   normalizeImageDisplayConfig,
   type ImageDisplayConfig,
@@ -121,8 +121,6 @@ export default function ImagePositionEditor({
     }
   };
 
-  const style = imageDisplayStyle(config);
-
   return (
     <div className={`space-y-3 ${className}`.trim()}>
       <div
@@ -144,13 +142,11 @@ export default function ImagePositionEditor({
       >
         {hasImage ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <ConfiguredFrameImage
               src={imageUrl!}
               alt={alt}
-              draggable={false}
-              className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-              style={style}
+              config={config}
+              sizes="480px"
             />
             <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-accent/35" />
           </>
@@ -198,8 +194,8 @@ export default function ImagePositionEditor({
               Reset
             </button>
             <span className="self-center text-[11px] text-white/35">
-              Drag inside the frame to set the focal point. Slight zoom-out is
-              allowed.
+              Drag to pan. Zoom out to squeeze more of the photo into the frame;
+              zoom in to focus closer.
             </span>
           </div>
         </>

@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import AdminConfirmDialog from "@/components/admin/cms/AdminConfirmDialog";
+import ImagePositionEditor from "@/components/media/ImagePositionEditor";
 import {
+  FEATURED_STRIP_IMAGE_ASPECT,
   GALLERY_CATEGORIES,
   MEDIA_ACCEPTED_TYPES,
   MEDIA_MAX_UPLOAD_COUNT,
   isVideoMediaUrl,
   useCreateMediaBatchMutation,
+  useDeleteMediaBatchMutation,
   useMediaLibrary,
   useMigrateSiteMediaMutation,
   useRemoveLocalPublicMediaMutation,
@@ -16,7 +20,13 @@ import {
   useUploadMediaFilesMutation,
   type GalleryCategory,
   type MediaAsset,
+  MediaInUseError,
 } from "@/lib/domains/media";
+import {
+  DEFAULT_IMAGE_DISPLAY_CONFIG,
+  normalizeImageDisplayConfig,
+  type ImageDisplayConfig,
+} from "@/lib/domains/media/display";
 import { formatPostDate } from "@/lib/blog";
 import { adminToast } from "@/lib/admin/toast-store";
 
@@ -24,6 +34,7 @@ type DraftMeta = {
   title: string;
   category: GalleryCategory;
   showInGallery: boolean;
+  stripConfig: ImageDisplayConfig;
 };
 
 type SessionItem = {
@@ -45,11 +56,50 @@ type PageSize = 10 | 20;
 
 const PAGE_SIZE_OPTIONS: PageSize[] = [10, 20];
 
+/**
+ * Split items left→right across columns (row order), then stack in each column.
+ * Same uneven masonry pattern as the public Gallery.
+ */
+function distributeIntoColumns<T>(items: T[], columnCount: number): T[][] {
+  const count = Math.max(1, columnCount);
+  const columns: T[][] = Array.from({ length: count }, () => []);
+  items.forEach((item, i) => {
+    columns[i % count]!.push(item);
+  });
+  return columns;
+}
+
+function useMediaLibraryColumnCount() {
+  const [count, setCount] = useState(1);
+
+  useEffect(() => {
+    const sm = window.matchMedia("(min-width: 640px)");
+    const xl = window.matchMedia("(min-width: 1280px)");
+    const update = () => {
+      if (xl.matches) setCount(3);
+      else if (sm.matches) setCount(2);
+      else setCount(1);
+    };
+    update();
+    sm.addEventListener("change", update);
+    xl.addEventListener("change", update);
+    return () => {
+      sm.removeEventListener("change", update);
+      xl.removeEventListener("change", update);
+    };
+  }, []);
+
+  return count;
+}
+
 function draftsEqual(a: DraftMeta, b: DraftMeta): boolean {
   return (
     a.title === b.title &&
     a.category === b.category &&
-    a.showInGallery === b.showInGallery
+    a.showInGallery === b.showInGallery &&
+    a.stripConfig.positionX === b.stripConfig.positionX &&
+    a.stripConfig.positionY === b.stripConfig.positionY &&
+    a.stripConfig.zoom === b.stripConfig.zoom
   );
 }
 
@@ -58,6 +108,7 @@ function toDraft(asset: MediaAsset): DraftMeta {
     title: asset.title,
     category: asset.category,
     showInGallery: asset.showInGallery,
+    stripConfig: normalizeImageDisplayConfig(asset.stripConfig),
   };
 }
 
@@ -71,6 +122,7 @@ export default function AdminMediaLibrary() {
   const createBatch = useCreateMediaBatchMutation();
   const updateBatch = useUpdateMediaBatchMutation();
   const visibilityBatch = useSetMediaVisibilityBatchMutation();
+  const deleteBatch = useDeleteMediaBatchMutation();
   const removeVideos = useRemoveVideoMediaMutation();
   const migrateSiteMedia = useMigrateSiteMediaMutation();
   const removeLocalPublic = useRemoveLocalPublicMediaMutation();
@@ -89,6 +141,8 @@ export default function AdminMediaLibrary() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [session, setSession] = useState<EditSession | null>(null);
   const [discardOpen, setDiscardOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<MediaAsset[] | null>(null);
+  const columnCount = useMediaLibraryColumnCount();
 
   const items = useMemo(
     () => (mediaQuery.data ?? []).filter((item) => !isVideoMediaUrl(item.imageUrl)),
@@ -166,6 +220,11 @@ export default function AdminMediaLibrary() {
     return filtered.slice(start, start + pageSize);
   }, [filtered, currentPage, pageSize]);
 
+  const gridColumns = useMemo(
+    () => distributeIntoColumns(pageItems, columnCount),
+    [pageItems, columnCount],
+  );
+
   const rangeStart = filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const rangeEnd = Math.min(currentPage * pageSize, filtered.length);
 
@@ -173,7 +232,8 @@ export default function AdminMediaLibrary() {
     uploadFiles.isPending ||
     createBatch.isPending ||
     updateBatch.isPending ||
-    visibilityBatch.isPending;
+    visibilityBatch.isPending ||
+    deleteBatch.isPending;
 
   const current = session?.items[session.index] ?? null;
 
@@ -228,13 +288,17 @@ export default function AdminMediaLibrary() {
           title: "",
           category: "Others",
           showInGallery: false,
+          stripConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
         };
         return {
           id: s.id,
           imageUrl: s.imageUrl,
           imageKitFileId: s.imageKitFileId,
           draft,
-          baseline: { ...draft },
+          baseline: {
+            ...draft,
+            stripConfig: { ...draft.stripConfig },
+          },
         };
       });
       setSession({ mode: "create", items: sessionItems, index: 0 });
@@ -259,7 +323,10 @@ export default function AdminMediaLibrary() {
           imageUrl: asset.imageUrl,
           imageKitFileId: asset.imageKitFileId,
           draft,
-          baseline: { ...draft },
+          baseline: {
+            ...draft,
+            stripConfig: { ...draft.stripConfig },
+          },
         };
       }),
       index: 0,
@@ -284,6 +351,7 @@ export default function AdminMediaLibrary() {
               altText: item.draft.title.trim(),
               category: item.draft.category,
               showInGallery: item.draft.showInGallery,
+              stripConfig: item.draft.stripConfig,
             },
           })),
         );
@@ -299,6 +367,7 @@ export default function AdminMediaLibrary() {
               altText: item.draft.title.trim(),
               category: item.draft.category,
               showInGallery: item.draft.showInGallery,
+              stripConfig: item.draft.stripConfig,
             },
           })),
         );
@@ -376,13 +445,65 @@ export default function AdminMediaLibrary() {
     }
   };
 
+  const requestDelete = (assets: MediaAsset[]) => {
+    if (!assets.length) return;
+    setDeleteTarget(assets);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget?.length) return;
+    const targets = deleteTarget;
+
+    const applyRemoved = (removedIds: string[]) => {
+      if (!removedIds.length) return;
+      const idSet = new Set(removedIds);
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        for (const id of idSet) next.delete(id);
+        return next;
+      });
+      setSession((prev) => {
+        if (!prev || prev.mode === "create") return prev;
+        const remaining = prev.items.filter((item) => !idSet.has(item.id));
+        if (!remaining.length) return null;
+        return {
+          ...prev,
+          items: remaining,
+          index: Math.min(prev.index, remaining.length - 1),
+        };
+      });
+    };
+
+    try {
+      const result = await deleteBatch.mutateAsync(targets);
+      applyRemoved(result.deletedIds);
+      adminToast.success(
+        `${result.deletedIds.length} image${result.deletedIds.length === 1 ? "" : "s"} removed from Media Library.`,
+      );
+      setDeleteTarget(null);
+    } catch (error) {
+      if (error instanceof MediaInUseError) {
+        applyRemoved(error.deletedIds);
+        adminToast.error(error.message);
+      } else {
+        adminToast.error(
+          error instanceof Error
+            ? error.message
+            : "Could not delete image.",
+        );
+      }
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <div className="space-y-6 text-white">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <p className="max-w-2xl text-sm text-white/50">
           Upload up to {MEDIA_MAX_UPLOAD_COUNT} images at once, review each, then
           submit all together. Public Gallery shows assets with “Show in
-          Gallery” enabled.
+          Gallery” enabled. Featured moments crop only affects the scrolling
+          strip on the Gallery page.
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -518,6 +639,14 @@ export default function AdminMediaLibrary() {
           </button>
           <button
             type="button"
+            disabled={busy}
+            onClick={() => requestDelete(selectedAssets)}
+            className="rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 font-title text-[8px] uppercase tracking-[1.5px] text-red-300 hover:bg-red-500/20 disabled:opacity-50"
+          >
+            Delete
+          </button>
+          <button
+            type="button"
             onClick={() => setSelectedIds(new Set())}
             className="rounded-md px-3 py-2 font-title text-[8px] uppercase tracking-[1.5px] text-white/45 hover:text-white"
           >
@@ -546,55 +675,64 @@ export default function AdminMediaLibrary() {
       ) : null}
 
       {viewMode === "grid" && pageItems.length > 0 ? (
-        <div className="columns-1 gap-4 sm:columns-2 xl:columns-3">
-          {pageItems.map((asset) => (
-            <article
-              key={asset.id}
-              className="mb-4 break-inside-avoid overflow-hidden rounded-xl border border-white/10 bg-navy-800"
+        <div className="flex items-start gap-4">
+          {gridColumns.map((column, colIndex) => (
+            <div
+              key={`col-${colIndex}`}
+              className="flex min-w-0 flex-1 flex-col gap-4"
             >
-              <button
-                type="button"
-                onClick={() => openSingleEdit(asset)}
-                className="block w-full text-left"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={asset.imageUrl}
-                  alt={
-                    asset.altText || asset.title
-                      ? asset.altText || asset.title
-                      : ""
-                  }
-                  className="h-auto w-full object-cover"
-                />
-                <div className="space-y-1.5 p-3">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-title text-[8px] uppercase tracking-[1.5px]">
-                    <span className="text-accent-light">{asset.category}</span>
-                    <span className="text-white/25" aria-hidden>
-                      ·
-                    </span>
-                    <span
-                      className={
-                        asset.showInGallery
-                          ? "text-emerald-400"
-                          : "text-white/40"
+              {column.map((asset) => (
+                <article
+                  key={asset.id}
+                  className="overflow-hidden rounded-xl border border-white/10 bg-navy-800"
+                >
+                  <button
+                    type="button"
+                    onClick={() => openSingleEdit(asset)}
+                    className="block w-full text-left"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={asset.imageUrl}
+                      alt={
+                        asset.altText || asset.title
+                          ? asset.altText || asset.title
+                          : ""
                       }
-                    >
-                      {asset.showInGallery ? "In Gallery" : "Library only"}
-                    </span>
-                  </div>
-                  {asset.title ? (
-                    <p className="font-display text-[15px] leading-snug text-white/90">
-                      {asset.title}
-                    </p>
-                  ) : (
-                    <p className="font-display text-[15px] italic text-white/35">
-                      No description
-                    </p>
-                  )}
-                </div>
-              </button>
-            </article>
+                      className="h-auto w-full object-contain"
+                    />
+                    <div className="space-y-1.5 p-3">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-title text-[8px] uppercase tracking-[1.5px]">
+                        <span className="text-accent-light">
+                          {asset.category}
+                        </span>
+                        <span className="text-white/25" aria-hidden>
+                          ·
+                        </span>
+                        <span
+                          className={
+                            asset.showInGallery
+                              ? "text-emerald-400"
+                              : "text-white/40"
+                          }
+                        >
+                          {asset.showInGallery ? "In Gallery" : "Library only"}
+                        </span>
+                      </div>
+                      {asset.title ? (
+                        <p className="font-display text-[15px] leading-snug text-white/90">
+                          {asset.title}
+                        </p>
+                      ) : (
+                        <p className="font-display text-[15px] italic text-white/35">
+                          No description
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                </article>
+              ))}
+            </div>
           ))}
         </div>
       ) : null}
@@ -670,14 +808,24 @@ export default function AdminMediaLibrary() {
                     {formatPostDate(asset.updatedAt)}
                   </td>
                   <td className="px-3 py-3 align-middle">
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => openSingleEdit(asset)}
-                      className="font-title text-[8px] uppercase tracking-[1.5px] text-accent-light hover:text-accent disabled:opacity-50"
-                    >
-                      Edit
-                    </button>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => openSingleEdit(asset)}
+                        className="font-title text-[8px] uppercase tracking-[1.5px] text-accent-light hover:text-accent disabled:opacity-50"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => requestDelete([asset])}
+                        className="font-title text-[8px] uppercase tracking-[1.5px] text-red-300/90 hover:text-red-200 disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -761,7 +909,7 @@ export default function AdminMediaLibrary() {
               <img
                 src={current.imageUrl}
                 alt={current.draft.title || ""}
-                className="max-h-56 w-full object-contain"
+                className="max-h-40 w-full object-contain"
               />
             </div>
 
@@ -820,6 +968,28 @@ export default function AdminMediaLibrary() {
                   Show in public Gallery
                 </span>
               </label>
+
+              <div className="space-y-3 border-t border-white/10 pt-4">
+                <div>
+                  <h3 className="font-display text-lg font-light text-white">
+                    Featured moments crop
+                  </h3>
+                  <p className="mt-1 text-sm text-white/45">
+                    Adjust how this photo looks in the moving strip at the top
+                    of the Gallery page. Drag to choose what stays in view.
+                  </p>
+                </div>
+                <ImagePositionEditor
+                  imageUrl={current.imageUrl}
+                  alt={current.draft.title || "Featured moments"}
+                  aspectRatio={FEATURED_STRIP_IMAGE_ASPECT}
+                  value={current.draft.stripConfig}
+                  onChange={(stripConfig) =>
+                    patchCurrentDraft({ stripConfig })
+                  }
+                  emptyLabel="No image"
+                />
+              </div>
             </div>
 
             <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
@@ -841,16 +1011,31 @@ export default function AdminMediaLibrary() {
                   Next
                 </button>
               </div>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void submitSession()}
-                className="rounded-lg bg-accent px-5 py-3 font-title text-[10px] uppercase tracking-[2px] text-white hover:bg-accent-light disabled:opacity-60"
-              >
-                {createBatch.isPending || updateBatch.isPending
-                  ? "Submitting…"
-                  : `Submit all (${session.items.length})`}
-              </button>
+              <div className="flex flex-wrap gap-2">
+                {session.mode === "edit" ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      const asset = items.find((item) => item.id === current.id);
+                      if (asset) requestDelete([asset]);
+                    }}
+                    className="rounded-lg border border-red-500/40 bg-red-500/10 px-5 py-3 font-title text-[10px] uppercase tracking-[2px] text-red-300 hover:bg-red-500/20 disabled:opacity-60"
+                  >
+                    Delete image
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void submitSession()}
+                  className="rounded-lg bg-accent px-5 py-3 font-title text-[10px] uppercase tracking-[2px] text-white hover:bg-accent-light disabled:opacity-60"
+                >
+                  {createBatch.isPending || updateBatch.isPending
+                    ? "Submitting…"
+                    : `Submit all (${session.items.length})`}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -902,6 +1087,33 @@ export default function AdminMediaLibrary() {
           </div>
         </div>
       ) : null}
+
+      <AdminConfirmDialog
+        open={Boolean(deleteTarget?.length)}
+        eyebrow="Delete from library"
+        title={
+          deleteTarget?.length === 1
+            ? "Remove this image?"
+            : `Remove ${deleteTarget?.length ?? 0} images?`
+        }
+        description={
+          <>
+            This removes the image from the Media Library
+            {deleteTarget?.some((asset) => asset.showInGallery)
+              ? " and the public Gallery"
+              : ""}
+            , and deletes the file from ImageKit. If it is used on Profile,
+            Research, Publications, Impacts, Achievements, or a blog post,
+            deletion will be blocked.
+          </>
+        }
+        confirmLabel={deleteBatch.isPending ? "Checking…" : "Delete"}
+        busy={deleteBatch.isPending}
+        onConfirm={() => void confirmDelete()}
+        onCancel={() => {
+          if (!deleteBatch.isPending) setDeleteTarget(null);
+        }}
+      />
     </div>
   );
 }

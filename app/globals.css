@@ -158,11 +158,13 @@ mark[data-search-hit].search-hit-fade {
     @apply overflow-hidden;
   }
 
-  .img-zoom img {
+  /* Hover scale lives on a wrapper so it never fights crop zoom on the img. */
+  .img-zoom .img-zoom-motion {
+    @apply h-full w-full;
     transition: transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
-  .img-zoom:hover img {
+  .img-zoom:hover .img-zoom-motion {
     transform: scale(1.06);
   }
 

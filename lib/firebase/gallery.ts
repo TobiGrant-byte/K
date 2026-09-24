@@ -29,12 +29,17 @@ import {
   normalizeMediaMetadata,
 } from "@/lib/media";
 import {
+  DEFAULT_IMAGE_DISPLAY_CONFIG,
+  normalizeImageDisplayConfig,
+} from "@/lib/domains/media/display";
+import {
   LEGACY_SITE_GALLERY,
   LIBRARY_ONLY_SITE_MEDIA,
   isLocalPublicMediaUrl,
   isVideoMediaUrl,
   legacyGalleryId,
 } from "@/lib/domains/media/legacy-gallery";
+import { partitionMediaByUsage, MediaInUseError } from "@/lib/domains/media/media-usage";
 
 function dateString(value: unknown): string {
   if (value instanceof Timestamp) return value.toDate().toISOString();
@@ -55,6 +60,11 @@ function mediaFromData(id: string, data: DocumentData): MediaAsset {
     category,
     altText: description,
     showInGallery: Boolean(data.showInGallery),
+    stripConfig: normalizeImageDisplayConfig(
+      data.stripConfig && typeof data.stripConfig === "object"
+        ? (data.stripConfig as Record<string, unknown>)
+        : DEFAULT_IMAGE_DISPLAY_CONFIG,
+    ),
     imageKitFileId: String(data.imageKitFileId ?? ""),
     createdAt: dateString(data.createdAt),
     updatedAt: dateString(data.updatedAt),
@@ -75,7 +85,7 @@ function requireFirebase() {
   }
 }
 
-/** Admin: all media assets, newest updates first. */
+/** Admin: all media assets, newest uploads first (createdAt). */
 export function subscribeToAllMedia(
   onMedia: (items: MediaAsset[]) => void,
   onError: (error: Error) => void,
@@ -90,7 +100,7 @@ export function subscribeToAllMedia(
   }
   const mediaQuery = query(
     collection(getFirebaseFirestore(), "gallery"),
-    orderBy("updatedAt", "desc"),
+    orderBy("createdAt", "desc"),
   );
   return onSnapshot(
     mediaQuery,
@@ -180,6 +190,7 @@ export async function createMediaRecord(args: {
     category: meta.category,
     altText: meta.altText,
     showInGallery: meta.showInGallery,
+    stripConfig: meta.stripConfig,
     imageKitFileId: args.imageKitFileId ?? "",
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -210,6 +221,7 @@ export async function createMediaRecordsBatch(
       category: meta.category,
       altText: meta.altText,
       showInGallery: meta.showInGallery,
+      stripConfig: meta.stripConfig,
       imageKitFileId: item.imageKitFileId ?? "",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -294,6 +306,9 @@ export async function updateMediaMetadata(
   if (metadata.showInGallery !== undefined) {
     patch.showInGallery = Boolean(metadata.showInGallery);
   }
+  if (metadata.stripConfig !== undefined) {
+    patch.stripConfig = normalizeImageDisplayConfig(metadata.stripConfig);
+  }
   await updateDoc(ref, patch);
 }
 
@@ -332,6 +347,9 @@ export async function updateMediaRecordsBatch(
     }
     if (item.metadata.showInGallery !== undefined) {
       patch.showInGallery = Boolean(item.metadata.showInGallery);
+    }
+    if (item.metadata.stripConfig !== undefined) {
+      patch.stripConfig = normalizeImageDisplayConfig(item.metadata.stripConfig);
     }
     batch.update(doc(db, "gallery", item.id), patch);
   }
@@ -372,6 +390,27 @@ export async function deleteMediaRecordsBatch(ids: string[]): Promise<void> {
     batch.delete(doc(db, "gallery", id));
   }
   await batch.commit();
+}
+
+/**
+ * Delete Media Library records that are not referenced by CMS pages / posts.
+ * Unused assets are removed first. If any are still linked, throws
+ * MediaInUseError (with deletedIds of what already succeeded).
+ * Gallery-only usage (showInGallery) does not block deletion.
+ * Callers should also remove the matching ImageKit files for deletedIds.
+ */
+export async function deleteMediaAssetsIfUnused(
+  assets: MediaAsset[],
+): Promise<{ deletedIds: string[] }> {
+  const { free, blocked } = await partitionMediaByUsage(assets);
+  const deletedIds = free.map((asset) => asset.id);
+  if (deletedIds.length) {
+    await deleteMediaRecordsBatch(deletedIds);
+  }
+  if (blocked.length) {
+    throw new MediaInUseError(blocked, deletedIds);
+  }
+  return { deletedIds };
 }
 
 /**

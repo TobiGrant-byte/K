@@ -10,6 +10,7 @@ import {
   type GalleryCategory,
   type MediaAsset,
 } from "@/lib/domains/media";
+import { DEFAULT_IMAGE_DISPLAY_CONFIG } from "@/lib/domains/media/display";
 import { adminToast } from "@/lib/admin/toast-store";
 
 type Props = {
@@ -87,6 +88,7 @@ export default function MediaPicker({
         category: "Others",
         altText: "",
         showInGallery: false,
+        stripConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
         imageKitFileId: item.imageKitFileId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
