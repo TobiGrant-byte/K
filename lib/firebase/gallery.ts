@@ -29,6 +29,10 @@ import {
   normalizeMediaMetadata,
 } from "@/lib/media";
 import {
+  DEFAULT_IMAGE_DISPLAY_CONFIG,
+  normalizeImageDisplayConfig,
+} from "@/lib/domains/media/display";
+import {
   LEGACY_SITE_GALLERY,
   LIBRARY_ONLY_SITE_MEDIA,
   isLocalPublicMediaUrl,
@@ -55,6 +59,11 @@ function mediaFromData(id: string, data: DocumentData): MediaAsset {
     category,
     altText: description,
     showInGallery: Boolean(data.showInGallery),
+    stripConfig: normalizeImageDisplayConfig(
+      data.stripConfig && typeof data.stripConfig === "object"
+        ? (data.stripConfig as Record<string, unknown>)
+        : DEFAULT_IMAGE_DISPLAY_CONFIG,
+    ),
     imageKitFileId: String(data.imageKitFileId ?? ""),
     createdAt: dateString(data.createdAt),
     updatedAt: dateString(data.updatedAt),
@@ -180,6 +189,7 @@ export async function createMediaRecord(args: {
     category: meta.category,
     altText: meta.altText,
     showInGallery: meta.showInGallery,
+    stripConfig: meta.stripConfig,
     imageKitFileId: args.imageKitFileId ?? "",
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -210,6 +220,7 @@ export async function createMediaRecordsBatch(
       category: meta.category,
       altText: meta.altText,
       showInGallery: meta.showInGallery,
+      stripConfig: meta.stripConfig,
       imageKitFileId: item.imageKitFileId ?? "",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -294,6 +305,9 @@ export async function updateMediaMetadata(
   if (metadata.showInGallery !== undefined) {
     patch.showInGallery = Boolean(metadata.showInGallery);
   }
+  if (metadata.stripConfig !== undefined) {
+    patch.stripConfig = normalizeImageDisplayConfig(metadata.stripConfig);
+  }
   await updateDoc(ref, patch);
 }
 
@@ -332,6 +346,9 @@ export async function updateMediaRecordsBatch(
     }
     if (item.metadata.showInGallery !== undefined) {
       patch.showInGallery = Boolean(item.metadata.showInGallery);
+    }
+    if (item.metadata.stripConfig !== undefined) {
+      patch.stripConfig = normalizeImageDisplayConfig(item.metadata.stripConfig);
     }
     batch.update(doc(db, "gallery", item.id), patch);
   }

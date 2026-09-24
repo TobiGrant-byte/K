@@ -200,6 +200,7 @@ export function useUpdateMediaBatchMutation() {
             category: patch.category ?? item.category,
             altText: patch.altText ?? item.altText,
             showInGallery: patch.showInGallery ?? item.showInGallery,
+            stripConfig: patch.stripConfig ?? item.stripConfig,
           });
           return { ...item, ...next, updatedAt: new Date().toISOString() };
         }),

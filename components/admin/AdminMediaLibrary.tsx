@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import ImagePositionEditor from "@/components/media/ImagePositionEditor";
 import {
+  FEATURED_STRIP_IMAGE_ASPECT,
   GALLERY_CATEGORIES,
   MEDIA_ACCEPTED_TYPES,
   MEDIA_MAX_UPLOAD_COUNT,
@@ -17,6 +19,11 @@ import {
   type GalleryCategory,
   type MediaAsset,
 } from "@/lib/domains/media";
+import {
+  DEFAULT_IMAGE_DISPLAY_CONFIG,
+  normalizeImageDisplayConfig,
+  type ImageDisplayConfig,
+} from "@/lib/domains/media/display";
 import { formatPostDate } from "@/lib/blog";
 import { adminToast } from "@/lib/admin/toast-store";
 
@@ -24,6 +31,7 @@ type DraftMeta = {
   title: string;
   category: GalleryCategory;
   showInGallery: boolean;
+  stripConfig: ImageDisplayConfig;
 };
 
 type SessionItem = {
@@ -49,7 +57,10 @@ function draftsEqual(a: DraftMeta, b: DraftMeta): boolean {
   return (
     a.title === b.title &&
     a.category === b.category &&
-    a.showInGallery === b.showInGallery
+    a.showInGallery === b.showInGallery &&
+    a.stripConfig.positionX === b.stripConfig.positionX &&
+    a.stripConfig.positionY === b.stripConfig.positionY &&
+    a.stripConfig.zoom === b.stripConfig.zoom
   );
 }
 
@@ -58,6 +69,7 @@ function toDraft(asset: MediaAsset): DraftMeta {
     title: asset.title,
     category: asset.category,
     showInGallery: asset.showInGallery,
+    stripConfig: normalizeImageDisplayConfig(asset.stripConfig),
   };
 }
 
@@ -228,13 +240,17 @@ export default function AdminMediaLibrary() {
           title: "",
           category: "Others",
           showInGallery: false,
+          stripConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
         };
         return {
           id: s.id,
           imageUrl: s.imageUrl,
           imageKitFileId: s.imageKitFileId,
           draft,
-          baseline: { ...draft },
+          baseline: {
+            ...draft,
+            stripConfig: { ...draft.stripConfig },
+          },
         };
       });
       setSession({ mode: "create", items: sessionItems, index: 0 });
@@ -259,7 +275,10 @@ export default function AdminMediaLibrary() {
           imageUrl: asset.imageUrl,
           imageKitFileId: asset.imageKitFileId,
           draft,
-          baseline: { ...draft },
+          baseline: {
+            ...draft,
+            stripConfig: { ...draft.stripConfig },
+          },
         };
       }),
       index: 0,
@@ -284,6 +303,7 @@ export default function AdminMediaLibrary() {
               altText: item.draft.title.trim(),
               category: item.draft.category,
               showInGallery: item.draft.showInGallery,
+              stripConfig: item.draft.stripConfig,
             },
           })),
         );
@@ -299,6 +319,7 @@ export default function AdminMediaLibrary() {
               altText: item.draft.title.trim(),
               category: item.draft.category,
               showInGallery: item.draft.showInGallery,
+              stripConfig: item.draft.stripConfig,
             },
           })),
         );
@@ -382,7 +403,8 @@ export default function AdminMediaLibrary() {
         <p className="max-w-2xl text-sm text-white/50">
           Upload up to {MEDIA_MAX_UPLOAD_COUNT} images at once, review each, then
           submit all together. Public Gallery shows assets with “Show in
-          Gallery” enabled.
+          Gallery” enabled. Featured moments crop only affects the scrolling
+          strip on the Gallery page.
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -761,7 +783,7 @@ export default function AdminMediaLibrary() {
               <img
                 src={current.imageUrl}
                 alt={current.draft.title || ""}
-                className="max-h-56 w-full object-contain"
+                className="max-h-40 w-full object-contain"
               />
             </div>
 
@@ -820,6 +842,28 @@ export default function AdminMediaLibrary() {
                   Show in public Gallery
                 </span>
               </label>
+
+              <div className="space-y-3 border-t border-white/10 pt-4">
+                <div>
+                  <h3 className="font-display text-lg font-light text-white">
+                    Featured moments crop
+                  </h3>
+                  <p className="mt-1 text-sm text-white/45">
+                    Adjust how this photo looks in the moving strip at the top
+                    of the Gallery page. Drag to choose what stays in view.
+                  </p>
+                </div>
+                <ImagePositionEditor
+                  imageUrl={current.imageUrl}
+                  alt={current.draft.title || "Featured moments"}
+                  aspectRatio={FEATURED_STRIP_IMAGE_ASPECT}
+                  value={current.draft.stripConfig}
+                  onChange={(stripConfig) =>
+                    patchCurrentDraft({ stripConfig })
+                  }
+                  emptyLabel="No image"
+                />
+              </div>
             </div>
 
             <div className="mt-8 flex flex-wrap items-center justify-between gap-3">

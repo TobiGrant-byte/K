@@ -1,10 +1,10 @@
 /**
- * Page-specific image presentation — separate from Media Library asset identity.
+ * Page-specific image presentation — separate from Media Library asset identity
+ * except `stripConfig` on gallery/{id}, which is only for the public Featured
+ * moments strip.
  *
  * Media Library answers "which image?".
- * ImageDisplayConfig answers "how should it appear in this section?".
- *
- * Stored later on CMS content docs (e.g. About), never on gallery/{id}.
+ * ImageDisplayConfig answers "how should it appear in this frame?".
  */
 
 export type ImageDisplayConfig = {

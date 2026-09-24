@@ -1,4 +1,5 @@
 import type { GalleryCategory, MediaAsset } from "@/lib/media";
+import { DEFAULT_IMAGE_DISPLAY_CONFIG } from "@/lib/domains/media/display";
 import { siteMediaImageKitUrl } from "@/lib/domains/media/site-media-migration";
 
 /**
@@ -52,6 +53,7 @@ export function knownHostedMediaAsset(id: string): MediaAsset | null {
       altText: caption,
       category: item.category,
       showInGallery: false,
+      stripConfig: { ...DEFAULT_IMAGE_DISPLAY_CONFIG },
       imageKitFileId: item.imageKitFileId ?? "",
       createdAt: "",
       updatedAt: "",

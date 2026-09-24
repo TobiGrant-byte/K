@@ -1,5 +1,11 @@
 /** Shared Media Library types and validation (Admin + Public). */
 
+import {
+  DEFAULT_IMAGE_DISPLAY_CONFIG,
+  normalizeImageDisplayConfig,
+  type ImageDisplayConfig,
+} from "@/lib/domains/media/display";
+
 export const GALLERY_CATEGORIES = [
   "Graduation",
   "Recognition",
@@ -9,6 +15,9 @@ export const GALLERY_CATEGORIES = [
 
 export type GalleryCategory = (typeof GALLERY_CATEGORIES)[number];
 
+/** Featured-moments strip frame — matches Gallery strip thumbs (~240×160). */
+export const FEATURED_STRIP_IMAGE_ASPECT = 240 / 160;
+
 export type MediaAsset = {
   id: string;
   imageUrl: string;
@@ -16,6 +25,8 @@ export type MediaAsset = {
   category: GalleryCategory;
   altText: string;
   showInGallery: boolean;
+  /** Focal crop for the public Gallery “Featured moments” strip only. */
+  stripConfig: ImageDisplayConfig;
   /** ImageKit file id when available — for future asset management only. */
   imageKitFileId: string;
   createdAt: string;
@@ -27,6 +38,7 @@ export type MediaMetadataInput = {
   category: GalleryCategory;
   altText: string;
   showInGallery: boolean;
+  stripConfig?: Partial<ImageDisplayConfig> | null;
 };
 
 export const MEDIA_MAX_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -67,9 +79,13 @@ export function validateMediaFiles(files: File[]): string | null {
   return null;
 }
 
-export function normalizeMediaMetadata(
-  input: Partial<MediaMetadataInput>,
-): MediaMetadataInput {
+export function normalizeMediaMetadata(input: Partial<MediaMetadataInput>): {
+  title: string;
+  category: GalleryCategory;
+  altText: string;
+  showInGallery: boolean;
+  stripConfig: ImageDisplayConfig;
+} {
   // Image description and alt stay identical; empty means pass nothing publicly.
   const description = (input.title ?? input.altText ?? "").trim();
   const category =
@@ -81,5 +97,8 @@ export function normalizeMediaMetadata(
     category,
     altText: description,
     showInGallery: Boolean(input.showInGallery),
+    stripConfig: normalizeImageDisplayConfig(
+      input.stripConfig ?? DEFAULT_IMAGE_DISPLAY_CONFIG,
+    ),
   };
 }

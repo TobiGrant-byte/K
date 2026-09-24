@@ -17,6 +17,7 @@ export {
 export type { MediaAsset, MediaMetadataInput, GalleryCategory } from "@/lib/media";
 export {
   GALLERY_CATEGORIES,
+  FEATURED_STRIP_IMAGE_ASPECT,
   MEDIA_ACCEPTED_TYPES,
   MEDIA_MAX_BYTES,
   MEDIA_MAX_UPLOAD_COUNT,
