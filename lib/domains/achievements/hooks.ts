@@ -9,7 +9,7 @@ import {
 import type { AchievementsContentInput } from "@/lib/domains/achievements/types";
 import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
-const ACHIEVEMENTS_STALE = 5 * 60_000;
+const ACHIEVEMENTS_STALE = 60 * 60_000; // 1 hour
 
 export function useAchievementsContent() {
   return useQuery({

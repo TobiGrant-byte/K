@@ -28,6 +28,10 @@ export {
   toProfileWritePayload,
   validateProfileWritePayload,
 } from "@/lib/domains/profile/normalize";
+export {
+  parseHomeQuote,
+  type ParsedHomeQuote,
+} from "@/lib/domains/profile/quote";
 export { profileKeys } from "@/lib/domains/profile/keys";
 export {
   ensureProfileContentSeeded,

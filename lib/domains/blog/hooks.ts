@@ -17,7 +17,7 @@ import {
 } from "@/lib/domains/blog/service";
 import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
-const BLOG_STALE = 5 * 60_000;
+const BLOG_STALE = 60 * 60_000; // 1 hour
 
 /** Admin: all posts (published + drafts). One shared Firestore listener. */
 export function useAdminPosts() {

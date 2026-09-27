@@ -142,6 +142,17 @@ export function subscribeToPublicGalleryMedia(
   );
 }
 
+/** One-shot admin list (no listener). */
+export async function fetchAllMedia(): Promise<MediaAsset[]> {
+  requireFirebase();
+  const mediaQuery = query(
+    collection(getFirebaseFirestore(), "gallery"),
+    orderBy("createdAt", "desc"),
+  );
+  const snap = await getDocs(mediaQuery);
+  return snap.docs.map(mediaFromSnapshot);
+}
+
 /** One-shot public fetch for SSR / SEO hydration (no listener). */
 export async function fetchPublicGalleryMedia(): Promise<MediaAsset[]> {
   if (!firebaseConfigured) return [];

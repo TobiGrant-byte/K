@@ -9,7 +9,7 @@ import {
 import type { ResearchContentInput } from "@/lib/domains/research/types";
 import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
-const RESEARCH_STALE = 5 * 60_000;
+const RESEARCH_STALE = 60 * 60_000; // 1 hour
 
 /** Admin: load (and seed once if missing) Research content. */
 export function useResearchContent() {

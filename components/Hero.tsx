@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import {
   HOME_HERO_IMAGE_SRC,
+  parseHomeQuote,
   roleLines,
   type ProfileHomeContent,
 } from "@/lib/domains/profile";
@@ -24,6 +25,7 @@ export default function Hero({ home }: Props) {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
 
   const roles = home.roles.map(roleLines).filter((lines) => lines.length > 0);
+  const { text: quoteText, author: quoteAuthor } = parseHomeQuote(home.quote);
 
   return (
     <section
@@ -54,21 +56,30 @@ export default function Hero({ home }: Props) {
             <div className="h-px w-9 shrink-0 bg-accent/80" />
           </motion.div>
 
-          <div className="mb-[22px] max-w-[920px] overflow-hidden">
-            <motion.h1
+          <div className="mb-[22px] max-w-[920px]">
+            <motion.div
               initial={{ y: 80 }}
               animate={{ y: 0 }}
               transition={{ duration: 1.1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="m-0 font-display text-[clamp(28px,4.6vw,56px)] font-light italic leading-[1.2] text-white"
             >
-              <span className="text-accent-light" aria-hidden>
-                &ldquo;
-              </span>
-              {home.quote}
-              <span className="text-accent-light" aria-hidden>
-                &rdquo;
-              </span>
-            </motion.h1>
+              <h1 className="m-0 inline font-display text-[clamp(28px,4.6vw,56px)] font-light italic leading-[1.12] tracking-[-0.01em] text-white">
+                <span className="text-accent-light" aria-hidden>
+                  &ldquo;
+                </span>
+                {quoteText}
+                <span className="text-accent-light" aria-hidden>
+                  &rdquo;
+                </span>
+              </h1>
+              {quoteAuthor ? (
+                <cite className="ml-2.5 inline-block translate-y-[-0.12em] font-display text-[clamp(14px,1.35vw,18px)] font-light not-italic tracking-normal text-white/45">
+                  <span className="text-accent-light/70" aria-hidden>
+                    _
+                  </span>{" "}
+                  {quoteAuthor}
+                </cite>
+              ) : null}
+            </motion.div>
           </div>
 
           <motion.div

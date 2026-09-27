@@ -9,7 +9,7 @@ import {
 import type { PublicationsContentInput } from "@/lib/domains/publications/types";
 import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
-const PUBLICATIONS_STALE = 5 * 60_000;
+const PUBLICATIONS_STALE = 60 * 60_000; // 1 hour
 
 export function usePublicationsContent() {
   return useQuery({
