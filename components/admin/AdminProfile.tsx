@@ -359,12 +359,7 @@ export default function AdminProfile() {
           <div>
             <h2 className="font-display text-xl font-light">Home quote</h2>
             <p className="mt-1 text-sm text-white/45">
-              Shown in the Home hero. To credit an author, type the quote, then
-              a dash and the name on the same line — for example:{" "}
-              <span className="text-white/70">
-                Keep going every day — Dr. Sunday Okafor
-              </span>
-              . Leave the dash and name off if you do not want an author line.
+              Shown in the Home hero.
             </p>
           </div>
 

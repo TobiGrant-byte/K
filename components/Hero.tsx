@@ -72,8 +72,8 @@ export default function Hero({ home }: Props) {
                 </span>
               </h1>
               {quoteAuthor ? (
-                <cite className="ml-2.5 inline-block translate-y-[-0.12em] font-display text-[clamp(14px,1.35vw,18px)] font-light not-italic tracking-normal text-white/45">
-                  <span className="text-accent-light/70" aria-hidden>
+                <cite className="ml-2.5 inline-block translate-y-[-0.12em] font-display text-[clamp(14px,1.35vw,18px)] font-light not-italic tracking-normal text-white/75">
+                  <span className="text-accent-light" aria-hidden>
                     _
                   </span>{" "}
                   {quoteAuthor}
