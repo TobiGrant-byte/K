@@ -5,18 +5,16 @@ import { usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { retainPublishedPostsListener } from "@/lib/domains/blog/listeners";
 import { retainPublicGalleryListener } from "@/lib/domains/media/listeners";
-import { subscribeToAdminAuth } from "@/lib/firebase/auth";
 
 /**
- * Public gallery / blog listeners: closed until the visitor actually opens
- * /gallery or /blog. Once opened, stay open for the rest of the tab session
- * (soft navigations do not reconnect). Admin sessions skip these — admin
- * bootstrap owns realtime.
+ * Public gallery / blog listeners: closed until the visitor opens /gallery
+ * or /blog. Once opened, stay open for the rest of the tab session.
+ * Runs for everyone (including signed-in admin) — public UI reads these
+ * cache keys, which are separate from the admin CMS listeners.
  */
 export default function PublicRealtimeBootstrap() {
   const queryClient = useQueryClient();
   const pathname = usePathname();
-  const [isAdmin, setIsAdmin] = useState(false);
   const [galleryLive, setGalleryLive] = useState(false);
   const [postsLive, setPostsLive] = useState(false);
 
@@ -28,20 +26,14 @@ export default function PublicRealtimeBootstrap() {
   }
 
   useEffect(() => {
-    return subscribeToAdminAuth((state) => {
-      setIsAdmin(state.status === "admin");
-    });
-  }, []);
-
-  useEffect(() => {
-    if (isAdmin || !galleryLive) return;
+    if (!galleryLive) return;
     return retainPublicGalleryListener(queryClient);
-  }, [isAdmin, galleryLive, queryClient]);
+  }, [galleryLive, queryClient]);
 
   useEffect(() => {
-    if (isAdmin || !postsLive) return;
+    if (!postsLive) return;
     return retainPublishedPostsListener(queryClient);
-  }, [isAdmin, postsLive, queryClient]);
+  }, [postsLive, queryClient]);
 
   return null;
 }
