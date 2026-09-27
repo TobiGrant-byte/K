@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 /** ISR: serve cached HTML; admin saves bust the cache via /api/revalidate. */
-export const revalidate = 300;
+export const revalidate = 3600;
 
 export default async function GalleryPage() {
   let initialMedia: Awaited<ReturnType<typeof fetchPublicGalleryMedia>> = [];

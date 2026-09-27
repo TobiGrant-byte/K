@@ -9,10 +9,7 @@ import {
 import { createId } from "@/lib/blog";
 import { uploadGalleryMediaImage } from "@/lib/imagekit/images";
 import { mediaKeys } from "@/lib/domains/media/keys";
-import {
-  retainAdminMediaListener,
-  retainPublicGalleryListener,
-} from "@/lib/domains/media/listeners";
+import { retainPublicGalleryListener } from "@/lib/domains/media/listeners";
 import {
   createMediaRecordsBatch,
   deleteMediaAssetsIfUnused,
@@ -38,11 +35,12 @@ async function bumpPublicMedia() {
   await revalidatePublicSite("gallery");
 }
 
-/** Admin Media Library + Media Picker: shared list + one Firestore listener. */
+/**
+ * Admin Media Library + Media Picker: read shared cache.
+ * Listener is owned by AdminRealtimeBootstrap (once per admin session).
+ */
 export function useMediaLibrary() {
   const queryClient = useQueryClient();
-
-  useEffect(() => retainAdminMediaListener(queryClient), [queryClient]);
 
   return useQuery({
     queryKey: mediaKeys.list(),
