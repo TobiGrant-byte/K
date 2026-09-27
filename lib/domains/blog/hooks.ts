@@ -1,13 +1,7 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { blogKeys } from "@/lib/domains/blog/keys";
-import {
-  retainAdminCommentsListener,
-  retainAdminPostsListener,
-  retainPublishedPostsListener,
-} from "@/lib/domains/blog/listeners";
 import {
   deletePostComment,
   removePost,
@@ -19,27 +13,28 @@ import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
 const BLOG_STALE = 60 * 60_000; // 1 hour
 
-/** Admin: all posts (published + drafts). One shared Firestore listener. */
+/**
+ * Admin: all posts (published + drafts).
+ * Listener is owned by AdminRealtimeBootstrap (once per admin session).
+ */
 export function useAdminPosts() {
   const queryClient = useQueryClient();
-
-  useEffect(() => retainAdminPostsListener(queryClient), [queryClient]);
 
   return useQuery({
     queryKey: blogKeys.adminPosts(),
     queryFn: async () =>
       queryClient.getQueryData<BlogPost[]>(blogKeys.adminPosts()) ?? [],
     staleTime: BLOG_STALE,
-    // Realtime listener keeps cache fresh; don't refetch on mount/focus.
     refetchOnMount: false,
   });
 }
 
-/** Public: published posts only. Shared listener + cache. */
+/**
+ * Public: published posts only.
+ * Listener is owned by PublicRealtimeBootstrap (once per tab session).
+ */
 export function usePublishedPosts() {
   const queryClient = useQueryClient();
-
-  useEffect(() => retainPublishedPostsListener(queryClient), [queryClient]);
 
   return useQuery({
     queryKey: blogKeys.publishedPosts(),
@@ -50,35 +45,12 @@ export function usePublishedPosts() {
   });
 }
 
-/** Admin: comments across posts. Depends on admin posts cache for titles. */
+/**
+ * Admin: comments across posts.
+ * Listener is owned by AdminRealtimeBootstrap (once per admin session).
+ */
 export function useAdminComments() {
   const queryClient = useQueryClient();
-  const postsQuery = useAdminPosts();
-
-  const postMetas = useMemo(
-    () =>
-      (postsQuery.data ?? []).map((p) => ({
-        id: p.id,
-        title: p.title,
-        slug: p.slug,
-        published: p.published,
-      })),
-    [postsQuery.data],
-  );
-
-  const postKey = useMemo(
-    () =>
-      postMetas
-        .map((p) => p.id)
-        .sort()
-        .join("|"),
-    [postMetas],
-  );
-
-  useEffect(() => {
-    return retainAdminCommentsListener(queryClient, postMetas);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- postKey drives resubscribe
-  }, [queryClient, postKey]);
 
   return useQuery({
     queryKey: blogKeys.adminComments(),

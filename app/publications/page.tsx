@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 /** ISR: admin saves bust via /api/revalidate. */
-export const revalidate = 300;
+export const revalidate = 3600;
 
 type MediaPick = Pick<MediaAsset, "imageUrl" | "altText" | "title"> | null;
 
