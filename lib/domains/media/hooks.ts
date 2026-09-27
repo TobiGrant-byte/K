@@ -32,7 +32,7 @@ import { migrateSiteMediaToImageKit } from "@/lib/domains/media/migrate-site-med
 import { deleteImageKitMediaAssets } from "@/lib/imagekit/images";
 import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
-const MEDIA_STALE = 5 * 60_000;
+const MEDIA_STALE = 60 * 60_000; // 1 hour — admin/public; listeners cover live edits
 
 async function bumpPublicMedia() {
   await revalidatePublicSite("gallery");

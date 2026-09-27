@@ -9,7 +9,7 @@ import {
 import type { ProfileContentInput } from "@/lib/domains/profile/types";
 import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
-const PROFILE_STALE = 5 * 60_000;
+const PROFILE_STALE = 60 * 60_000; // 1 hour
 
 /**
  * Admin Profile editor: loads (and seeds once if missing) the shared document.

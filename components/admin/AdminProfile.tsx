@@ -356,6 +356,18 @@ export default function AdminProfile() {
             </button>
           </div>
 
+          <div>
+            <h2 className="font-display text-xl font-light">Home quote</h2>
+            <p className="mt-1 text-sm text-white/45">
+              Shown in the Home hero. To credit an author, type the quote, then
+              a dash and the name on the same line — for example:{" "}
+              <span className="text-white/70">
+                Keep going every day — Dr. Sunday Okafor
+              </span>
+              . Leave the dash and name off if you do not want an author line.
+            </p>
+          </div>
+
           <label className="block">
             <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/50">
               Quote
@@ -364,8 +376,13 @@ export default function AdminProfile() {
               value={draft.home.quote}
               onChange={(e) => patchHome({ quote: e.target.value })}
               rows={3}
-              className="w-full resize-y rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-accent/60"
+              placeholder="Quote text — Author name (author optional)"
+              className="w-full resize-y rounded-lg border border-white/12 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-accent/60"
             />
+            <p className="mt-2 text-[12px] leading-relaxed text-white/40">
+              Tip: use an em dash (—), en dash (–), or two hyphens ( -- ) before
+              the author. Without it, only the quote is shown.
+            </p>
           </label>
         </div>
       ) : null}

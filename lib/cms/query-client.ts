@@ -1,14 +1,16 @@
 import { QueryClient } from "@tanstack/react-query";
 
-/** Shared QueryClient defaults — CMS content changes infrequently; avoid refetch storms. */
+/** Shared QueryClient defaults — CMS changes infrequently; avoid refetch storms. */
 export function createAppQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60_000,
-        gcTime: 30 * 60_000,
+        staleTime: 60 * 60_000, // 1 hour
+        gcTime: 2 * 60 * 60_000, // keep unused cache ~2 hours
         refetchOnWindowFocus: false,
-        refetchOnReconnect: true,
+        // Don't re-hit Firebase just because the laptop woke / network flapped
+        // while nobody is actively using the CMS.
+        refetchOnReconnect: false,
         retry: 1,
       },
       mutations: {

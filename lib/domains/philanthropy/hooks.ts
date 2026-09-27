@@ -9,7 +9,7 @@ import {
 import type { PhilanthropyContentInput } from "@/lib/domains/philanthropy/types";
 import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
-const PHILANTHROPY_STALE = 5 * 60_000;
+const PHILANTHROPY_STALE = 60 * 60_000; // 1 hour
 
 export function usePhilanthropyContent() {
   return useQuery({

@@ -3,6 +3,7 @@ export {
   createMediaRecordsBatch,
   deleteMediaAssetsIfUnused,
   deleteMediaRecordsBatch,
+  fetchAllMedia,
   fetchMediaAssetById,
   fetchPublicGalleryMedia,
   importLegacySiteGallery,
