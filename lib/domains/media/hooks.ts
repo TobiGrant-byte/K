@@ -9,7 +9,6 @@ import {
 import { createId } from "@/lib/blog";
 import { uploadGalleryMediaImage } from "@/lib/imagekit/images";
 import { mediaKeys } from "@/lib/domains/media/keys";
-import { retainPublicGalleryListener } from "@/lib/domains/media/listeners";
 import {
   createMediaRecordsBatch,
   deleteMediaAssetsIfUnused,
@@ -51,7 +50,10 @@ export function useMediaLibrary() {
   });
 }
 
-/** Public Gallery source of truth (showInGallery). Shared listener + cache. */
+/**
+ * Public Gallery source of truth (showInGallery).
+ * Listener is owned by PublicRealtimeBootstrap (once per tab session).
+ */
 export function usePublicGalleryMedia(initialData: MediaAsset[] = []) {
   const queryClient = useQueryClient();
 
@@ -62,8 +64,6 @@ export function usePublicGalleryMedia(initialData: MediaAsset[] = []) {
     // Seed once from SSR; listener keeps cache fresh afterward.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount seed
   }, [queryClient]);
-
-  useEffect(() => retainPublicGalleryListener(queryClient), [queryClient]);
 
   return useQuery({
     queryKey: mediaKeys.publicGallery(),

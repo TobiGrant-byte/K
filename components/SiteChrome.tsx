@@ -66,12 +66,35 @@ function useStaleTabRefresh(isAdmin: boolean) {
   }, [isAdmin, router]);
 }
 
+/**
+ * Browser reload (hard refresh): ask App Router for a fresh RSC payload.
+ * Soft in-app navigations do not hit this. Admin saves already bust ISR via
+ * /api/revalidate, so a reload after a save shows the new content immediately.
+ */
+function useHardReloadRefresh(isAdmin: boolean) {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAdmin) return;
+    try {
+      const nav = performance.getEntriesByType(
+        "navigation",
+      )[0] as PerformanceNavigationTiming | undefined;
+      if (nav?.type !== "reload") return;
+      router.refresh();
+    } catch {
+      /* ignore */
+    }
+  }, [isAdmin, router]);
+}
+
 /** Site chrome is hidden on /admin so the CMS can own the full viewport. */
 export default function SiteChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAdmin = Boolean(pathname?.startsWith("/admin"));
   usePublicRouteRefreshAfterCmsSave(isAdmin);
   useStaleTabRefresh(isAdmin);
+  useHardReloadRefresh(isAdmin);
 
   if (isAdmin) {
     return <>{children}</>;

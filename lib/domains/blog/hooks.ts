@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { blogKeys } from "@/lib/domains/blog/keys";
-import { retainPublishedPostsListener } from "@/lib/domains/blog/listeners";
 import {
   deletePostComment,
   removePost,
@@ -31,11 +29,12 @@ export function useAdminPosts() {
   });
 }
 
-/** Public: published posts only. Shared listener + cache. */
+/**
+ * Public: published posts only.
+ * Listener is owned by PublicRealtimeBootstrap (once per tab session).
+ */
 export function usePublishedPosts() {
   const queryClient = useQueryClient();
-
-  useEffect(() => retainPublishedPostsListener(queryClient), [queryClient]);
 
   return useQuery({
     queryKey: blogKeys.publishedPosts(),
