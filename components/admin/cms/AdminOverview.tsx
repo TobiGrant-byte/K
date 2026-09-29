@@ -64,6 +64,7 @@ export default function AdminOverview() {
 
   const hints: Partial<Record<(typeof editSections)[number]["id"], string>> = {
     about: "Home roles, quote, About, and hobbies",
+    projects: "Engineering project areas",
     "research-dev": "R&D and Research in Action",
     publications: "Press and scholarship tips",
     gallery: "Upload and manage images",

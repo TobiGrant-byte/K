@@ -30,6 +30,13 @@ export const searchIndex: SearchEntry[] = [
     keywords: ["research", "safety", "crash", "connected", "google scholar", "garver"],
   },
   {
+    title: "Projects",
+    description: "Engineering projects across safety, operations, and ITS.",
+    href: "/projects",
+    category: "Page",
+    keywords: ["projects", "engineering", "operations", "its", "safety"],
+  },
+  {
     title: "Publications",
     description: "Press features and LinkedIn scholarship articles.",
     href: "/publications",

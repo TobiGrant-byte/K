@@ -24,6 +24,7 @@ export const navItems: NavItem[] = [
   {
     label: "Profession",
     children: [
+      { label: "Projects", href: "/projects" },
       { label: "Research and Development", href: "/research" },
       { label: "Publications", href: "/publications" },
       { label: "Achievements", href: "/achievements" },

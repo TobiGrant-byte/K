@@ -5,6 +5,7 @@ export type AdminSection =
   | "blog-posts"
   | "gallery"
   | "about"
+  | "projects"
   | "research-dev"
   | "publications"
   | "scholarship"
@@ -20,6 +21,7 @@ const ADMIN_SECTIONS = new Set<AdminSection>([
   "blog-posts",
   "gallery",
   "about",
+  "projects",
   "research-dev",
   "publications",
   "scholarship",

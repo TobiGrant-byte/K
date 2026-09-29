@@ -28,6 +28,7 @@ export type MediaUsageRef = {
 
 const CONTENT_SCAN_TARGETS = [
   { id: "profile", label: "Profile" },
+  { id: "projects", label: "Projects" },
   { id: "research", label: "Research & Development" },
   { id: "publications", label: "Publications" },
   { id: "philanthropy", label: "Impacts" },

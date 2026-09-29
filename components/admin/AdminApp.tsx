@@ -6,6 +6,7 @@ import AdminOverview from "@/components/admin/cms/AdminOverview";
 import AdminPosts from "@/components/admin/AdminPosts";
 import AdminMediaLibrary from "@/components/admin/AdminMediaLibrary";
 import AdminProfile from "@/components/admin/AdminProfile";
+import AdminProjects from "@/components/admin/AdminProjects";
 import AdminResearch from "@/components/admin/AdminResearch";
 import AdminPublications from "@/components/admin/AdminPublications";
 import AdminPhilanthropy from "@/components/admin/AdminPhilanthropy";
@@ -128,6 +129,7 @@ export default function AdminApp() {
       {section === "blog-posts" ? <AdminPosts /> : null}
       {section === "gallery" ? <AdminMediaLibrary /> : null}
       {section === "about" ? <AdminProfile /> : null}
+      {section === "projects" ? <AdminProjects /> : null}
       {section === "research-dev" ? <AdminResearch /> : null}
       {section === "publications" ? <AdminPublications /> : null}
       {section === "philanthropy" ? <AdminPhilanthropy /> : null}

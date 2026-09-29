@@ -16,6 +16,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { id: "blog-posts", label: "Posts", enabled: true, group: "Blog" },
   { id: "gallery", label: "Media Library", enabled: true, group: "Media" },
   { id: "about", label: "Profile", enabled: true, group: "Site" },
+  { id: "projects", label: "Projects", enabled: true, group: "Professional" },
   {
     id: "philanthropy",
     label: "Impacts",
@@ -71,6 +72,8 @@ export function sectionPublicPath(section: AdminSection): string | null {
       return "/gallery";
     case "about":
       return "/about";
+    case "projects":
+      return "/projects";
     case "research-dev":
       return "/research";
     case "publications":
@@ -94,6 +97,8 @@ export function sectionPublicLabel(section: AdminSection): string | null {
       return "View gallery";
     case "about":
       return "View about";
+    case "projects":
+      return "View projects";
     case "research-dev":
       return "View research";
     case "publications":
@@ -119,6 +124,7 @@ export const ADMIN_PUBLIC_QUICK_LINKS: Array<{
   { href: "/blog", label: "Blog", hint: "Published posts" },
   { href: "/gallery", label: "Gallery", hint: "Public media" },
   { href: "/about", label: "About", hint: "Profile page" },
+  { href: "/projects", label: "Projects", hint: "Engineering project areas" },
   { href: "/research", label: "Research", hint: "R&D and Research in Action" },
   { href: "/publications", label: "Publications", hint: "Press & scholarship tips" },
   { href: "/achievements", label: "Achievements", hint: "Credentials" },

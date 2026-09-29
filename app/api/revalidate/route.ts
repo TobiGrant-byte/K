@@ -11,6 +11,7 @@ import {
 
 const SCOPES = new Set<SiteRevalidateScope>([
   "profile",
+  "projects",
   "research",
   "publications",
   "philanthropy",

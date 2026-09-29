@@ -4,6 +4,7 @@
  */
 export type SiteRevalidateScope =
   | "profile"
+  | "projects"
   | "research"
   | "publications"
   | "philanthropy"
@@ -19,6 +20,7 @@ export type RevalidateTarget = {
 
 const PATHS_BY_SCOPE: Record<SiteRevalidateScope, RevalidateTarget[]> = {
   profile: [{ path: "/" }, { path: "/about" }],
+  projects: [{ path: "/projects" }],
   research: [{ path: "/research" }],
   publications: [{ path: "/publications" }],
   philanthropy: [{ path: "/philanthropy" }],
@@ -27,6 +29,7 @@ const PATHS_BY_SCOPE: Record<SiteRevalidateScope, RevalidateTarget[]> = {
     { path: "/gallery" },
     { path: "/" },
     { path: "/about" },
+    { path: "/projects" },
     { path: "/research" },
     { path: "/publications" },
     { path: "/philanthropy" },
