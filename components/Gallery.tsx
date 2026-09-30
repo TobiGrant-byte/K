@@ -15,6 +15,7 @@ import {
   type MediaAsset,
 } from "@/lib/domains/media";
 import { DEFAULT_IMAGE_DISPLAY_CONFIG } from "@/lib/domains/media/display";
+import { isImageKitUrl } from "@/lib/imagekit/config";
 
 type GalleryFilter = "All" | MediaCategory;
 
@@ -422,6 +423,7 @@ export default function Gallery({ initialMedia = [] }: Props) {
                               alt={imageAlt(p.caption)}
                               width={p.width}
                               height={p.height}
+                              unoptimized={isImageKitUrl(p.src)}
                               className="h-auto w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
                               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                               priority={rowIndex === 0 && colIndex < 3}
@@ -522,6 +524,7 @@ export default function Gallery({ initialMedia = [] }: Props) {
                     alt={imageAlt(photos[lightbox].caption)}
                     width={photos[lightbox].width}
                     height={photos[lightbox].height}
+                    unoptimized={isImageKitUrl(photos[lightbox].src)}
                     className="max-h-[min(70vh,720px)] w-auto max-w-full object-contain"
                     sizes="90vw"
                     priority

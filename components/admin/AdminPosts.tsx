@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import ImageCropModal from "@/components/admin/ImageCropModal";
 import AdminComments from "@/components/admin/AdminComments";
+import AdminPostEngagementStats from "@/components/admin/AdminPostEngagementStats";
 import AdminConfirmDialog from "@/components/admin/cms/AdminConfirmDialog";
 import PostRowActions from "@/components/admin/PostRowActions";
 import RichTextEditor, {
@@ -595,6 +596,10 @@ export default function AdminPosts() {
                           {htmlToPlainText(post.excerpt)}
                         </p>
                       ) : null}
+                      <AdminPostEngagementStats
+                        postId={post.id}
+                        className="mt-3"
+                      />
                     </div>
                   </div>
                 </article>
@@ -609,9 +614,17 @@ export default function AdminPosts() {
         ) : (
           <form onSubmit={save} className="mx-auto max-w-3xl">
             <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
-              <h1 className="font-display text-3xl font-light">
-                {mode === "edit" ? "Edit post" : "New post"}
-              </h1>
+              <div className="min-w-0">
+                <h1 className="font-display text-3xl font-light">
+                  {mode === "edit" ? "Edit post" : "New post"}
+                </h1>
+                {mode === "edit" && editingId ? (
+                  <AdminPostEngagementStats
+                    postId={editingId}
+                    className="mt-3"
+                  />
+                ) : null}
+              </div>
               <button
                 type="button"
                 onClick={() => {

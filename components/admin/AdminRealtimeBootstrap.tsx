@@ -45,9 +45,14 @@ export default function AdminRealtimeBootstrap() {
 
   useEffect(() => {
     return subscribeToAdminAuth((state) => {
-      setIsAdmin(state.status === "admin");
+      const next = state.status === "admin";
+      setIsAdmin(next);
+      if (!next) {
+        // Drop per-user admin cache so the next login cannot see the previous account.
+        void queryClient.removeQueries({ queryKey: ["admins"] });
+      }
     });
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
     if (!isAdmin) return;

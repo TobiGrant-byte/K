@@ -8,6 +8,7 @@ import {
   normalizeImageDisplayConfig,
   type ImageDisplayConfig,
 } from "@/lib/domains/media/display";
+import { isImageKitUrl } from "@/lib/imagekit/config";
 
 type Props = {
   src: string;
@@ -73,6 +74,8 @@ export default function ConfiguredFrameImage({
   );
 
   const fallbackStyle = imageDisplayStyle(display);
+  // ImageKit already CDNs/transforms — skip Next's /_next/image proxy.
+  const unoptimized = isImageKitUrl(src);
 
   return (
     <div
@@ -95,6 +98,7 @@ export default function ConfiguredFrameImage({
             fill
             priority={priority}
             sizes={sizes}
+            unoptimized={unoptimized}
             className={`object-cover ${imageClassName}`.trim()}
           />
         </div>
@@ -105,6 +109,7 @@ export default function ConfiguredFrameImage({
           fill
           priority={priority}
           sizes={sizes}
+          unoptimized={unoptimized}
           className={`object-cover ${imageClassName}`.trim()}
           style={fallbackStyle}
         />

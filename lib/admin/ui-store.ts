@@ -10,7 +10,9 @@ export type AdminSection =
   | "publications"
   | "scholarship"
   | "achievements"
-  | "philanthropy";
+  | "philanthropy"
+  | "manage-admins"
+  | "settings";
 
 export type AdminTheme = "dark" | "light";
 
@@ -27,6 +29,8 @@ const ADMIN_SECTIONS = new Set<AdminSection>([
   "scholarship",
   "achievements",
   "philanthropy",
+  "manage-admins",
+  "settings",
 ]);
 
 export function isAdminSection(value: string): value is AdminSection {
