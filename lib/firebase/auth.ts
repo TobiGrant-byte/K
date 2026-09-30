@@ -2,6 +2,8 @@ import type { User } from "firebase/auth";
 import {
   GoogleAuthProvider,
   onAuthStateChanged,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
 } from "firebase/auth";
@@ -11,6 +13,7 @@ import {
   getFirebaseAuth,
   getFirebaseFirestore,
 } from "./config";
+import { resolveAdminLoginEmail } from "./admins";
 
 export type AdminAuthState =
   | { status: "loading"; user: null; isAdmin: false }
@@ -58,6 +61,60 @@ export async function signInAdminWithGoogle(): Promise<User> {
   const result = await signInWithPopup(getFirebaseAuth(), googleProvider);
   await result.user.getIdToken(true);
   return result.user;
+}
+
+/** Email or username + password — admin verification happens in subscribeToAdminAuth. */
+export async function signInAdminWithEmailPassword(
+  usernameOrEmail: string,
+  password: string,
+): Promise<User> {
+  if (!firebaseConfigured) {
+    throw new Error("Firebase environment variables are missing.");
+  }
+
+  const trimmed = usernameOrEmail.trim();
+  if (!trimmed || !password) {
+    throw new Error("Username/email and password are required.");
+  }
+
+  const email = await resolveAdminLoginEmail(trimmed);
+  const result = await signInWithEmailAndPassword(
+    getFirebaseAuth(),
+    email,
+    password,
+  );
+  await result.user.getIdToken(true);
+  return result.user;
+}
+
+/**
+ * Logged-out password reset by email. Firebase sends the reset link.
+ */
+export async function requestAdminPasswordReset(email: string): Promise<void> {
+  if (!firebaseConfigured) {
+    throw new Error("Firebase environment variables are missing.");
+  }
+
+  const trimmed = email.trim().toLowerCase();
+  if (!trimmed || !trimmed.includes("@")) {
+    throw new Error("Enter a valid email address.");
+  }
+
+  try {
+    await sendPasswordResetEmail(getFirebaseAuth(), trimmed);
+  } catch (error) {
+    const code = (error as { code?: string }).code;
+    // Avoid confirming whether an email exists in Auth.
+    if (
+      code === "auth/user-not-found" ||
+      code === "auth/invalid-email"
+    ) {
+      return;
+    }
+    throw error instanceof Error
+      ? error
+      : new Error("Could not send reset email.");
+  }
 }
 
 export async function signOutAdmin(): Promise<void> {

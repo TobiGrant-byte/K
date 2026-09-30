@@ -47,6 +47,18 @@ export const ADMIN_NAV: AdminNavItem[] = [
     enabled: true,
     group: "Professional",
   },
+  {
+    id: "manage-admins",
+    label: "Manage Admins",
+    enabled: true,
+    group: "System",
+  },
+  {
+    id: "settings",
+    label: "Settings",
+    enabled: true,
+    group: "System",
+  },
 ];
 export function isAdminNavEnabled(section: AdminSection): boolean {
   return ADMIN_NAV.find((n) => n.id === section)?.enabled ?? false;

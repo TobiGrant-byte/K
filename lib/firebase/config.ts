@@ -30,7 +30,7 @@ export const missingFirebaseEnvironmentVariables = Object.entries(
 export const firebaseConfigured =
   missingFirebaseEnvironmentVariables.length === 0;
 
-function getFirebaseApp(): FirebaseApp {
+export function getFirebaseApp(): FirebaseApp {
   if (!firebaseConfigured) {
     throw new Error(
       `Missing Firebase environment variables: ${missingFirebaseEnvironmentVariables.join(", ")}`,
