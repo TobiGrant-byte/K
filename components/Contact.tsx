@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useInView } from "framer-motion";
 import { submitWeb3Form } from "@/lib/web3forms";
+import type { ContactContent } from "@/lib/domains/contact";
 
 type Status = "idle" | "loading" | "error";
 type FormState = {
@@ -15,7 +16,11 @@ type FormState = {
 const inputClass =
   "w-full px-4 py-3.5 bg-white/5 border border-white/12 rounded-lg text-white font-sans text-sm outline-none transition-[border-color] duration-300 focus:border-accent/60 disabled:opacity-70";
 
-export default function Contact() {
+type Props = {
+  content: ContactContent;
+};
+
+export default function Contact({ content }: Props) {
   const router = useRouter();
   const ref = useRef(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -87,35 +92,22 @@ export default function Contact() {
           >
             <div className="flex items-center gap-3.5 mb-4">
               <div className="section-rule" />
-              <span className="eyebrow">Contact</span>
+              <span className="eyebrow">{content.eyebrow}</span>
             </div>
             <h2 className="font-display font-light text-[clamp(32px,4vw,56px)] text-white leading-[1.1] mb-5">
-              Let&apos;s Start a{" "}
-              <em className="font-semibold text-accent-light">Conversation</em>
+              {content.title}{" "}
+              {content.titleAccent ? (
+                <em className="font-semibold text-accent-light">
+                  {content.titleAccent}
+                </em>
+              ) : null}
             </h2>
             <p className="font-display text-lg italic text-white/55 leading-[1.7] mb-11">
-              Get in touch about collaborations, speaking, or mentorship.
+              {content.subtitle}
             </p>
             <div className="h-px bg-gradient-to-r from-accent/35 to-transparent mb-9" />
-            {[
-              {
-                label: "Professional Engagement",
-                detail: "Consulting and partnerships",
-              },
-              {
-                label: "Public Speaking",
-                detail: "Keynotes and panel discussion",
-              },
-              {
-                label: "Collaboration",
-                detail: "Research and social programs",
-              },
-              {
-                label: "Mentorship",
-                detail: "Career and personal development",
-              },
-            ].map((item) => (
-              <div key={item.label} className="flex gap-3.5 mb-5">
+            {content.topics.map((item) => (
+              <div key={item.id || item.label} className="flex gap-3.5 mb-5">
                 <div className="w-1.5 h-1.5 rounded-full bg-accent/70 shrink-0 mt-1.5" />
                 <div>
                   <div className="font-title text-[10px] tracking-[2px] uppercase text-white/50 mb-[3px]">

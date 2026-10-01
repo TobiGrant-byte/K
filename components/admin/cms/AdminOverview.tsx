@@ -59,12 +59,13 @@ export default function AdminOverview() {
   const hints: Partial<Record<(typeof editSections)[number]["id"], string>> = {
     about: "Home roles, quote, About, and hobbies",
     projects: "Engineering project areas",
-    "research-dev": "R&D and Research in Action",
+    "research-dev": "R&D, Research in Action, and Google Scholar",
     publications: "Press and scholarship tips",
     gallery: "Upload and manage images",
     "blog-posts": "Blog articles and comments",
     achievements: "Milestones and Career Journey",
     philanthropy: "Community impacts",
+    contact: "Contact page copy and topics",
     "manage-admins": "Invite and manage CMS administrators",
     settings: "Your username and password",
   };

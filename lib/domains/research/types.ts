@@ -40,18 +40,38 @@ export type ResearchActionContent = {
   items: ResearchActionItem[];
 };
 
+export type ResearchScholarStat = {
+  id: string;
+  value: number;
+  label: string;
+  /** When true, public CountUp shows a trailing " +". Animation still runs either way. */
+  showPlus: boolean;
+};
+
+export type ResearchScholarContent = {
+  profileUrl: string;
+  eyebrow: string;
+  title: string;
+  titleAccent: string;
+  body: string;
+  stats: ResearchScholarStat[];
+  bullets: string[];
+  ctaLabel: string;
+};
+
 /**
  * Shared Research page document (`content/research`).
- * development = R&D block; action = Research in Action block.
- * Google Scholar card stays hardcoded in `components/Research.tsx`.
+ * development = R&D block; action = Research in Action; scholar = Google Scholar card.
  */
 export type ResearchContent = {
   development: ResearchDevelopmentContent;
   action: ResearchActionContent;
+  scholar: ResearchScholarContent;
   updatedAt: string;
 };
 
 export type ResearchContentInput = {
   development: ResearchDevelopmentContent;
   action: ResearchActionContent;
+  scholar: ResearchScholarContent;
 };

@@ -11,6 +11,7 @@ export type AdminSection =
   | "scholarship"
   | "achievements"
   | "philanthropy"
+  | "contact"
   | "manage-admins"
   | "settings";
 
@@ -29,6 +30,7 @@ const ADMIN_SECTIONS = new Set<AdminSection>([
   "scholarship",
   "achievements",
   "philanthropy",
+  "contact",
   "manage-admins",
   "settings",
 ]);

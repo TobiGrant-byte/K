@@ -7,19 +7,17 @@ import {
   researchAreaNumber,
   type ResearchActionItem,
   type ResearchContent,
+  type ResearchScholarStat,
 } from "@/lib/domains/research";
 import type { MediaAsset } from "@/lib/media";
 import type { ImageDisplayConfig } from "@/lib/domains/media/display";
 import { isImageKitMediaUrl } from "@/lib/domains/media";
 
-const GOOGLE_SCHOLAR =
-  "https://scholar.google.com/citations?user=iAfft0gAAAAJ&hl=en";
-
 type MediaPick = Pick<MediaAsset, "imageUrl" | "altText" | "title"> | null;
 
 function CountUp({
   to,
-  suffix = " +",
+  suffix = "",
   active,
   duration = 4500,
 }: {
@@ -57,22 +55,20 @@ function CountUp({
   );
 }
 
-function ScholarStats() {
+function ScholarStats({ stats }: { stats: ResearchScholarStat[] }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: false, amount: 0.6 });
-
-  const stats = [
-    { to: 160, label: "Citations" },
-    { to: 5, label: "h-index" },
-    { to: 10, label: "Articles" },
-  ];
 
   return (
     <div ref={ref} className="grid grid-cols-3 gap-4">
       {stats.map((stat) => (
-        <div key={stat.label}>
+        <div key={stat.id || stat.label}>
           <div className="font-display text-[28px] font-medium leading-none text-accent-light tabular-nums">
-            <CountUp to={stat.to} active={inView} />
+            <CountUp
+              to={stat.value}
+              suffix={stat.showPlus ? " +" : ""}
+              active={inView}
+            />
           </div>
           <div className="mt-1.5 font-title text-[8px] uppercase tracking-[2px] text-white/40">
             {stat.label}
@@ -130,7 +126,7 @@ export default function Research({
 }: Props) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
-  const { development, action } = research;
+  const { development, action, scholar } = research;
   const media =
     developmentMedia?.imageUrl &&
     development.image &&
@@ -231,35 +227,26 @@ export default function Research({
             <div>
               <div className="mb-4 flex items-center gap-3.5">
                 <div className="section-rule" />
-                <span className="eyebrow">Academic Publications</span>
+                <span className="eyebrow">{scholar.eyebrow}</span>
               </div>
               <h3 className="mb-4 font-display text-[clamp(28px,3.5vw,42px)] font-light leading-[1.15] text-white">
-                Published research on{" "}
-                <em className="font-semibold text-accent-light">
-                  Google Scholar
-                </em>
+                {scholar.title}{" "}
+                {scholar.titleAccent ? (
+                  <em className="font-semibold text-accent-light">
+                    {scholar.titleAccent}
+                  </em>
+                ) : null}
               </h3>
               <p className="max-w-[520px] text-[15px] leading-[1.85] text-white/55">
-                Google Scholar hosts Dr. Okafor&apos;s verified academic
-                profile — peer-reviewed articles, conference papers, and his
-                doctoral dissertation. His listed research areas are road
-                traffic safety, connected vehicles, and sustainable
-                transportation, with work spanning crash-severity modeling,
-                pedestrian injury pathways, large-truck safety, and
-                connected-vehicle hard-braking data for proactive safety
-                improvement.
+                {scholar.body}
               </p>
             </div>
 
             <div className="flex flex-col justify-center gap-6 border-t border-white/10 pt-8 md:border-l md:border-t-0 md:pl-10 md:pt-0">
-              <ScholarStats />
+              <ScholarStats stats={scholar.stats} />
 
               <ul className="flex flex-col gap-3">
-                {[
-                  "Road traffic safety · connected vehicles · sustainable transport",
-                  "Dissertation on connected-vehicle data for proactive road safety",
-                  "Collaborations with Alabama Transportation Institute researchers",
-                ].map((item) => (
+                {scholar.bullets.map((item) => (
                   <li
                     key={item}
                     className="flex items-start gap-3 text-[13px] leading-[1.6] text-white/65"
@@ -273,15 +260,17 @@ export default function Research({
                 ))}
               </ul>
 
-              <a
-                href={GOOGLE_SCHOLAR}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-1 inline-flex w-fit items-center gap-3 rounded-lg border border-accent/45 bg-accent/15 px-6 py-4 font-title text-[10px] uppercase tracking-[2.5px] text-accent-light no-underline transition-colors hover:border-accent/70 hover:bg-accent/25"
-              >
-                View full Google Scholar profile
-                <span aria-hidden>→</span>
-              </a>
+              {scholar.profileUrl ? (
+                <a
+                  href={scholar.profileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-flex w-fit items-center gap-3 rounded-lg border border-accent/45 bg-accent/15 px-6 py-4 font-title text-[10px] uppercase tracking-[2.5px] text-accent-light no-underline transition-colors hover:border-accent/70 hover:bg-accent/25"
+                >
+                  {scholar.ctaLabel}
+                  <span aria-hidden>→</span>
+                </a>
+              ) : null}
             </div>
           </div>
         </motion.div>

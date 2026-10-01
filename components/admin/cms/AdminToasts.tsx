@@ -6,13 +6,23 @@ import {
   type AdminToast,
   type ToastTone,
 } from "@/lib/admin/toast-store";
+import { useAdminUiStore } from "@/lib/admin/ui-store";
 
 const AUTO_DISMISS_MS = 4500;
 
-const toneClass: Record<ToastTone, string> = {
-  success: "border-emerald-500/40 bg-emerald-500/15 text-emerald-100",
-  error: "border-red-500/40 bg-red-500/15 text-red-100",
-  info: "border-sky-500/40 bg-sky-500/15 text-sky-100",
+const toneClassDark: Record<ToastTone, string> = {
+  success: "border-emerald-400/50 bg-emerald-500/20 text-emerald-50",
+  error: "border-red-400/50 bg-red-500/20 text-red-50",
+  info: "border-sky-400/50 bg-sky-500/20 text-sky-50",
+};
+
+/** Solid fills — light theme remaps `text-white`, so use explicit white. */
+const toneClassLight: Record<ToastTone, string> = {
+  success:
+    "border-emerald-600 bg-emerald-500 text-[#ffffff] shadow-[0_12px_32px_rgba(16,185,129,0.35)]",
+  error:
+    "border-red-600 bg-red-500 text-[#ffffff] shadow-[0_12px_32px_rgba(239,68,68,0.3)]",
+  info: "border-sky-600 bg-sky-500 text-[#ffffff] shadow-[0_12px_32px_rgba(14,165,233,0.3)]",
 };
 
 const toneLabel: Record<ToastTone, string> = {
@@ -23,6 +33,9 @@ const toneLabel: Record<ToastTone, string> = {
 
 function ToastItem({ toast }: { toast: AdminToast }) {
   const dismiss = useAdminToastStore((s) => s.dismiss);
+  const theme = useAdminUiStore((s) => s.theme);
+  const toneClass =
+    theme === "light" ? toneClassLight : toneClassDark;
 
   useEffect(() => {
     const t = window.setTimeout(() => dismiss(toast.id), AUTO_DISMISS_MS);
@@ -32,19 +45,23 @@ function ToastItem({ toast }: { toast: AdminToast }) {
   return (
     <div
       role={toast.tone === "error" ? "alert" : "status"}
-      className={`pointer-events-auto flex w-[min(100vw-2rem,22rem)] items-start gap-3 rounded-lg border px-4 py-3 text-sm shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-md ${toneClass[toast.tone]}`}
+      className={`pointer-events-auto flex w-[min(100vw-2rem,22rem)] items-start gap-3 rounded-lg border px-4 py-3 text-sm backdrop-blur-md ${
+        theme === "light"
+          ? ""
+          : "shadow-[0_12px_40px_rgba(0,0,0,0.45)] "
+      }${toneClass[toast.tone]}`}
     >
       <div className="min-w-0 flex-1">
-        <div className="mb-0.5 font-title text-[8px] uppercase tracking-[2px] opacity-70">
+        <div className="mb-0.5 font-title text-[8px] uppercase tracking-[2px] opacity-80">
           {toneLabel[toast.tone]}
         </div>
-        <p className="leading-relaxed">{toast.message}</p>
+        <p className="leading-relaxed font-medium">{toast.message}</p>
       </div>
       <button
         type="button"
         onClick={() => dismiss(toast.id)}
         aria-label="Dismiss notification"
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-current/20 text-xs opacity-70 transition-opacity hover:opacity-100"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-current/25 text-xs opacity-80 transition-opacity hover:opacity-100"
       >
         ✕
       </button>

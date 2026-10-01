@@ -1,4 +1,39 @@
-import type { ResearchContent } from "@/lib/domains/research/types";
+import type { ResearchContent, ResearchScholarContent } from "@/lib/domains/research/types";
+
+export const RESEARCH_SCHOLAR_FALLBACK: ResearchScholarContent = {
+  profileUrl:
+    "https://scholar.google.com/citations?user=iAfft0gAAAAJ&hl=en",
+  eyebrow: "Academic Publications",
+  title: "Published research on",
+  titleAccent: "Google Scholar",
+  body: "Google Scholar hosts Dr. Okafor's verified academic profile — peer-reviewed articles, conference papers, and his doctoral dissertation. His listed research areas are road traffic safety, connected vehicles, and sustainable transportation, with work spanning crash-severity modeling, pedestrian injury pathways, large-truck safety, and connected-vehicle hard-braking data for proactive safety improvement.",
+  stats: [
+    {
+      id: "stat-citations",
+      value: 160,
+      label: "Citations",
+      showPlus: true,
+    },
+    {
+      id: "stat-h-index",
+      value: 5,
+      label: "h-index",
+      showPlus: true,
+    },
+    {
+      id: "stat-articles",
+      value: 10,
+      label: "Articles",
+      showPlus: true,
+    },
+  ],
+  bullets: [
+    "Road traffic safety · connected vehicles · sustainable transport",
+    "Dissertation on connected-vehicle data for proactive road safety",
+    "Collaborations with Alabama Transportation Institute researchers",
+  ],
+  ctaLabel: "View full Google Scholar profile",
+};
 
 /**
  * Canonical static fallbacks — copy only (no image URLs).
@@ -71,6 +106,7 @@ export const RESEARCH_FALLBACK: ResearchContent = {
       },
     ],
   },
+  scholar: RESEARCH_SCHOLAR_FALLBACK,
   updatedAt: "",
 };
 

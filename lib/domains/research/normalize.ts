@@ -3,7 +3,10 @@ import {
   normalizeImageDisplayConfig,
   type MediaImageRef,
 } from "@/lib/domains/media/display";
-import { RESEARCH_FALLBACK } from "@/lib/domains/research/defaults";
+import {
+  RESEARCH_FALLBACK,
+  RESEARCH_SCHOLAR_FALLBACK,
+} from "@/lib/domains/research/defaults";
 import type {
   ResearchActionContent,
   ResearchActionItem,
@@ -11,10 +14,27 @@ import type {
   ResearchContent,
   ResearchContentInput,
   ResearchDevelopmentContent,
+  ResearchScholarContent,
+  ResearchScholarStat,
 } from "@/lib/domains/research/types";
 
 function asString(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;
+}
+
+function asNumber(value: unknown, fallback = 0): number {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.max(0, Math.round(value));
+  }
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value.trim());
+    if (Number.isFinite(parsed)) return Math.max(0, Math.round(parsed));
+  }
+  return fallback;
+}
+
+function asBoolean(value: unknown, fallback = true): boolean {
+  return typeof value === "boolean" ? value : fallback;
 }
 
 function normalizeImageRef(value: unknown): MediaImageRef | null {
@@ -105,9 +125,72 @@ export function normalizeResearchAction(
   };
 }
 
+function normalizeScholarStat(
+  value: unknown,
+  index: number,
+): ResearchScholarStat | null {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Record<string, unknown>;
+  const label = asString(raw.label).trim();
+  if (!label) return null;
+  return {
+    id: asString(raw.id).trim() || `stat-${index + 1}`,
+    value: asNumber(raw.value, 0),
+    label,
+    showPlus: asBoolean(raw.showPlus, true),
+  };
+}
+
+export function normalizeResearchScholarStats(
+  value: unknown,
+): ResearchScholarStat[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item, index) => normalizeScholarStat(item, index))
+    .filter((item): item is ResearchScholarStat => Boolean(item));
+}
+
+export function normalizeResearchScholarBullets(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => asString(item).trim())
+    .filter((item) => Boolean(item));
+}
+
 /**
- * Supports nested `{ development, action }` and older flat R&D-only docs.
- * Does not reinject seed copy — Firebase fields only.
+ * Missing/legacy docs get RESEARCH_SCHOLAR_FALLBACK so the public card stays intact.
+ */
+export function normalizeResearchScholar(
+  input?: Partial<ResearchScholarContent> | Record<string, unknown> | null,
+): ResearchScholarContent {
+  if (!input || typeof input !== "object") {
+    return { ...RESEARCH_SCHOLAR_FALLBACK, stats: [...RESEARCH_SCHOLAR_FALLBACK.stats], bullets: [...RESEARCH_SCHOLAR_FALLBACK.bullets] };
+  }
+  const raw = input as Record<string, unknown>;
+  const stats = normalizeResearchScholarStats(raw.stats);
+  const bullets = normalizeResearchScholarBullets(raw.bullets);
+  return {
+    profileUrl:
+      asString(raw.profileUrl).trim() || RESEARCH_SCHOLAR_FALLBACK.profileUrl,
+    eyebrow: asString(raw.eyebrow).trim() || RESEARCH_SCHOLAR_FALLBACK.eyebrow,
+    title: asString(raw.title).trim() || RESEARCH_SCHOLAR_FALLBACK.title,
+    titleAccent:
+      asString(raw.titleAccent).trim() ||
+      RESEARCH_SCHOLAR_FALLBACK.titleAccent,
+    body: asString(raw.body).trim() || RESEARCH_SCHOLAR_FALLBACK.body,
+    stats: stats.length ? stats : [...RESEARCH_SCHOLAR_FALLBACK.stats],
+    bullets: bullets.length
+      ? bullets
+      : [...RESEARCH_SCHOLAR_FALLBACK.bullets],
+    ctaLabel:
+      asString(raw.ctaLabel).trim() || RESEARCH_SCHOLAR_FALLBACK.ctaLabel,
+  };
+}
+
+/**
+ * Supports nested `{ development, action, scholar }` and older flat R&D-only docs.
+ * Does not reinject seed copy for development/action — Firebase fields only.
+ * Scholar falls back when missing so legacy docs keep the Google Scholar card.
  */
 export function normalizeResearchContent(
   input?: Partial<ResearchContent> | Record<string, unknown> | null,
@@ -123,6 +206,9 @@ export function normalizeResearchContent(
       action: normalizeResearchAction(
         raw.action as Partial<ResearchActionContent> | null,
       ),
+      scholar: normalizeResearchScholar(
+        raw.scholar as Partial<ResearchScholarContent> | null,
+      ),
       updatedAt: asString(raw.updatedAt, updatedAt),
     };
   }
@@ -137,6 +223,9 @@ export function normalizeResearchContent(
       areas: normalizeResearchAreas(raw.areas),
     }),
     action: normalizeResearchAction(null),
+    scholar: normalizeResearchScholar(
+      raw.scholar as Partial<ResearchScholarContent> | null,
+    ),
     updatedAt: asString(raw.updatedAt, updatedAt),
   };
 }
@@ -166,6 +255,11 @@ export function toResearchWritePayload(
         fallbackSrc: "",
       })),
     },
+    scholar: {
+      ...normalized.scholar,
+      stats: normalized.scholar.stats.map((stat) => ({ ...stat })),
+      bullets: [...normalized.scholar.bullets],
+    },
   };
 }
 
@@ -174,6 +268,7 @@ export function researchSeedPayload(): ResearchContentInput {
   return toResearchWritePayload({
     development: RESEARCH_FALLBACK.development,
     action: RESEARCH_FALLBACK.action,
+    scholar: RESEARCH_FALLBACK.scholar,
   });
 }
 
@@ -195,6 +290,11 @@ export const RESEARCH_PUBLIC_EMPTY: ResearchContent = {
     titleAccent: "",
     subtitle: "",
     items: [],
+  },
+  scholar: {
+    ...RESEARCH_SCHOLAR_FALLBACK,
+    stats: [...RESEARCH_SCHOLAR_FALLBACK.stats],
+    bullets: [...RESEARCH_SCHOLAR_FALLBACK.bullets],
   },
   updatedAt: "",
 };
