@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ImageCropModal from "@/components/admin/ImageCropModal";
 import AdminComments from "@/components/admin/AdminComments";
 import AdminPostEngagementStats from "@/components/admin/AdminPostEngagementStats";
@@ -33,6 +33,8 @@ import {
   removePost,
   savePost,
   useAdminPosts,
+  useBlogPageContent,
+  useSaveBlogPageMutation,
 } from "@/lib/domains/blog";
 import {
   deleteImageKitImages,
@@ -76,6 +78,9 @@ function emptyDraft(): Omit<BlogPost, "id" | "createdAt" | "updatedAt"> & {
 export default function AdminPosts() {
   const postsQuery = useAdminPosts();
   const posts = postsQuery.data ?? [];
+  const pageQuery = useBlogPageContent();
+  const savePageMutation = useSaveBlogPageMutation();
+  const [pageSubtitle, setPageSubtitle] = useState<string | null>(null);
   const commentsPostId = useAdminUiStore((s) => s.commentsPostId);
   const openPostComments = useAdminUiStore((s) => s.openPostComments);
   const clearPostComments = useAdminUiStore((s) => s.clearPostComments);
@@ -99,6 +104,15 @@ export default function AdminPosts() {
     if (error) adminToast.error(text);
     else adminToast.success(text);
   }, []);
+
+  const serverSubtitle = pageQuery.data?.subtitle ?? "";
+  useEffect(() => {
+    if (pageQuery.data && pageSubtitle === null) {
+      setPageSubtitle(pageQuery.data.subtitle);
+    }
+  }, [pageQuery.data, pageSubtitle]);
+  const pageDirty =
+    pageSubtitle !== null && pageSubtitle.trim() !== serverSubtitle.trim();
 
   const sorted = useMemo(
     () =>
@@ -518,6 +532,63 @@ export default function AdminPosts() {
 
         {mode === "list" ? (
           <>
+            <section className="mb-8 rounded-xl border border-white/10 bg-navy-800 p-5 sm:p-6">
+              <div className="mb-1 font-title text-[9px] uppercase tracking-[2px] text-white/50">
+                Blog page
+              </div>
+              <h2 className="font-display text-2xl font-light text-white">
+                List subtitle
+              </h2>
+              <p className="mt-1 text-sm text-white/45">
+                Shown under the blog heading on /blog. Leave blank to hide it.
+              </p>
+              <label className="mt-5 block">
+                <span className="mb-2 block font-title text-[9px] uppercase tracking-[2px] text-white/45">
+                  Subtitle
+                </span>
+                <textarea
+                  rows={3}
+                  maxLength={800}
+                  value={pageSubtitle ?? ""}
+                  onChange={(e) => setPageSubtitle(e.target.value)}
+                  placeholder="Notes on family, career, and the world beyond the résumé…"
+                  className={`${inputClass} min-h-[5.5rem] resize-y`}
+                />
+              </label>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  disabled={!pageDirty || savePageMutation.isPending}
+                  onClick={() => {
+                    void savePageMutation
+                      .mutateAsync({ subtitle: pageSubtitle ?? "" })
+                      .then(() => flash("Blog subtitle saved."))
+                      .catch((error) =>
+                        flash(
+                          error instanceof Error
+                            ? error.message
+                            : "Could not save subtitle.",
+                          true,
+                        ),
+                      );
+                  }}
+                  className="rounded-lg bg-accent px-5 py-3 font-title text-[10px] uppercase tracking-[2px] text-white hover:bg-accent-light disabled:opacity-40"
+                >
+                  {savePageMutation.isPending ? "Saving…" : "Save subtitle"}
+                </button>
+                {pageDirty ? (
+                  <button
+                    type="button"
+                    disabled={savePageMutation.isPending}
+                    onClick={() => setPageSubtitle(serverSubtitle)}
+                    className="font-title text-[9px] uppercase tracking-[2px] text-white/45 hover:text-white"
+                  >
+                    Reset
+                  </button>
+                ) : null}
+              </div>
+            </section>
+
             <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
               <p className="text-sm text-white/50">{sorted.length} total</p>
               <button

@@ -149,10 +149,7 @@ export default function Gallery({ initialMedia = [] }: Props) {
   const columnCount = useGalleryColumnCount();
 
   const mediaQuery = usePublicGalleryMedia(initialMedia);
-  const mediaItems = useMemo(
-    () => mediaQuery.data ?? [],
-    [mediaQuery.data],
-  );
+  const mediaItems = useMemo(() => mediaQuery.data ?? [], [mediaQuery.data]);
   const allPhotos = useMemo(() => {
     // CMS images from Firebase/ImageKit; video stays a public static file.
     const fromCms = mediaItems

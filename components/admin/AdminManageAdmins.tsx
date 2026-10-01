@@ -7,6 +7,7 @@ import { getFirebaseAuth } from "@/lib/firebase/config";
 import type { AdminRecord } from "@/lib/firebase/admin-types";
 import {
   createAdminAccount,
+  filterDirectoryAdmins,
   listAdmins,
   revokeAdminAccess,
 } from "@/lib/firebase/admins";
@@ -50,18 +51,20 @@ export default function AdminManageAdmins() {
   const admins = adminsQuery.data ?? [];
   const loading = adminsQuery.isPending;
   const sortedAdmins = useMemo(() => {
+    // Hard gate before sort/render (listAdmins also filters).
+    const visible = filterDirectoryAdmins(admins, currentUser?.email);
     const createdMs = (value: string | null) => {
       if (!value) return 0;
       const ms = new Date(value).getTime();
       return Number.isNaN(ms) ? 0 : ms;
     };
-    return [...admins].sort((a, b) => {
+    return [...visible].sort((a, b) => {
       const aYou = a.uid === currentUid;
       const bYou = b.uid === currentUid;
       if (aYou !== bYou) return aYou ? -1 : 1;
       return createdMs(b.createdAt) - createdMs(a.createdAt);
     });
-  }, [admins, currentUid]);
+  }, [admins, currentUid, currentUser?.email]);
   const [busy, setBusy] = useState(false);
 
   const [username, setUsername] = useState("");
@@ -212,7 +215,7 @@ export default function AdminManageAdmins() {
 
         {loading ? (
           <p className="mt-6 text-sm text-white/45">Loading admins…</p>
-        ) : admins.length === 0 ? (
+        ) : sortedAdmins.length === 0 ? (
           <p className="mt-6 text-sm text-white/45">No admins found.</p>
         ) : (
           <div className="mt-6 overflow-x-auto">
