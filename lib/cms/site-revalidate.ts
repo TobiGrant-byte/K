@@ -11,6 +11,7 @@ export type SiteRevalidateScope =
   | "achievements"
   | "gallery"
   | "blog"
+  | "contact"
   | "all";
 
 export type RevalidateTarget = {
@@ -36,6 +37,7 @@ const PATHS_BY_SCOPE: Record<SiteRevalidateScope, RevalidateTarget[]> = {
     { path: "/achievements" },
   ],
   blog: [{ path: "/blog" }, { path: "/blog/[slug]", type: "page" }],
+  contact: [{ path: "/contact" }],
   all: [
     { path: "/" },
     { path: "/about" },
@@ -46,6 +48,7 @@ const PATHS_BY_SCOPE: Record<SiteRevalidateScope, RevalidateTarget[]> = {
     { path: "/gallery" },
     { path: "/blog" },
     { path: "/blog/[slug]", type: "page" },
+    { path: "/contact" },
   ],
 };
 

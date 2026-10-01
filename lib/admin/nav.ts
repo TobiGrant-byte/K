@@ -48,6 +48,12 @@ export const ADMIN_NAV: AdminNavItem[] = [
     group: "Professional",
   },
   {
+    id: "contact",
+    label: "Contact",
+    enabled: true,
+    group: "Site",
+  },
+  {
     id: "manage-admins",
     label: "Manage Admins",
     enabled: true,
@@ -96,6 +102,8 @@ export function sectionPublicPath(section: AdminSection): string | null {
       return "/achievements";
     case "philanthropy":
       return "/philanthropy";
+    case "contact":
+      return "/contact";
     default:
       return null;
   }
@@ -121,6 +129,8 @@ export function sectionPublicLabel(section: AdminSection): string | null {
       return "View achievements";
     case "philanthropy":
       return "View impacts";
+    case "contact":
+      return "View contact";
     default:
       return null;
   }
@@ -137,7 +147,7 @@ export const ADMIN_PUBLIC_QUICK_LINKS: Array<{
   { href: "/gallery", label: "Gallery", hint: "Public media" },
   { href: "/about", label: "About", hint: "Profile page" },
   { href: "/projects", label: "Projects", hint: "Engineering project areas" },
-  { href: "/research", label: "Research", hint: "R&D and Research in Action" },
+  { href: "/research", label: "Research", hint: "R&D, Action, and Scholar" },
   { href: "/publications", label: "Publications", hint: "Press & scholarship tips" },
   { href: "/achievements", label: "Achievements", hint: "Credentials" },
   { href: "/philanthropy", label: "Impacts", hint: "Community work" },

@@ -12,6 +12,7 @@ import AdminResearch from "@/components/admin/AdminResearch";
 import AdminPublications from "@/components/admin/AdminPublications";
 import AdminPhilanthropy from "@/components/admin/AdminPhilanthropy";
 import AdminAchievements from "@/components/admin/AdminAchievements";
+import AdminContact from "@/components/admin/AdminContact";
 import AdminManageAdmins from "@/components/admin/AdminManageAdmins";
 import AdminSettings from "@/components/admin/AdminSettings";
 import AdminShell from "@/components/admin/cms/AdminShell";
@@ -298,6 +299,7 @@ export default function AdminApp() {
       {section === "publications" ? <AdminPublications /> : null}
       {section === "philanthropy" ? <AdminPhilanthropy /> : null}
       {section === "achievements" ? <AdminAchievements /> : null}
+      {section === "contact" ? <AdminContact /> : null}
       {section === "manage-admins" ? <AdminManageAdmins /> : null}
       {section === "settings" ? <AdminSettings /> : null}
     </AdminShell>

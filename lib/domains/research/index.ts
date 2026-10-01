@@ -5,6 +5,8 @@ export type {
   ResearchContent,
   ResearchContentInput,
   ResearchDevelopmentContent,
+  ResearchScholarContent,
+  ResearchScholarStat,
 } from "@/lib/domains/research/types";
 export {
   RESEARCH_ACTION_IMAGE_ASPECT,
@@ -14,6 +16,7 @@ export {
   RESEARCH_FALLBACK,
   RESEARCH_IMAGE_FALLBACK_ALT,
   RESEARCH_IMAGE_FALLBACK_SRC,
+  RESEARCH_SCHOLAR_FALLBACK,
 } from "@/lib/domains/research/defaults";
 export {
   normalizeResearchAreas,
@@ -21,6 +24,9 @@ export {
   normalizeResearchActionItems,
   normalizeResearchContent,
   normalizeResearchDevelopment,
+  normalizeResearchScholar,
+  normalizeResearchScholarBullets,
+  normalizeResearchScholarStats,
   researchAreaNumber,
   RESEARCH_PUBLIC_EMPTY,
   researchSeedPayload,
