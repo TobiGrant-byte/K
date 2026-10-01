@@ -10,7 +10,10 @@ import {
   writeCachedPostList,
 } from "@/lib/blog-cache";
 import { BLOG_CATEGORIES, type BlogCategory } from "@/lib/blog";
-import { usePublishedPosts } from "@/lib/domains/blog";
+import {
+  usePublicBlogPageContent,
+  usePublishedPosts,
+} from "@/lib/domains/blog";
 
 function subscribeNoop() {
   return () => {};
@@ -18,6 +21,8 @@ function subscribeNoop() {
 
 export default function BlogList() {
   const postsQuery = usePublishedPosts();
+  const pageQuery = usePublicBlogPageContent();
+  const subtitle = (pageQuery.data?.subtitle ?? "").trim();
   const cached = useSyncExternalStore(
     subscribeNoop,
     readCachedPostList,
@@ -75,10 +80,11 @@ export default function BlogList() {
             Posts on life,{" "}
             <em className="font-semibold text-accent">work &amp; society</em>
           </h1>
-          <p className="mt-4 font-display text-lg italic leading-[1.7] text-text-secondary">
-            Notes on family, career, and the world beyond the résumé — in Dr.
-            Okafor&apos;s own words.
-          </p>
+          {subtitle ? (
+            <p className="mt-4 font-display text-lg italic leading-[1.7] text-text-secondary">
+              {subtitle}
+            </p>
+          ) : null}
         </motion.div>
 
         <div className="mb-10 flex flex-wrap gap-2">

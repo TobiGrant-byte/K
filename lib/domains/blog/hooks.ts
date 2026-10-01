@@ -9,6 +9,12 @@ import {
   type AdminBlogComment,
   type BlogPost,
 } from "@/lib/domains/blog/service";
+import type { BlogPageContentInput } from "@/lib/domains/blog/page-types";
+import {
+  ensureBlogPageContentSeeded,
+  fetchBlogPageContent,
+  saveBlogPageContent,
+} from "@/lib/firebase/blog-page";
 import { revalidatePublicSite } from "@/lib/cms/revalidate-client";
 
 const BLOG_STALE = 60 * 60_000; // 1 hour
@@ -62,6 +68,42 @@ export function useAdminComments() {
   });
 }
 
+/** Admin: blog list page settings (seeds once if missing). */
+export function useBlogPageContent() {
+  return useQuery({
+    queryKey: blogKeys.pageContent(),
+    queryFn: ensureBlogPageContentSeeded,
+    staleTime: BLOG_STALE,
+  });
+}
+
+/** Public: blog list page settings (empty if missing — no seed). */
+export function usePublicBlogPageContent() {
+  return useQuery({
+    queryKey: [...blogKeys.pageContent(), "public"] as const,
+    queryFn: fetchBlogPageContent,
+    staleTime: BLOG_STALE,
+  });
+}
+
+export function useSaveBlogPageMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: BlogPageContentInput) => {
+      const data = await saveBlogPageContent(input);
+      await revalidatePublicSite("blog");
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(blogKeys.pageContent(), data);
+      queryClient.setQueryData(
+        [...blogKeys.pageContent(), "public"] as const,
+        data,
+      );
+    },
+  });
+}
+
 export function useSavePostMutation() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -71,7 +113,6 @@ export function useSavePostMutation() {
       return data;
     },
     onSuccess: () => {
-      // Realtime listeners will update cache; invalidate as a safety net.
       void queryClient.invalidateQueries({ queryKey: blogKeys.all });
     },
   });
@@ -97,7 +138,6 @@ export function useDeleteCommentMutation() {
     mutationFn: (args: { postId: string; commentId: string }) =>
       deletePostComment(args.postId, args.commentId),
     onSuccess: (_data, vars) => {
-      // Optimistically drop from cache; listener confirms.
       queryClient.setQueryData<AdminBlogComment[]>(
         blogKeys.adminComments(),
         (prev) =>
