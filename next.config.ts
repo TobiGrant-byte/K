@@ -16,6 +16,15 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "sundayokafor.com" },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/philanthropy",
+        destination: "/impact",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     // WhatsApp/Facebook prefer OG image URLs that end in .jpg
     return [

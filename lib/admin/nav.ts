@@ -101,7 +101,7 @@ export function sectionPublicPath(section: AdminSection): string | null {
     case "achievements":
       return "/achievements";
     case "philanthropy":
-      return "/philanthropy";
+      return "/impact";
     case "contact":
       return "/contact";
     default:
@@ -150,6 +150,6 @@ export const ADMIN_PUBLIC_QUICK_LINKS: Array<{
   { href: "/research", label: "Research", hint: "R&D, Action, and Scholar" },
   { href: "/publications", label: "Publications", hint: "Press & scholarship tips" },
   { href: "/achievements", label: "Achievements", hint: "Credentials" },
-  { href: "/philanthropy", label: "Impacts", hint: "Community work" },
+  { href: "/impact", label: "Impacts", hint: "Community work" },
   { href: "/contact", label: "Contact", hint: "Get in touch" },
 ];

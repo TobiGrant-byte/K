@@ -60,7 +60,7 @@ export const searchIndex: SearchEntry[] = [
   {
     title: "Impacts",
     description: "Giving back through mentorship, community, and public safety.",
-    href: "/philanthropy",
+    href: "/impact",
     category: "Page",
     keywords: ["impacts", "philanthropy", "mentorship", "giving back", "community", "society"],
   },

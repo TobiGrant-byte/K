@@ -31,7 +31,7 @@ export const navItems: NavItem[] = [
     ],
   },
   { label: "Gallery", href: "/gallery" },
-  { label: "Impacts", href: "/philanthropy" },
+  { label: "Impacts", href: "/impact" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
 ];

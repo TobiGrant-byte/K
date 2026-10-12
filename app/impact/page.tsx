@@ -16,7 +16,7 @@ export const revalidate = 3600;
 
 type MediaPick = Pick<MediaAsset, "imageUrl" | "altText" | "title"> | null;
 
-export default async function PhilanthropyPage() {
+export default async function ImpactPage() {
   const philanthropy = await fetchPhilanthropyContent();
 
   const mediaIds = [
